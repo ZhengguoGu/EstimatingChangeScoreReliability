@@ -3,10 +3,13 @@
 GRM_sim <- function(ability, itempar){
   
   n_sub <- length(ability)
-  P <- matrix(NA, nrow(itempar), ncol(itempar))
+  #P <- matrix(NA, nrow(itempar), ncol(itempar))
   response <- matrix(NA, n_sub, nrow(itempar))
   
   for(i in 1:n_sub){
+    
+    P <- matrix(NA, nrow(itempar), ncol(itempar))
+    
     
     numeritor <- exp(sweep((ability[i]-itempar[, -1]), 1, itempar[, 1], "*"))
     P_star<- numeritor/(1+numeritor)
