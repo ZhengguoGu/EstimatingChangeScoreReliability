@@ -9,6 +9,7 @@
 
 # Last update Sep. 2016
 
+library(MASS)
 
 #-----------------------------------------------------------------
 # GRM_sim: simulate response data based on the graded response
@@ -38,3 +39,27 @@ GRM_sim <- function(ability, itempar){
 
   return(response)
 }
+
+
+#----------------------------------------------------------------
+# MulChange_sim: simulate multidimensional change data
+# Note that this is based on the code by Dr. Wilco Emons at TiU
+#----------------------------------------------------------------
+
+Mulchange_sim <- function(n_sub, covar, dimension, mean_change, sd_change, EMP){
+  
+  # generate theta values for pretest
+  Sigma_theta <- matrix(covar, dimension, dimension)
+  diag(Sigma_theta)  <- 1
+  theta_pre      <- mvrnorm(n_sub,mu=rep(0,dimension),Sigma=Sigma_theta,empirical=EMP)
+
+  cov_change      <- covar*sd_change^2
+  Sigma_change       <- matrix(cov_change,dimension,dimension)
+  diag(Sigma_change) <- sd_change^2
+  theta_change        <- mvrnorm(n_sub,mu=rep(mean_change,dimension),Sigma=Sigma_change,empirical=EMP)
+  theta_post     <- theta_pre + theta_change
+  
+  return(list(th.pre,th.post,S.th))
+  
+}
+  }
