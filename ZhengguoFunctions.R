@@ -62,4 +62,4 @@ Mulchange_sim <- function(n_sub, covar, dimension, mean_change, sd_change, EMP){
   return(list(th.pre,th.post,S.th))
   
 }
-  }
+  

@@ -1,3 +1,15 @@
+
+#-----------------------------------------------------------------
+#
+#  A collection of funtions for psychometrics
+#
+#  Zhengguo Gu, Tilburg University
+#
+#-----------------------------------------------------------------
+
+
+
+
 # this is a program for simulating item reponse data from the graded response model (Samejima, 1969)
 
 GRM_sim <- function(ability, itempar){
