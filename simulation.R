@@ -8,7 +8,8 @@ set.seed(110)
 # simulate item parameters
 #-------------------------------------------------
 
-parallel_items <- 1 # 1: parallel, otherwise nonparallel
+parallel_items <- 2 # 1: parallel, otherwise nonparallel
+dimension <- 1 # number of dimensions in theta
 
 num_items <- 10
 
@@ -28,13 +29,25 @@ if (parallel_items == 1) {
 # simulate multidimensional theta's
 #-------------------------------------------------
 
-dimension <- 3
-cov_pretest <- 0.8 # need to justify why 0.8  
-mean_change <- 1
-sd_change <- 0.3 # need to justify why 0.3
-EMP <- FALSE
-num_persons <- 3000
-theta <- Mulchange_sim(num_persons/dimension, dimension, cov_pretest, mean_change, sd_change, EMP)
+if (dimension == 1){
+  
+  n_sub <- 1000
+  sd_pre <- 1
+  mean_change <- 1
+  sd_change <- 0.3
+  
+  theta <- Unichange_sim(n_sub, sd_pre, mean_change, sd_change)
+  
+} else{
+  
+  cov_pretest <- 0.8 # need to justify why 0.8  
+  mean_change <- 1
+  sd_change <- 0.3 # need to justify why 0.3
+  EMP <- FALSE
+  num_persons <- 3000 # note that this number is to be devided by # of dimension
+  theta <- Mulchange_sim(num_persons/dimension, dimension, cov_pretest, mean_change, sd_change, EMP)
+
+}
 
 theta_pre <- theta[[1]]
 theta_post <- theta[[2]]

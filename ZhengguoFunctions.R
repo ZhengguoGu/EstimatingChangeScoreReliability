@@ -42,7 +42,7 @@ GRM_sim <- function(ability, itempar){
 
 
 #----------------------------------------------------------------
-# MulChange_sim: simulate multidimensional change data
+# MulChange_sim: simulate multidimensional change in theta
 # Note that this is based on the code by Dr. Wilco Emons at TiU
 #----------------------------------------------------------------
 
@@ -58,6 +58,23 @@ Mulchange_sim <- function(n_sub, dimension, covar, mean_change, sd_change, EMP){
   diag(Sigma_change) <- sd_change^2
   theta_change <- mvrnorm(n_sub,mu=rep(mean_change,dimension),Sigma=Sigma_change,empirical=EMP)
   theta_post <- theta_pre + theta_change
+  
+  return(list(theta_pre, theta_post, theta_change))
+  
+}
+
+#-------------------------------------------------------------
+# UniChange_sim: simulate unidimensional change in theta
+#-------------------------------------------------------------
+
+Unichange_sim <- function(n_sub, sd_pre, mean_change, sd_change){
+  # generate theta values for pretest
+  theta_pre <- rnorm(n_sub, mean = 0, sd_pre=1)
+
+  sd_change <- sd_pre * sd_change^2  # need to justify why it is set like this
+  theta_change <- rnorm(n_sub, mean_change, sd_change)
+  
+  theta_post <- theta_pre + theta_post
   
   return(list(theta_pre, theta_post, theta_change))
   
