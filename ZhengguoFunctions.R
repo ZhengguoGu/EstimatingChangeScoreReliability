@@ -46,20 +46,20 @@ GRM_sim <- function(ability, itempar){
 # Note that this is based on the code by Dr. Wilco Emons at TiU
 #----------------------------------------------------------------
 
-Mulchange_sim <- function(n_sub, covar, dimension, mean_change, sd_change, EMP){
+Mulchange_sim <- function(n_sub, dimension, covar, mean_change, sd_change, EMP){
   
   # generate theta values for pretest
   Sigma_theta <- matrix(covar, dimension, dimension)
   diag(Sigma_theta)  <- 1
-  theta_pre      <- mvrnorm(n_sub,mu=rep(0,dimension),Sigma=Sigma_theta,empirical=EMP)
-
-  cov_change      <- covar*sd_change^2
-  Sigma_change       <- matrix(cov_change,dimension,dimension)
-  diag(Sigma_change) <- sd_change^2
-  theta_change        <- mvrnorm(n_sub,mu=rep(mean_change,dimension),Sigma=Sigma_change,empirical=EMP)
-  theta_post     <- theta_pre + theta_change
+  theta_pre <- mvrnorm(n_sub,mu=rep(0,dimension),Sigma=Sigma_theta,empirical=EMP)
   
-  return(list(th.pre,th.post,S.th))
+  cov_change <- covar*sd_change^2 # We set it in this way, but there are of course other ways of setting up the covariance
+  Sigma_change <- matrix(cov_change,dimension,dimension)
+  diag(Sigma_change) <- sd_change^2
+  theta_change <- mvrnorm(n_sub,mu=rep(mean_change,dimension),Sigma=Sigma_change,empirical=EMP)
+  theta_post <- theta_pre + theta_change
+  
+  return(list(theta_pre, theta_post, theta_change))
   
 }
   
