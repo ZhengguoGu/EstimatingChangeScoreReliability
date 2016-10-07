@@ -69,12 +69,12 @@ Mulchange_sim <- function(n_sub, dimension, covar, mean_change, sd_change, EMP){
 
 Unichange_sim <- function(n_sub, sd_pre, mean_change, sd_change){
   # generate theta values for pretest
-  theta_pre <- rnorm(n_sub, mean = 0, sd_pre=1)
+  theta_pre <- rnorm(n_sub, mean = 0, sd=1)
 
   sd_change <- sd_pre * sd_change^2  # need to justify why it is set like this
   theta_change <- rnorm(n_sub, mean_change, sd_change)
   
-  theta_post <- theta_pre + theta_post
+  theta_post <- theta_pre + theta_change
   
   return(list(theta_pre, theta_post, theta_change))
   
