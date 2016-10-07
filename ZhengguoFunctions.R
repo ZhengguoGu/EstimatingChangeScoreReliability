@@ -27,17 +27,18 @@ GRM_sim <- function(ability, itempar){
 
   n_sub <- length(ability)
   response <- matrix(NA, n_sub, nrow(itempar))
-
-
+  true_response <- matrix(NA, n_sub, nrow(itempar))
+  
   for(i in 1:n_sub){
 
     numeritor <- exp(sweep((ability[i]-itempar[, -1]), 1, itempar[, 1], "*"))
-    P_star<- numeritor/(1+numeritor)
+    P_star <- numeritor/(1+numeritor) # this is the "true response"
 
     response[i, ] <- rowSums(P_star >= runif(nrow(itempar), min=0, max=1))
+    true_response[i, ] <- rowSums(P_star)
   }
 
-  return(response)
+  return(list(response, true_response))
 }
 
 
