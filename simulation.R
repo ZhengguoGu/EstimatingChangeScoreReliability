@@ -1,3 +1,5 @@
+library(Lambda4)
+
 # data simulation
 
 ################################################
@@ -9,8 +11,8 @@ set.seed(110)
 #-------------------------------------------------
 
 parallel_items <- 2 # 1: parallel, otherwise nonparallel
-dimension <- c(1, 2, 4) # number of dimensions in theta
-num_persons <- c(4000, 2000, 1000)
+dimension <- c(1, 2, 4, 8) # number of dimensions in theta
+num_persons <- c(1000, 500, 250, 125)
 
 num_items <- 10
 
@@ -45,7 +47,7 @@ for (L in 1:length(dimension)){
   
     theta <- Unichange_sim(n_sub, sd_pre, mean_change, sd_change)
     
-    theta_pre <- theta[[1]]
+      theta_pre <- theta[[1]]
     theta_post <- theta[[2]]
   
   } else{
@@ -65,20 +67,30 @@ for (L in 1:length(dimension)){
 
   #-------------------------------------------------------------------
 
-  n_sim <- 1000 # simulate 1000 datasets
-  r_simresuls <- matrix(NA, n_sim, 3)  # 2 methods. 
+  n_sim <- 500 # simulate 1000 datasets
+  r_simresults <- matrix(NA, n_sim, 4)  # 3 methods. 
   for (i in 1:n_sim){
   #-------------------------------------------------
   # simulate graded response data
   #-------------------------------------------------
 
-  responses <- GRM_sim(as.vector(theta_pre), itempar)
-  response_pre <- responses[1]
-  true_pre <- responses[2]
+  #responses <- GRM_sim(as.vector(theta_pre), itempar)
+  #response_pre <- responses[[1]]
+  #true_pre <- responses[[2]]
   
-  responses <- GRM_sim(as.vector(theta_post), itempar)
-  response_post <- responses[1]
-  true_post <- responses[2]
+  #responses <- GRM_sim(as.vector(theta_post), itempar)
+  #response_post <- responses[[1]]
+  #true_post <- responses[[2]]
+    Ides = rep(1,num_items)
+    X1 = FsimMDGRM(as.matrix(theta_pre),itempar,Ides)  # pretest
+    X2 = FsimMDGRM(as.matrix(theta_post),itempar,Ides)  # posttest
+    
+    true_pre = X1[[1]]
+    true_post = X2[[1]]
+    
+    response_pre = X1[[2]]
+    response_post= X2[[2]]
+    
   # estimate the response data by means of function grm from package itm
 
   #library(ltm)
@@ -109,33 +121,34 @@ for (L in 1:length(dimension)){
   truechange_sumscores <- sum_true_post - sum_true_pre
   change_sumscores <- sum_post - sum_pre
   
-  r_simresuls[i, 1] <- var(truechange_sumscores)/var(change_sumscores)
+  r_simresults[i, 1] <- var(truechange_sumscores)/var(change_sumscores)
   
   ######## method 1  #########################
 
   r_pre <- psychometric::alpha(response_pre)  # ! cronback alpha is used here. 
   r_post <- psychometric::alpha(response_post)
 
-  r_simresuls[i, 2] <- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
+  r_simresults[i, 2] <- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
 
   ######## method 2  #########################
 
   response_change <- response_post - response_pre
-  r_simresuls[i, 3] <- psychometric::alpha(response_change)
+  r_simresults[i, 3] <- psychometric::alpha(response_change)
 
   ######## method 3: lambda 2 ################
 
-  r_simresuls[i, 4] <- Lambda4::lambda2(response_change)
+  r_simresults[i, 4] <- Lambda4::lambda2(response_change)
 
 
   }
 
-  r_forplots[[L]] <- r_simresuls
+  r_forplots[[L]] <- r_simresults
 
 }
 
 #------------------------
 results <- r_forplots[[1]]
+colnames(results) <- c('true_reliability', 'method1', 'method2', 'method3')
 
 plot(results[,2], results[, 3], xlab = "Estimated change-score reliability based on Method 1",
                      ylab = "Estimated change-score reliability based on Method 2", 
@@ -147,16 +160,26 @@ plot(results[,2], results[, 4], xlab = "Estimated change-score reliability based
      main = 'Dimension = 1', ylim = c(0, 0.4), xlim = c(0, 0.4))
 lines(c(0,1),c(0,1),col="red")
 
+plot(results[,2], results[, 1], xlab = "Estimated change-score reliability based on Method 1",
+     ylab = "True reliability", 
+     main = 'Dimension = 1', ylim = c(0, 0.4), xlim = c(0, 0.4))
+lines(c(0,1),c(0,1),col="red")
+
 #------------------------
 results <- r_forplots[[2]]
 
 plot(results[,2], results[, 3], xlab = "Estimated change-score reliability based on Method 1",
      ylab = "Estimated change-score reliability based on Method 2", 
-     main = 'Dimension = 2', ylim = c(0, 0.4), xlim = c(0, 0.4))
+     main = 'Dimension = 2', ylim = c(0.2, 0.4), xlim = c(0.2, 0.4))
 lines(c(0,1),c(0,1),col="red")
 
 plot(results[,2], results[, 4], xlab = "Estimated change-score reliability based on Method 1", 
      ylab = "Estimated change-score reliability based on Method 3",
+     main = 'Dimension = 2', ylim = c(0.2, 0.4), xlim = c(0.2, 0.4))
+lines(c(0,1),c(0,1),col="red")
+
+plot(results[,2], results[, 1], xlab = "Estimated change-score reliability based on Method 1",
+     ylab = "True reliability", 
      main = 'Dimension = 2', ylim = c(0, 0.4), xlim = c(0, 0.4))
 lines(c(0,1),c(0,1),col="red")
 
@@ -166,11 +189,33 @@ results <- r_forplots[[3]]
 
 plot(results[,2], results[, 3], xlab = "Estimated change-score reliability based on Method 1",
      ylab = "Estimated change-score reliability based on Method 2", 
-     main = 'Dimension = 4', ylim = c(0, 0.4), xlim = c(0, 0.4))
+     main = 'Dimension = 4', ylim = c(0.2, 0.4), xlim = c(0.2, 0.4))
 lines(c(0,1),c(0,1),col="red")
 
 plot(results[,2], results[, 4], xlab = "Estimated change-score reliability based on Method 1", 
      ylab = "Estimated change-score reliability based on Method 3",
-     main = 'Dimension = 4', ylim = c(0, 0.4), xlim = c(0, 0.4))
+     main = 'Dimension = 4', ylim = c(0.2, 0.4), xlim = c(0.2, 0.4))
 lines(c(0,1),c(0,1),col="red")
 
+plot(results[,2], results[, 1], xlab = "Estimated change-score reliability based on Method 1",
+     ylab = "True reliability", 
+     main = 'Dimension = 4', ylim = c(0, 0.4), xlim = c(0, 0.4))
+lines(c(0,1),c(0,1),col="red")
+#-----------------------------
+
+results <- r_forplots[[4]]
+
+plot(results[,2], results[, 3], xlab = "Estimated change-score reliability based on Method 1",
+     ylab = "Estimated change-score reliability based on Method 2", 
+     main = 'Dimension = 8', ylim = c(0.2, 0.4), xlim = c(0.2, 0.4))
+lines(c(0,1),c(0,1),col="red")
+
+plot(results[,2], results[, 4], xlab = "Estimated change-score reliability based on Method 1", 
+     ylab = "Estimated change-score reliability based on Method 3",
+     main = 'Dimension = 8', ylim = c(0.2, 0.4), xlim = c(0.2, 0.4))
+lines(c(0,1),c(0,1),col="red")
+
+plot(results[,2], results[, 1], xlab = "Estimated change-score reliability based on Method 1",
+     ylab = "True reliability", 
+     main = 'Dimension = 8', ylim = c(0, 0.4), xlim = c(0, 0.4))
+lines(c(0,1),c(0,1),col="red")
