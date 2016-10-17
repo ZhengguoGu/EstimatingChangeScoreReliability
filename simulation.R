@@ -46,154 +46,169 @@ if (parallel_items == 1) {
   }
 }
 
-r_forplots <- list()
 
-for (L in 1:length(dimension)){
+#####################################################
+#
+#  generate random samples from population (theta)
+#
+#####################################################
+
+r_pupulation <- list()
+
+p <- 1
+while(p<=100) {
+  
+  r_forplots <- list()
+
+  for (L in 1:length(dimension)){
   
   #-------------------------------------------------
   # simulate multidimensional theta's
   #-------------------------------------------------
   
-  if (dimension[L] == 1){
+    if (dimension[L] == 1){
     
     
-    n_sub <- num_persons[1]
+      n_sub <- num_persons[1]
     
-    sd_pre <- 1
-    mean_change <- 1
-    sd_change <- 0.3
+      sd_pre <- 1
+      mean_change <- 1
+      sd_change <- 0.3
     
-    theta <- Unichange_sim(n_sub, sd_pre, mean_change, sd_change)
+      theta <- Unichange_sim(n_sub, sd_pre, mean_change, sd_change)
     
+      theta_pre <- theta[[1]]
+      theta_post <- theta[[2]]
+    
+    } else{
+    
+      cov_pretest <- 0.8 # need to justify why 0.8  
+      mean_change <- 1
+      sd_change <- 0.3 # need to justify why 0.3
+      EMP <- FALSE
+    
+      n_sub <- num_persons
+      theta <- Mulchange_sim(n_sub, dimension[L], cov_pretest, mean_change, sd_change, EMP)
+    
+    }
+  
     theta_pre <- theta[[1]]
     theta_post <- theta[[2]]
-    
-  } else{
-    
-    cov_pretest <- 0.8 # need to justify why 0.8  
-    mean_change <- 1
-    sd_change <- 0.3 # need to justify why 0.3
-    EMP <- FALSE
-    
-    n_sub <- num_persons
-    theta <- Mulchange_sim(n_sub, dimension[L], cov_pretest, mean_change, sd_change, EMP)
-    
-  }
-  
-  theta_pre <- theta[[1]]
-  theta_post <- theta[[2]]
   
   #-------------------------------------------------------------------
   
-  n_sim <- 500 # simulate 1000 datasets
-  r_simresults <- matrix(NA, n_sim, 8)  # 8 methods.
+    n_sim <- 500 # simulate 1000 datasets
+    r_simresults <- matrix(NA, n_sim, 8)  # 8 methods.
   
-  for (i in 1:n_sim){
+    for (i in 1:n_sim){
     #-------------------------------------------------
     # simulate graded response data
     #-------------------------------------------------
     
-    responses <- GRM_sim(theta_pre, itempar)
-    response_pre <- responses[[1]]
-    true_pre <- responses[[2]]
+      responses <- GRM_sim(theta_pre, itempar)
+      response_pre <- responses[[1]]
+      true_pre <- responses[[2]]
     
-    responses <- GRM_sim(theta_post, itempar)
-    response_post <- responses[[1]]
-    true_post <- responses[[2]]
-    #Ides = rep(1,num_items)
-    #X1 = FsimMDGRM(as.matrix(theta_pre),itempar,Ides)  # pretest
-    #X2 = FsimMDGRM(as.matrix(theta_post),itempar,Ides)  # posttest
-    #true_pre = X1[[1]]
-    #true_post = X2[[1]]
-    #response_pre = X1[[2]]
-    #response_post= X2[[2]]
+      responses <- GRM_sim(theta_post, itempar)
+      response_post <- responses[[1]]
+      true_post <- responses[[2]]
+      #Ides = rep(1,num_items)
+      #X1 = FsimMDGRM(as.matrix(theta_pre),itempar,Ides)  # pretest
+      #X2 = FsimMDGRM(as.matrix(theta_post),itempar,Ides)  # posttest
+      #true_pre = X1[[1]]
+      #true_post = X2[[1]]
+      #response_pre = X1[[2]]
+      #response_post= X2[[2]]
     
-    # estimate the response data by means of function grm from package itm
+      # estimate the response data by means of function grm from package itm
     
-    #library(ltm)
-    #estimates_pre <- grm(response_pre)
-    #print(estimates_pre)
-    #estimates_post <- grm(response_post)
-    #print(estimates_post)
+      #library(ltm)
+      #estimates_pre <- grm(response_pre)
+      #print(estimates_pre)
+      #estimates_post <- grm(response_post)
+      #print(estimates_post)
     
-    #--------------------------------------------------
-    # Calculate inter-item covariance matrix
-    # for observed scores
-    #--------------------------------------------------
+      #--------------------------------------------------
+      # Calculate inter-item covariance matrix
+      # for observed scores
+      #--------------------------------------------------
     
-    #cov_obsmatrix <- cov(response_pre, response_post)
+      #cov_obsmatrix <- cov(response_pre, response_post)
     
-    #-------------------------------------------------
-    # calculate change-score reliability
-    #-------------------------------------------------
+      #-------------------------------------------------
+      # calculate change-score reliability
+      #-------------------------------------------------
     
-    # sum scores
-    sum_pre <- rowSums(response_pre)
-    sum_true_pre <- rowSums(true_pre)
-    sum_post <- rowSums(response_post)
-    sum_true_post <- rowSums(true_post)
+      # sum scores
+      sum_pre <- rowSums(response_pre)
+      sum_true_pre <- rowSums(true_pre)
+      sum_post <- rowSums(response_post)
+      sum_true_post <- rowSums(true_post)
     
-    #############################################################################################
-    # Methods for calculating reliability
-    #
-    # method 0.1: ture-change reliability - var(true change)/var(observed change)
-    # method 0.2: ture-change reliability - cor(true change, observed change)
-    # 
-    # method 1.1: estimated reliability - alpha (i.e. pre and post reliability estimated by alpha )
-    # method 1.2: estimated reliability - lambda2 (i.e. pre and post reliability estimated by lambda2)
-    # method 1.3: estimated reliability - lambda4 (i.e. pre and post reliability estimated by lambda4)
-    #
-    # method 2.1: estimated reliability (item-level) - alpha (i.e. change scores at item level are used to estimate reliability by means of alpha) 
-    # method 2.2: estimated reliability (item-level) - lambda2 (i.e. change scores at item level are used to estimate reliability by means of lambda2) 
-    # method 2.3: estimated reliability (item-level) - lambda4 (i.e. change scores at item level are used to estimate reliability by means of lambda4) 
-    #
+      #####################################################################################################################################################
+      # Methods for calculating reliability
+      #
+      # method 0.1: ture-change reliability - var(true change)/var(observed change)
+      # method 0.2: ture-change reliability - cor(true change, observed change)
+      # 
+      # method 1.1: estimated reliability - alpha (i.e. pre and post reliability estimated by alpha )
+      # method 1.2: estimated reliability - lambda2 (i.e. pre and post reliability estimated by lambda2)
+      # method 1.3: estimated reliability - lambda4 (i.e. pre and post reliability estimated by lambda4)
+      #
+      # method 2.1: estimated reliability (item-level) - alpha (i.e. change scores at item level are used to estimate reliability by means of alpha) 
+      # method 2.2: estimated reliability (item-level) - lambda2 (i.e. change scores at item level are used to estimate reliability by means of lambda2) 
+      # method 2.3: estimated reliability (item-level) - lambda4 (i.e. change scores at item level are used to estimate reliability by means of lambda4) 
+      ###################################################################################################################################################
     
-    ######## method 0.1: ture-change reliability - var(true change)/var(observed change) ###########
+      ######## method 0.1: ture-change reliability - var(true change)/var(observed change) ###########
     
-    truechange_sumscores <- sum_true_post - sum_true_pre
-    change_sumscores <- sum_post - sum_pre
+      truechange_sumscores <- sum_true_post - sum_true_pre
+      change_sumscores <- sum_post - sum_pre
     
-    r_simresults[i, 1] <- var(truechange_sumscores)/var(change_sumscores)
+      r_simresults[i, 1] <- var(truechange_sumscores)/var(change_sumscores)
     
-    ######## method 0.2: ture-change reliability - cor(true change, observed change) ###########
+      ######## method 0.2: ture-change reliability - cor(true change, observed change) ###########
     
-    r_simresults[i, 2] <- (cor(truechange_sumscores, change_sumscores))^2
+      r_simresults[i, 2] <- (cor(truechange_sumscores, change_sumscores))^2
     
-    ######## method 1.1: estimated reliability - alpha (i.e. pre and post reliability estimated by alpha )  #########################
+      ######## method 1.1: estimated reliability - alpha (i.e. pre and post reliability estimated by alpha )  #########################
     
-    r_pre <- psychometric::alpha(response_pre)  # ! cronback alpha is used here. 
-    r_post <- psychometric::alpha(response_post)
+      r_pre <- psychometric::alpha(response_pre)  # ! cronback alpha is used here. 
+      r_post <- psychometric::alpha(response_post)
     
-    r_simresults[i, 3] <- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
+      r_simresults[i, 3] <- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
     
-    ######## method 1.2: estimated reliability - lambda2 (i.e. pre and post reliability estimated by lambda2) #######
+      ######## method 1.2: estimated reliability - lambda2 (i.e. pre and post reliability estimated by lambda2) #######
     
-    r_pre <- Lambda4::lambda2(response_pre)  # ! lambda2 is used here. 
-    r_post <- Lambda4::lambda2(response_post)
+      r_pre <- Lambda4::lambda2(response_pre)  # ! lambda2 is used here. 
+      r_post <- Lambda4::lambda2(response_post)
     
-    r_simresults[i, 4] <- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
+      r_simresults[i, 4] <- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
     
-    ######## method 1.3: estimated reliability - lambda4 (i.e. pre and post reliability estimated by lambda4)
+      ######## method 1.3: estimated reliability - lambda4 (i.e. pre and post reliability estimated by lambda4)
     
-    r_simresults[i, 5] <- 0
+      r_simresults[i, 5] <- 0
     
-    ######## method 2.1: estimated reliability (item-level) - alpha (i.e. change scores at item level are used to estimate reliability by means of alpha)   #########################
+      ######## method 2.1: estimated reliability (item-level) - alpha (i.e. change scores at item level are used to estimate reliability by means of alpha)   #########################
     
-    response_change <- response_post - response_pre
-    r_simresults[i, 6] <- psychometric::alpha(response_change)
+      response_change <- response_post - response_pre
+      r_simresults[i, 6] <- psychometric::alpha(response_change)
     
-    ######## method 2.2: estimated reliability (item-level) - lambda2 (i.e. change scores at item level are used to estimate reliability by means of lambda2) ################
+      ######## method 2.2: estimated reliability (item-level) - lambda2 (i.e. change scores at item level are used to estimate reliability by means of lambda2) ################
     
-    r_simresults[i, 7] <- Lambda4::lambda2(response_change)
+      r_simresults[i, 7] <- Lambda4::lambda2(response_change)
     
-    ########method 2.3: estimated reliability (item-level) - lambda4 (i.e. change scores at item level are used to estimate reliability by means of lambda4) 
+      ########method 2.3: estimated reliability (item-level) - lambda4 (i.e. change scores at item level are used to estimate reliability by means of lambda4) 
     
-    r_simresults[i, 8] <- 0
+      r_simresults[i, 8] <- 0
     
+    }
+  
+    r_forplots[[L]] <- r_simresults
+  
   }
-  
-  r_forplots[[L]] <- r_simresults
-  
+  r_pupulation[[p]] <- r_forplots
+  P <- P+1
 }
 
 ###################################################################################
