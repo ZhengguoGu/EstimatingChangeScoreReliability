@@ -12,30 +12,37 @@ set.seed(110)
 #-------------------------------------------------
 
 parallel_items <- 2 # 1: parallel, otherwise nonparallel
-dimension <- c(1, 2, 4) # number of dimensions in theta
+dimension <- 1 # number of dimensions in theta
 num_persons <- 1000
 
 num_items <- 10
 
 if (parallel_items == 1) {
+  
   itempar <- matrix(NA,num_items,3)
   itempar[,1] <- runif(1,1,3)   # discrimination
   itempar[,2] <- runif(1,-2,0)  # difficulty  
   itempar[,3] <- runif(1,0.5,2) # difficulty
+  
 } else {
+  
   if (dimension == 1){
     
     itempar <- matrix(NA,num_items,3)
     itempar[,1] <- runif(num_items,1,3)  #the parameters are set according to Wilco
     itempar[,2] <- runif(num_items,-2,0)
     itempar[,3] <- runif(num_items,0.5,2)
+    
   } else if (dimension == 2){
+    
     itempar <- matrix(NA,num_items,4)
     itempar[,1] <- runif(num_items,1,3)  #the parameters are set according to Wilco
     itempar[,2] <- itempar[,1] # for this moment, let discimination for each item to be the same across dimenions. 
     itempar[,3] <- runif(num_items,-2,0)
     itempar[,4] <- runif(num_items,0.5,2)
+    
   } else if (dimension == 4){
+    
     itempar <- matrix(NA,num_items,6)
     itempar[,1] <- runif(num_items,1,3)  #the parameters are set according to Wilco
     itempar[,2] <- itempar[,1] # for this moment, let discimination for each item to be the same across dimenions. 
@@ -43,6 +50,7 @@ if (parallel_items == 1) {
     itempar[,4] <- itempar[,1]
     itempar[,5] <- runif(num_items,-2,0)
     itempar[,6] <- runif(num_items,0.5,2)
+    
   }
 }
 
@@ -56,7 +64,7 @@ if (parallel_items == 1) {
 r_pupulation <- list()
 
 p <- 1
-while(p<=100) {
+while(p<=1) {
   
   r_forplots <- list()
 
@@ -69,7 +77,7 @@ while(p<=100) {
     if (dimension[L] == 1){
     
     
-      n_sub <- num_persons[1]
+      n_sub <- num_persons
     
       sd_pre <- 1
       mean_change <- 1
@@ -87,8 +95,7 @@ while(p<=100) {
       sd_change <- 0.3 # need to justify why 0.3
       EMP <- FALSE
     
-      n_sub <- num_persons
-      theta <- Mulchange_sim(n_sub, dimension[L], cov_pretest, mean_change, sd_change, EMP)
+      theta <- Mulchange_sim(num_persons, dimension[L], cov_pretest, mean_change, sd_change, EMP)
     
     }
   
@@ -112,6 +119,7 @@ while(p<=100) {
       responses <- GRM_sim(theta_post, itempar)
       response_post <- responses[[1]]
       true_post <- responses[[2]]
+      
       #Ides = rep(1,num_items)
       #X1 = FsimMDGRM(as.matrix(theta_pre),itempar,Ides)  # pretest
       #X2 = FsimMDGRM(as.matrix(theta_post),itempar,Ides)  # posttest
@@ -140,6 +148,7 @@ while(p<=100) {
       #-------------------------------------------------
     
       # sum scores
+      
       sum_pre <- rowSums(response_pre)
       sum_true_pre <- rowSums(true_pre)
       sum_post <- rowSums(response_post)
@@ -207,8 +216,10 @@ while(p<=100) {
     r_forplots[[L]] <- r_simresults
   
   }
+  
   r_pupulation[[p]] <- r_forplots
-  P <- P+1
+  p <- p+1
+  
 }
 
 ###################################################################################
