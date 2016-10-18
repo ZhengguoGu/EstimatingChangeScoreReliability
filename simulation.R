@@ -12,10 +12,10 @@ set.seed(110)
 #-------------------------------------------------
 
 parallel_items <- 2 # 1: parallel, otherwise nonparallel
-dimension <- 1 # number of dimensions in theta
+dimension <- 4 # number of dimensions in theta
 num_persons <- 1000
 
-num_items <- 10
+num_items <- 50
 
 if (parallel_items == 1) {
   
@@ -228,12 +228,38 @@ while(p<=1) {
 #
 ###################################################################################
 
-#results <- r_forplots[[1]]
-#colnames(results) <- c('true_reliability_var', 'true_reliability_cor', 'method1', 'method2', 'method3')
+results <- r_pupulation[[1]]
 
-#plot(results[,1], results[, 2], xlab = "true reliability - proportion variance",
-#                     ylab = "true reliability - correlation", 
-#                     main = 'Dimension = 2', xlim=c(0, 1), ylim=c(0, 1))
-#lines(c(0,1),c(0,1),col="red")
+plot(results[[1]][,1], results[[1]][, 2], xlab = "true reliability - proportion variance",
+                     ylab = "true reliability - correlation", 
+                     xlim=c(0, 1), ylim=c(0, 1),asp=1)
+lines(c(0,1),c(0,1),col="red")
 
+###
+
+plot(results[[1]][, 2], results[[1]][, 3], xlab = "true reliability - correlation",
+     ylab = "estimated reliability (pre and post reliability estimated by alpha )", 
+     xlim=c(0, 1), ylim=c(0, 1),asp=1)
+lines(c(0,1),c(0,1),col="red")
+
+###
+
+plot(results[[1]][, 2], results[[1]][, 4], xlab = "true reliability - correlation",
+     ylab = "estimated reliability (pre and post reliability estimated by lambda2)", 
+     xlim=c(0, 1), ylim=c(0, 1),asp=1)
+lines(c(0,1),c(0,1),col="red")
+
+###
+
+plot(results[[1]][, 2], results[[1]][, 6], xlab = "true reliability - correlation",
+     ylab = "estimated reliability (item-level) - alpha", 
+     xlim=c(0, 1), ylim=c(0, 1),asp=1)
+lines(c(0,1),c(0,1),col="red")
+
+###
+
+plot(results[[1]][, 2], results[[1]][, 7], xlab = "true reliability - correlation",
+     ylab = "estimated reliability (item-level) - lambda2", 
+     xlim=c(0, 1), ylim=c(0, 1),asp=1)
+lines(c(0,1),c(0,1),col="red")
 
