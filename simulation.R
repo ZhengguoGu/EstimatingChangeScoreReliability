@@ -15,7 +15,7 @@ parallel_items <- 2 # 1: parallel, otherwise nonparallel
 dimension <- 4 # number of dimensions in theta
 num_persons <- 1000
 
-num_items <- 50
+num_items <- 20
 
 if (parallel_items == 1) {
   
@@ -26,35 +26,18 @@ if (parallel_items == 1) {
   
 } else {
   
-  if (dimension == 1){
-    
-    itempar <- matrix(NA,num_items,3)
-    itempar[,1] <- runif(num_items,1,3)  #the parameters are set according to Wilco
-    itempar[,2] <- runif(num_items,-2,0)
-    itempar[,3] <- runif(num_items,0.5,2)
-    
-  } else if (dimension == 2){
-    
-    itempar <- matrix(NA,num_items,4)
-    itempar[,1] <- runif(num_items,1,3)  #the parameters are set according to Wilco
-    itempar[,2] <- itempar[,1] # for this moment, let discimination for each item to be the same across dimenions. 
-    itempar[,3] <- runif(num_items,-2,0)
-    itempar[,4] <- runif(num_items,0.5,2)
-    
-  } else if (dimension == 4){
-    
-    itempar <- matrix(NA,num_items,6)
-    itempar[,1] <- runif(num_items,1,3)  #the parameters are set according to Wilco
-    itempar[,2] <- itempar[,1] # for this moment, let discimination for each item to be the same across dimenions. 
-    itempar[,3] <- itempar[,1]
-    itempar[,4] <- itempar[,1]
-    itempar[,5] <- runif(num_items,-2,0)
-    itempar[,6] <- runif(num_items,0.5,2)
-    
-  }
+  itempar <- matrix(NA,num_items,3)
+  itempar[,1] <- runif(num_items,1,3)  #the parameters are set according to Wilco
+  itempar[,2] <- runif(num_items,-2,0)
+  itempar[,3] <- runif(num_items,0.5,2)
+  
 }
 
-
+id <- vector()
+for(d in 1: dimension){
+  id <- cbind(id, rep(d, num_items/dimension))
+}
+id <- as.vector(id)
 #####################################################
 #
 #  generate random samples from population (theta)
@@ -74,7 +57,7 @@ while(p<=1) {
   # simulate multidimensional theta's
   #-------------------------------------------------
   
-    if (dimension[L] == 1){
+    if (dimension == 1){
     
     
       n_sub <- num_persons
@@ -95,7 +78,7 @@ while(p<=1) {
       sd_change <- 0.3 # need to justify why 0.3
       EMP <- FALSE
     
-      theta <- Mulchange_sim(num_persons, dimension[L], cov_pretest, mean_change, sd_change, EMP)
+      theta <- Mulchange_sim(num_persons, dimension, cov_pretest, mean_change, sd_change, EMP)
     
     }
   
@@ -105,18 +88,18 @@ while(p<=1) {
   #-------------------------------------------------------------------
   
     n_sim <- 500 # simulate 1000 datasets
-    r_simresults <- matrix(NA, n_sim, 8)  # 8 methods.
+    r_simresults <- matrix(NA, n_sim, 10)  # 8 methods.
   
     for (i in 1:n_sim){
     #-------------------------------------------------
     # simulate graded response data
     #-------------------------------------------------
     
-      responses <- GRM_sim(theta_pre, itempar)
+      responses <- GRM_sim(theta_pre, itempar, id)
       response_pre <- responses[[1]]
       true_pre <- responses[[2]]
     
-      responses <- GRM_sim(theta_post, itempar)
+      responses <- GRM_sim(theta_post, itempar, id)
       response_post <- responses[[1]]
       true_post <- responses[[2]]
       
@@ -180,13 +163,14 @@ while(p<=1) {
     
       r_simresults[i, 2] <- (cor(truechange_sumscores, change_sumscores))^2
     
+      r_simresults[i, 9] <- (cor(sum_true_pre, sum_pre))^2
       ######## method 1.1: estimated reliability - alpha (i.e. pre and post reliability estimated by alpha )  #########################
     
       r_pre <- psychometric::alpha(response_pre)  # ! cronback alpha is used here. 
       r_post <- psychometric::alpha(response_post)
     
       r_simresults[i, 3] <- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
-    
+      
       ######## method 1.2: estimated reliability - lambda2 (i.e. pre and post reliability estimated by lambda2) #######
     
       r_pre <- Lambda4::lambda2(response_pre)  # ! lambda2 is used here. 
@@ -203,12 +187,13 @@ while(p<=1) {
       response_change <- response_post - response_pre
       r_simresults[i, 6] <- psychometric::alpha(response_change)
     
+      r_simresults[i, 10] <- psychometric::alpha(response_pre)
       ######## method 2.2: estimated reliability (item-level) - lambda2 (i.e. change scores at item level are used to estimate reliability by means of lambda2) ################
     
       r_simresults[i, 7] <- Lambda4::lambda2(response_change)
     
       ########method 2.3: estimated reliability (item-level) - lambda4 (i.e. change scores at item level are used to estimate reliability by means of lambda4) 
-    
+     
       r_simresults[i, 8] <- 0
     
     }

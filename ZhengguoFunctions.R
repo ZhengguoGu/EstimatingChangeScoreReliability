@@ -17,24 +17,30 @@ library(MASS)
 # 
 # 2016.10.14. Updated. An "Id" variable is added, so as to 
 # generate multidimensional responses. (Based on Wilco's code)
+# However, it should be noted that this is not strickly a typical
+# multidimensional irt model. Here I assume that items have 
+# different facets - that is, a person might have, say 3 dimenions 
+# in theta, and each dimension persons to a few items. But there
+# is no crossloadings between items and thetas
 #-----------------------------------------------------------------
 
-GRM_sim <- function(ability, itempar){
+GRM_sim <- function(ability, itempar, id){
   
   # descrption:
-  # ability = ability parameter, aka, theta. When it is a matrix, theta is multidimensional
-  # itempar = item parameter. Note that the first few columns are discriminating parameters,
-  #           and it is assumed that if the ability matrix has k comlumns, then the first k colums
-  #           in itempar are discriminating parameters correspondingly. 
+  #
+  # ability = ability parameter
+  # itempar = item parameter
+  # id = which theta goes with whitch discriminating parameter
   #
   # This function is designed for items with more than 2 answer alternatives!
   # (Thus, it needs to be extended to incorporate dichotomous items)
-  if (is.matrix(ability) == FALSE){
   
-    n_sub <- length(ability)
-    response <- matrix(NA, n_sub, nrow(itempar))
-    true_response <- matrix(NA, n_sub, nrow(itempar))
-    
+  n_sub <- nrow(ability)
+  response <- matrix(NA, n_sub, nrow(itempar))
+  true_response <- matrix(NA, n_sub, nrow(itempar))
+  
+  if(is.na(id[1])){
+
     for(i in 1:n_sub){
     
       numeritor <- exp(sweep((ability[i]-itempar[, -1]), 1, itempar[, 1], "*"))
@@ -44,29 +50,19 @@ GRM_sim <- function(ability, itempar){
       true_response[i, ] <- rowSums(P_star)
     
     }
-    
   } else{
     
-    n_sub <- nrow(ability)
+    for(i in 1:n_sub){
+      
+      abil <- ability[i, ][id]
+      numeritor <- exp(sweep((abil-itempar[, -1]), 1, itempar[, 1], "*"))
+      P_star <- numeritor/(1+numeritor) # this is the "true response"
     
-    ability <- as.matrix(ability)
-    discrim <- itempar[, 1:dim(ability)[2]]
-    difficulty <- itempar[, -(1:dim(ability)[2])]
-    
-    response <- matrix(NA, n_sub, nrow(itempar))
-    true_response <- matrix(NA, n_sub, nrow(itempar))
-      
-    for(j in 1:n_sub){
-      
-      numeritor <- exp(sweep(-rowSums(discrim) * difficulty, 1, discrim %*% ability[j, ], "+"))
-      P_star <- numeritor/(1+numeritor)
-        
-      response[j, ] <- rowSums(P_star >= runif(nrow(itempar), min=0, max=1))
-      true_response[j, ] <- rowSums(P_star)
-      
-      }
-  }
-
+      response[i, ] <- rowSums(P_star >= runif(nrow(itempar), min=0, max=1))
+      true_response[i, ] <- rowSums(P_star)
+    }
+  }  
+  
   return(list(response, true_response))
 }
 
