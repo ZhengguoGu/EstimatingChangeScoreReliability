@@ -44,15 +44,14 @@ id <- as.vector(id)
 #
 #####################################################
 
-r_pupulation <- list()
-
+sample_results <- list()
+maxp <- 100
+num_methods <- 8 #see below, method 0.1 to 2.3
+r_avg <- matrix(NA, maxp, num_methods)
 p <- 1
-while(p<=1) {
-  
-  r_forplots <- list()
 
-  for (L in 1:length(dimension)){
-  
+while(p<=maxp) {
+
   #-------------------------------------------------
   # simulate multidimensional theta's
   #-------------------------------------------------
@@ -87,8 +86,8 @@ while(p<=1) {
   
   #-------------------------------------------------------------------
   
-    n_sim <- 500 # simulate 1000 datasets
-    r_simresults <- matrix(NA, n_sim, 10)  # 8 methods.
+    n_sim <- 1000 # simulate 1000 datasets
+    r_simresults <- matrix(NA, n_sim, num_methods)  # 8 methods.
   
     for (i in 1:n_sim){
     #-------------------------------------------------
@@ -163,7 +162,6 @@ while(p<=1) {
     
       r_simresults[i, 2] <- (cor(truechange_sumscores, change_sumscores))^2
     
-      r_simresults[i, 9] <- (cor(sum_true_pre, sum_pre))^2
       ######## method 1.1: estimated reliability - alpha (i.e. pre and post reliability estimated by alpha )  #########################
     
       r_pre <- psychometric::alpha(response_pre)  # ! cronback alpha is used here. 
@@ -187,7 +185,6 @@ while(p<=1) {
       response_change <- response_post - response_pre
       r_simresults[i, 6] <- psychometric::alpha(response_change)
     
-      r_simresults[i, 10] <- psychometric::alpha(response_pre)
       ######## method 2.2: estimated reliability (item-level) - lambda2 (i.e. change scores at item level are used to estimate reliability by means of lambda2) ################
     
       r_simresults[i, 7] <- Lambda4::lambda2(response_change)
@@ -197,15 +194,18 @@ while(p<=1) {
       r_simresults[i, 8] <- 0
     
     }
-  
-    r_forplots[[L]] <- r_simresults
-  
-  }
-  
-  r_pupulation[[p]] <- r_forplots
-  p <- p+1
+    
+    sample_results[[p]] <- r_simresults
+    
+    r_avg[p, ] <- colSums(r_simresults)/n_sim
+    p <- p+1
   
 }
+  
+  
+  
+  
+
 
 ###################################################################################
 #
@@ -213,37 +213,37 @@ while(p<=1) {
 #
 ###################################################################################
 
-results <- r_pupulation[[1]]
+results <- r_avg
 
-plot(results[[1]][,1], results[[1]][, 2], xlab = "true reliability - proportion variance",
+plot(results[,1], results[, 2], xlab = "true reliability - proportion variance",
                      ylab = "true reliability - correlation", 
                      xlim=c(0, 1), ylim=c(0, 1),asp=1)
 lines(c(0,1),c(0,1),col="red")
 
 ###
 
-plot(results[[1]][, 2], results[[1]][, 3], xlab = "true reliability - correlation",
+plot(results[, 2], results[, 3], xlab = "true reliability - correlation",
      ylab = "estimated reliability (pre and post reliability estimated by alpha )", 
      xlim=c(0, 1), ylim=c(0, 1),asp=1)
 lines(c(0,1),c(0,1),col="red")
 
 ###
 
-plot(results[[1]][, 2], results[[1]][, 4], xlab = "true reliability - correlation",
+plot(results[, 2], results[, 4], xlab = "true reliability - correlation",
      ylab = "estimated reliability (pre and post reliability estimated by lambda2)", 
      xlim=c(0, 1), ylim=c(0, 1),asp=1)
 lines(c(0,1),c(0,1),col="red")
 
 ###
 
-plot(results[[1]][, 2], results[[1]][, 6], xlab = "true reliability - correlation",
+plot(results[, 2], results[, 6], xlab = "true reliability - correlation",
      ylab = "estimated reliability (item-level) - alpha", 
      xlim=c(0, 1), ylim=c(0, 1),asp=1)
 lines(c(0,1),c(0,1),col="red")
 
 ###
 
-plot(results[[1]][, 2], results[[1]][, 7], xlab = "true reliability - correlation",
+plot(results[, 2], results[, 7], xlab = "true reliability - correlation",
      ylab = "estimated reliability (item-level) - lambda2", 
      xlim=c(0, 1), ylim=c(0, 1),asp=1)
 lines(c(0,1),c(0,1),col="red")
