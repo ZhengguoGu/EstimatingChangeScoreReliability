@@ -45,7 +45,7 @@ id <- as.vector(id)
 #####################################################
 
 sample_results <- list()
-maxp <- 10
+maxp <- 20
 num_methods <- 8 #see below, method 0.1 to 2.3
 r_avg <- matrix(NA, maxp, num_methods)
 r_sd <- matrix(NA, maxp, num_methods)
@@ -199,7 +199,7 @@ while(p<=maxp) {
     sample_results[[p]] <- r_simresults
     
     r_avg[p, ] <- colSums(r_simresults)/n_sim
-    r_sd[p, ] <- apply(r_simresults, 1, sd)
+    r_sd[p, ] <- apply(r_simresults, 2, sd)
     p <- p+1
   
 }
