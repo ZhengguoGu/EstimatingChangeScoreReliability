@@ -2,4 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+<<<<<<< HEAD
 simulation.R
+=======
+>>>>>>> 3590c83f3e4e9cf14d6bb4e5a7818f0084b1a953

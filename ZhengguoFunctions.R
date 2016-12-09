@@ -30,17 +30,16 @@ GRM_sim <- function(ability, itempar, id){
   #
   # ability = ability parameter
   # itempar = item parameter
-  # id = which theta goes with whitch discriminating parameter
+  # id = which theta goes with which discriminating parameter
   #
   # This function is designed for items with more than 2 answer alternatives!
-  # (Thus, it needs to be extended to incorporate dichotomous items)
   
   n_sub <- nrow(ability)
   response <- matrix(NA, n_sub, nrow(itempar))
   true_response <- matrix(NA, n_sub, nrow(itempar))
   
-  if(is.na(id[1])){
-
+  if(sum(id == 1)==length(id)) {
+    # if true, then unidimensional 
     for(i in 1:n_sub){
     
       numeritor <- exp(sweep((ability[i]-itempar[, -1]), 1, itempar[, 1], "*"))
@@ -70,9 +69,11 @@ GRM_sim <- function(ability, itempar, id){
 #----------------------------------------------------------------
 # MulChange_sim: simulate multidimensional change in theta
 # Note that this is based on the code by Dr. Wilco Emons at TiU
+#
+# Last update: 2016/12/08
 #----------------------------------------------------------------
 
-Mulchange_sim <- function(n_sub, dimension, covar, mean_change, sd_change, EMP){
+Mulchange_sim <- function(n_sub, dimension, covar, sd_change, EMP){
   
   # generate theta values for pretest
   Sigma_theta <- matrix(covar, dimension, dimension)
@@ -82,7 +83,7 @@ Mulchange_sim <- function(n_sub, dimension, covar, mean_change, sd_change, EMP){
   cov_change <- covar*sd_change^2 # We set it in this way, but there are of course other ways of setting up the covariance
   Sigma_change <- matrix(cov_change,dimension,dimension)
   diag(Sigma_change) <- sd_change^2
-  theta_change <- mvrnorm(n_sub,mu=rep(mean_change,dimension),Sigma=Sigma_change,empirical=EMP)
+  theta_change <- mvrnorm(n_sub,mu=rep(0,dimension),Sigma=Sigma_change,empirical=EMP)
   theta_post <- theta_pre + theta_change
   
   return(list(theta_pre, theta_post, theta_change))
@@ -91,18 +92,42 @@ Mulchange_sim <- function(n_sub, dimension, covar, mean_change, sd_change, EMP){
 
 #-------------------------------------------------------------
 # UniChange_sim: simulate unidimensional change in theta
+#
+# Last update: 2016/12/08
 #-------------------------------------------------------------
 
-Unichange_sim <- function(n_sub, sd_pre, mean_change, sd_change){
+Unichange_sim <- function(n_sub, sd_change){
   # generate theta values for pretest
-  theta_pre <- rnorm(n_sub, mean = 0, sd=1)
-
-  sd_change <- sd_pre * sd_change^2  # need to justify why it is set like this
-  theta_change <- rnorm(n_sub, mean_change, sd_change)
   
+  theta_pre <- rnorm(n_sub, mean = 0, sd=1)
+  theta_change <- rnorm(n_sub, mean = 0, sd_change) #note that because mean does not influnce reliability
+                                                    #we set mean = 0
   theta_post <- theta_pre + theta_change
   
   return(list(theta_pre, theta_post, theta_change))
   
+}
+
+
+#--------------------------------------------------------------
+# Mimicking carry-over effects
+#
+# Last update: 2016/12/08
+#--------------------------------------------------------------
+
+carry_over <- function(pre, post){
+  
+  strong_post <- post
+  weak_post <- post  
+  
+  ind1 <- (pre - post < -1) 
+  strong_post[ind1] <- pre[ind1] + 1
+  weak_post[ind1] <- post[ind1] - 1
+  
+  ind2 <- (pre - post > 1)
+  strong_post[ind2] <- pre[ind2] - 1
+  weak_post[ind2] <- post[ind2] + 1
+  
+  return(list(strong_post, weak_post))
 }
   
