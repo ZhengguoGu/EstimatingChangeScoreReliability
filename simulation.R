@@ -7,66 +7,129 @@ library(psychometric)
 
 set.seed(110)
 
-#------------------------------------------------- 
-# simulate item parameters
-#-------------------------------------------------
+#------------------------------------------------------------------------------ 
+# parameteres 
+#------------------------------------------------------------------------------
 
-num_items <- 9 # test length: 9, 18, 27, 36 items
+test_length <- c(9, 21, 36)
+parallel_item <- c(1, 0) # 1== yes, 0 == no
+correlated_facets <- c(1, .6, .8) #if == 1, then dimension of theta is 1, otherwise 3 dimensions
+magnitude_sd <- c(sqrt(.14), sqrt(.5))
+strongweak_carry <- c(0, 10, 1) #0 == no, 10 == strong, 1 == weak
 
-parallel_items <- 1 # 1: parallel, otherwise nonparallel
+num_condition <- length(test_length)*length(parallel_item)*length(correlated_facets)*length(magnitude_sd)*length(strongweak_carry)
+conditions <- list()
 
-dimension <- 3 # number of dimensions in theta
-
-cov_pretest <- 0.8  # 0.3, 0.5, 0.8
-sd_change <- 0.14 # 0.14, 0.5
-
-existence_carryover <- 1 # 1 = yes, 0 = no
-strong_weak <- 1 # 1 = strong, -1 = weak carry-over effects
-
-num_persons <- 1000 # number of subjects
-n_sim <- 1000 # simulate 1000 datasets
-
-if (parallel_items == 1) {
-  
-  itempar <- matrix(NA,num_items,5)
-  itempar[,1] <- runif(1,1.5,2.5)   # discrimination
-  avg_beta <- runif(1, 0, 1.25)
-  itempar[,2] <- avg_beta - 1
-  itempar[,3] <- avg_beta - .5
-  itempar[,4] <- avg_beta + .5
-  itempar[,5] <- avg_beta + 1
-  
-} else {
-  
-  itempar <- matrix(NA,num_items,5)
-  itempar[,1] <- runif(num_items,1.5,2.5)  # discrimination
-  avg_beta <- runif(num_items, 0, 1.25)
-  itempar[,2] <- avg_beta - 1
-  itempar[,3] <- avg_beta - .5
-  itempar[,4] <- avg_beta + .5
-  itempar[,5] <- avg_beta + 1
-  
-}
-
-id <- vector()
-for(d in 1: dimension){
-  id <- cbind(id, rep(d, num_items/dimension))
-}
-id <- as.vector(id)
-#####################################################
-#
-#  generate random samples from population (theta)
-#
-#####################################################
-
-sample_results <- list()
-maxp <- 20
-num_methods <- 8 #see below, method 0.1 to 2.3
-r_avg <- matrix(NA, maxp, num_methods)
-r_sd <- matrix(NA, maxp, num_methods)
 p <- 1
+for(i in 1:length(test_length)){
+  for (j in 1:length(parallel_item)){
+    for (k in 1:length(correlated_facets)){
+      for(l in 1:length(magnitude_sd)){
+        for(m in 1:length(strongweak_carry)){
+          
+          conditions[[p]] <- c(test_length[i], parallel_item[j], correlated_facets[k], magnitude_sd[l], strongweak_carry[m])
+          p <- p + 1
+        }
+      }
+    }
+  }
+}
 
-while(p<=maxp) {
+
+df <- data.frame(matrix(unlist(conditions), nrow=192, byrow = T))
+colnames(df) <- c('test length', 'parallel item', 'correlated facets',
+                  'maginute of sd', 'carry-over effects')
+library(xlsx)
+library(rJava)
+write.csv(df, 'conditions.csv', sep=',')
+
+
+
+# --------------------------------------------------------------------------------
+#
+# Run the simulations following the order of the test conditions --> df dataframe. 
+#
+#---------------------------------------------------------------------------------
+
+restuls_conditions <- list()
+num_test <- 1
+
+while (num_test <= nrow(df)){
+
+  num_items <- df[num_test, 1]
+  
+  parallel_items <- df[num_test, 2]
+  
+  if(df[num_test, 3] == 1){
+      dimension <- 1
+  } else if (df[num_test, 3] == .6){
+      dimension <- 3
+      cov_pretest <- .6
+  } else if (df[num_test, 3] == .8){
+      dimension <- 3
+      cov_pretest <- .8
+  }
+
+  sd_change <- df[num_test, 4]
+  
+  if(df[num_test, 5] == 0){
+      existence_carryover <- 0
+  } else if (df[num_test, 5] == 10){
+      existence_carryover <- 1
+      strong_weak <- 1  # 1: strong
+  } else if (df[num_test, 5] == 1){
+      existence_carryover <- 1
+      strong_weak <- -1  # -1: weak   note that this part might be a bit confusing
+  }
+
+
+
+  num_persons <- 1000 # number of subjects
+  n_sim <- 1000 # simulate 1000 datasets
+
+  #------------------------------------------------------------------------------
+
+  if (parallel_items == 1) {
+  
+    itempar <- matrix(NA,num_items,5)
+    itempar[,1] <- runif(1,1.5,2.5)   # discrimination
+    avg_beta <- runif(1, 0, 1.25)
+    itempar[,2] <- avg_beta - 1
+    itempar[,3] <- avg_beta - .5
+    itempar[,4] <- avg_beta + .5
+    itempar[,5] <- avg_beta + 1
+  
+  } else {
+  
+    itempar <- matrix(NA,num_items,5)
+    itempar[,1] <- runif(num_items,1.5,2.5)  # discrimination
+    avg_beta <- runif(num_items, 0, 1.25)
+    itempar[,2] <- avg_beta - 1
+    itempar[,3] <- avg_beta - .5
+    itempar[,4] <- avg_beta + .5
+    itempar[,5] <- avg_beta + 1
+  
+  }
+
+  id <- vector()
+  for(d in 1: dimension){
+    id <- cbind(id, rep(d, num_items/dimension))
+  }
+  id <- as.vector(id)
+  #####################################################
+  #
+  #  generate random samples from population (theta)
+  #
+  #####################################################
+
+  sample_results <- list()
+  maxp <- 20
+  num_methods <- 8 #see below, method 0.1 to 2.3
+  r_avg <- matrix(NA, maxp, num_methods)
+  r_sd <- matrix(NA, maxp, num_methods)
+
+  p <- 1
+  while(p<=maxp) {
 
   #-------------------------------------------------
   # simulate multidimensional theta's
@@ -205,128 +268,12 @@ while(p<=maxp) {
     r_sd[p, ] <- apply(r_simresults, 2, sd)
     p <- p+1
   
-}
+  }
   
+  restuls_conditions[[num_test]] <- list(sample_results, r_avg, r_sd)
+  num_test <- num_test + 1  
   
-  
-  
-
-
-###################################################################################
-#
-#  A few plots
-#
-###################################################################################
-
-##########################################################
-# cross all samples of persons
-results <- r_avg
-
-plot(results[,1], results[, 2], xlab = "true reliability - proportion variance",
-                     ylab = "true reliability - correlation", 
-                     xlim=c(0, 1), ylim=c(0, 1),asp=1)
-lines(c(0,1),c(0,1),col="red")
-
-###
-
-plot(results[, 2], results[, 3], xlab = "true reliability - correlation",
-     ylab = "estimated reliability (pre and post reliability estimated by alpha )", 
-     xlim=c(0, 1), ylim=c(0, 1),asp=1)
-lines(c(0,1),c(0,1),col="red")
-
-###
-
-plot(results[, 2], results[, 4], xlab = "true reliability - correlation",
-     ylab = "estimated reliability (pre and post reliability estimated by lambda2)", 
-     xlim=c(0, 1), ylim=c(0, 1),asp=1)
-lines(c(0,1),c(0,1),col="red")
-
-###
-
-plot(results[, 2], results[, 6], xlab = "true reliability - correlation",
-     ylab = "estimated reliability (item-level) - alpha", 
-     xlim=c(0, 1), ylim=c(0, 1),asp=1)
-lines(c(0,1),c(0,1),col="red")
-
-###
-
-plot(results[, 2], results[, 7], xlab = "true reliability - correlation",
-     ylab = "estimated reliability (item-level) - lambda2", 
-     xlim=c(0, 1), ylim=c(0, 1),asp=1)
-lines(c(0,1),c(0,1),col="red")
-
-
-#######################
-# one sample 
-
-p <- sample(1:maxp, 1)
-
-results_oneS <- sample_results[[p]]
-
-plot(results_oneS[,1], results_oneS[, 2], xlab = "true reliability - proportion variance",
-     ylab = "true reliability - correlation", 
-     xlim=c(0, 1), ylim=c(0, 1),asp=1)
-lines(c(0,1),c(0,1),col="red")
-
-###
-
-plot(results_oneS[, 2], results_oneS[, 3], xlab = "true reliability - correlation",
-     ylab = "estimated reliability (pre and post reliability estimated by alpha )", 
-     xlim=c(0, 1), ylim=c(0, 1),asp=1)
-lines(c(0,1),c(0,1),col="red")
-
-###
-
-plot(results_oneS[, 2], results_oneS[, 4], xlab = "true reliability - correlation",
-     ylab = "estimated reliability (pre and post reliability estimated by lambda2)", 
-     xlim=c(0, 1), ylim=c(0, 1),asp=1)
-lines(c(0,1),c(0,1),col="red")
-
-###
-
-plot(results_oneS[, 2], results_oneS[, 6], xlab = "true reliability - correlation",
-     ylab = "estimated reliability (item-level) - alpha", 
-     xlim=c(0, 1), ylim=c(0, 1),asp=1)
-lines(c(0,1),c(0,1),col="red")
-
-###
-
-plot(results_oneS[, 2], results_oneS[, 7], xlab = "true reliability - correlation",
-     ylab = "estimated reliability (item-level) - lambda2", 
-     xlim=c(0, 1), ylim=c(0, 1),asp=1)
-lines(c(0,1),c(0,1),col="red")
-
-
-######## trial #################
-
-plot(results[, 2], results[, 7], xlab = "true reliability - correlation",
-     ylab = "estimated reliability (item-level) - lambda2", 
-     xlim=c(0.3, 0.5), ylim=c(0.3, 0.5),asp=1)
-lines(c(0,1),c(0,1),col="red")
-
-for (i in 1:maxp){
-  
-  r_02 <- sample_results[[i]][, 2]
-  r_22 <- sample_results[[i]][, 7]
-  
-  points(r_02, r_22, pch=8, col = 'grey')
-}
-
-## some pretty colors
-library(RColorBrewer)
-k <- 11
-my.cols <- rev(brewer.pal(k, "RdYlBu"))
-
-for (i in 1:maxp){
-  
-  r_02 <- sample_results[[i]][, 2]
-  r_22 <- sample_results[[i]][, 7]
-  
-  ## compute 2D kernel density, see MASS book, pp. 130-131
-  z <- kde2d(r_02, r_22, n=100)
-  
-  contour(z, drawlabels=FALSE, nlevels=k, col=my.cols, add=TRUE)
-}
+} # END OF WHILE
 
 
 
