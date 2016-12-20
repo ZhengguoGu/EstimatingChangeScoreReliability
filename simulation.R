@@ -36,7 +36,7 @@ for(i in 1:length(test_length)){
 }
 
 
-df <- data.frame(matrix(unlist(conditions), nrow=192, byrow = T))
+df <- data.frame(matrix(unlist(conditions), nrow=num_condition, byrow = T))
 colnames(df) <- c('test length', 'parallel item', 'correlated facets',
                   'maginute of sd', 'carry-over effects')
 library(xlsx)
