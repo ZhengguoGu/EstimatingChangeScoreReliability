@@ -7,7 +7,7 @@
 #
 #-----------------------------------------------------------------
 
-# Last update Sep. 2016
+# Last check Dec. 2016
 
 library(MASS)
 
@@ -22,6 +22,7 @@ library(MASS)
 # different facets - that is, a person might have, say 3 dimenions 
 # in theta, and each dimension persons to a few items. But there
 # is no crossloadings between items and thetas
+#
 #-----------------------------------------------------------------
 
 GRM_sim <- function(ability, itempar, id){
@@ -34,11 +35,13 @@ GRM_sim <- function(ability, itempar, id){
   #
   # This function is designed for items with more than 2 answer alternatives!
   
-  n_sub <- nrow(ability)
-  response <- matrix(NA, n_sub, nrow(itempar))
-  true_response <- matrix(NA, n_sub, nrow(itempar))
   
   if(sum(id == 1)==length(id)) {
+    
+    n_sub <- length(ability)
+    response <- matrix(NA, n_sub, nrow(itempar))
+    true_response <- matrix(NA, n_sub, nrow(itempar))
+    
     # if true, then unidimensional 
     for(i in 1:n_sub){
     
@@ -50,6 +53,10 @@ GRM_sim <- function(ability, itempar, id){
     
     }
   } else{
+    
+    n_sub <- nrow(ability)
+    response <- matrix(NA, n_sub, nrow(itempar))
+    true_response <- matrix(NA, n_sub, nrow(itempar))
     
     for(i in 1:n_sub){
       
@@ -100,7 +107,7 @@ Unichange_sim <- function(n_sub, sd_change){
   # generate theta values for pretest
   
   theta_pre <- rnorm(n_sub, mean = 0, sd=1)
-  theta_change <- rnorm(n_sub, mean = 0, sd_change) #note that because mean does not influnce reliability
+  theta_change <- rnorm(n_sub, mean = 0, sd = sd_change) #note that because mean does not influnce reliability
                                                     #we set mean = 0
   theta_post <- theta_pre + theta_change
   
@@ -128,7 +135,7 @@ carry_over <- function(pre, post){
   strong_post[ind2] <- pre[ind2] - 1
   weak_post[ind2] <- post[ind2] + 1
   
-  ind3 <- (abs(pre - post)=1 )
+  ind3 <- (abs(pre-post)==1 )
   strong_post[ind3] <- pre[ind3]
   weak_post[ind3] <- post[ind3]
   
