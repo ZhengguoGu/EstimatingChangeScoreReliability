@@ -128,6 +128,12 @@ carry_over <- function(pre, post){
   strong_post[ind2] <- pre[ind2] - 1
   weak_post[ind2] <- post[ind2] + 1
   
+  ind3 <- (abs(pre - post)=1 )
+  strong_post[ind3] <- pre[ind3]
+  weak_post[ind3] <- post[ind3]
+  
+
+  
   return(list(strong_post, weak_post))
 }
   
