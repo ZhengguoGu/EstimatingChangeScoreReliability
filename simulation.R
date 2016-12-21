@@ -76,16 +76,14 @@ while (num_test <= nrow(df)){
       existence_carryover <- 0
   } else if (df[num_test, 5] == 10){
       existence_carryover <- 1
-      strong_weak <- 1  # 1: strong
+      strong_weak <- 1  # 1: strong !!!note that this part might be a bit confusing
   } else if (df[num_test, 5] == 1){
       existence_carryover <- 1
-      strong_weak <- -1  # -1: weak   note that this part might be a bit confusing
+      strong_weak <- -1  # -1: weak !!!note that this part might be a bit confusing
   }
 
 
 
-  num_persons <- 1000 # number of subjects
-  n_sim <- 1000 # simulate 1000 datasets
 
   #------------------------------------------------------------------------------
 
@@ -115,25 +113,29 @@ while (num_test <= nrow(df)){
   for(d in 1: dimension){
     id <- cbind(id, rep(d, num_items/dimension))
   }
-  id <- as.vector(id)
+  id <- as.vector(id)  #this is for identifying the facets/dimensions in theta. 
+  
   #####################################################
   #
   #  generate random samples from population (theta)
   #
   #####################################################
 
-  sample_results <- list()
-  maxp <- 20
+  
+  maxp <- 100  # thus 100 samples (each with 1000 persons) were simulated
+  num_persons <- 1000 # number of subjects
+  n_sim <- 1000 # simulate 1000 datasets
   num_methods <- 8 #see below, method 0.1 to 2.3
   r_avg <- matrix(NA, maxp, num_methods)
   r_sd <- matrix(NA, maxp, num_methods)
-
+  sample_results <- list()
+  
   p <- 1
   while(p<=maxp) {
 
-  #-------------------------------------------------
-  # simulate multidimensional theta's
-  #-------------------------------------------------
+    #-------------------------------------------------
+    # simulate multidimensional theta's
+    #-------------------------------------------------
   
     if (dimension == 1){
       
