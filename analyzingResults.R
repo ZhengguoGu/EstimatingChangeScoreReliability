@@ -5,7 +5,7 @@
 ##########################################################################################
 
 # 1. load simulation results
-load('results2016-12-23.RData')
+load('results20161223.RData')
 
 # 2. Review the structure of results
 
@@ -50,4 +50,17 @@ for (k in 1:6){
   reliaManova[, k] <- datamanova[, k+1] - datamanova[, 1]
 }
 reliaManova[, 7:11] <- datamanova[, 8:12]
+reliaManova <- data.frame(reliaManova)
+# columns 7:11 --> factors
+for (i in 7:11){
+  reliaManova[, i] <- factor(reliaManova[, i])
+}
+reliaManova[, 7]
+reliaManova[, 8]
+reliaManova[, 9]
+reliaManova[, 10]
+reliaManova[, 11]
 
+# MANOVA, no interactions
+fit <- manova(as.matrix(reliaManova[, 1:6]) ~ reliaManova[, 7] + reliaManova[, 8] + reliaManova[, 9] + reliaManova[, 10] + reliaManova[, 11])
+summary(fit)
