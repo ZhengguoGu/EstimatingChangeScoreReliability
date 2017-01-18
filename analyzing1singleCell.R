@@ -3,7 +3,7 @@
 # responses have been generated, what the estimated reliability is like. 
 
 
-set.seed(110)
+
 
 #------------------------------------------------------------------------------ 
 # parameteres 
@@ -303,5 +303,32 @@ sum_post_true <- restuls_conditions[[4]][[1]][[9]][[sample_n]]
 r_pre <- psychometric::alpha(res_pre)  # ! cronback alpha is used here. 
 r_post <- psychometric::alpha(res_post_carry)
 
-r_est<- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
+r_est1<- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
 
+######## method 0.1: ture-change reliability - var(true change)/var(observed change) ###########
+
+truechange_sumscores <- sum_post_true - sum_pre_true 
+change_sumscores <- sum_post - sum_pre
+
+r_est2<- var(truechange_sumscores)/var(change_sumscores)
+
+
+#############--------------------------------------
+# given the 108 cells, which cells generate negative reliabilites?
+# I prefer to example each cell manually. 
+
+weird_index <- rep(0, 108)
+for(i in 1:108){
+  allestimates <- matrix(unlist(restuls_conditions[[i]][2]), nrow = 20, ncol = 8) 
+  if(sum(allestimates < 0)>=1){
+    weird_index[i] <- 1
+  }
+}
+
+weird_index2 <- rep(0, 108)
+for(i in 1:108){
+  allestimates <- matrix(unlist(restuls_conditions[[i]][2]), nrow = 20, ncol = 8) 
+  if(sum(allestimates[, 2:8] >1)>=1){
+    weird_index2[i] <- 1
+  }
+}
