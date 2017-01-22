@@ -315,7 +315,6 @@ r_est2<- var(truechange_sumscores)/var(change_sumscores)
 
 #############--------------------------------------
 # given the 108 cells, which cells generate negative reliabilites?
-# I prefer to example each cell manually. 
 
 weird_index <- rep(0, 108)
 for(i in 1:108){

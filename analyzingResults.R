@@ -28,6 +28,36 @@ for (i in 1:108){
   pop_re[i, ] <- colMeans(restuls_conditions[[i]][[2]])
 }
 
+# plot pop_re
+
+plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "(Estimated) Reliability", col='red', pch=19)
+points(pop_re[, 3], pch=0)
+points(pop_re[, 4], pch=1)
+points(pop_re[, 5], pch=2)
+points(pop_re[, 6], pch=15, col='blue')
+points(pop_re[, 7], pch=19, col='blue')
+points(pop_re[, 8], pch=17, col='blue')
+
+#############--------------------------------------
+# given the 108 cells, which cells generate negative reliabilites?
+
+weird_index <- rep(0, 108)
+for(i in 1:108){
+  allestimates <- matrix(unlist(restuls_conditions[[i]][2]), nrow = 20, ncol = 8) 
+  if(sum(allestimates < 0)>=1){
+    weird_index[i] <- 1
+  }
+}
+
+weird_index2 <- rep(0, 108)
+for(i in 1:108){
+  allestimates <- matrix(unlist(restuls_conditions[[i]][2]), nrow = 20, ncol = 8) 
+  if(sum(allestimates[, 2:8] >1)>=1){
+    weird_index2[i] <- 1
+  }
+}
+
+
 #-- generate a data matrix for MANOVA
 datamanova <- matrix(NA, nrow = 1, ncol=(8+5))
 results <- data.matrix(df)
