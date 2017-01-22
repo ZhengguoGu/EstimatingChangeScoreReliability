@@ -52,6 +52,7 @@ write.csv(df, 'conditions.csv', sep=',')
 #---------------------------------------------------------------------------------
 
 restuls_conditions <- list()
+simulatedRawdata <- list()  #this include the simulated theta's and responses. 
 num_test <- 1
 
 while (num_test <= nrow(df)){
@@ -122,13 +123,15 @@ while (num_test <= nrow(df)){
   #####################################################
 
   
-  maxp <- 100  # thus 100 samples (each with 1000 persons) were simulated
+  maxp <- 20  # thus 100 samples (each with 1000 persons) were simulated
   num_persons <- 1000 # number of subjects
-  n_sim <- 1000 # simulate 1000 datasets
+  n_sim <- 50 # simulate 1000 datasets
   num_methods <- 8 #see below, method 0.1 to 2.3
   r_avg <- matrix(NA, maxp, num_methods)
   r_sd <- matrix(NA, maxp, num_methods)
   sample_results <- list()
+  sample_theta <- list()
+  simResponses <- list()  #this contains a list of p lists. 
   
   p <- 1
   while(p<=maxp) {
@@ -152,12 +155,22 @@ while (num_test <= nrow(df)){
   
     theta_pre <- theta[[1]]
     theta_post <- theta[[2]]
-  
+    sample_theta[[p]] <- list(theta_pre, theta_post)
   #-------------------------------------------------------------------
   
   
     r_simresults <- matrix(NA, n_sim, num_methods)  # 8 methods.
   
+    pre_response <- list()
+    pre_response_true <- list()
+    post_response <- list()
+    post_response_true <- list()
+    post_response_carry <- list()
+    sumpre_response <- list()
+    sum_Truepre_response <- list()
+    sumpost_response <- list()
+    sum_Truepost_response <- list()
+    
     for (i in 1:n_sim){
     #-------------------------------------------------
     # simulate graded response data
@@ -165,11 +178,15 @@ while (num_test <= nrow(df)){
     
       responses <- GRM_sim(theta_pre, itempar, id)
       response_pre <- responses[[1]]
+      pre_response[[i]] <- response_pre
       true_pre <- responses[[2]]
+      pre_response_true[[i]] <- true_pre
     
       responses <- GRM_sim(theta_post, itempar, id)
       response_post <- responses[[1]]
+      post_response[[i]] <- response_post
       true_post <- responses[[2]]
+      post_response_true[[i]] <- true_post
       
       carryover_results <- carry_over(response_pre, response_post)
       response_post_strong <- carryover_results[[1]]
@@ -183,6 +200,8 @@ while (num_test <= nrow(df)){
           response_post <- response_post_weak #replace with scores with weak carryover effects
         }
       }
+      
+      post_response_carry[[i]] <- response_post 
       #--------------------------------------------------
       # Calculate inter-item covariance matrix
       # for observed scores
@@ -197,10 +216,13 @@ while (num_test <= nrow(df)){
       # sum scores
       
       sum_pre <- rowSums(response_pre)
+      sumpre_response[[i]] <- sum_pre
       sum_true_pre <- rowSums(true_pre)
+      sum_Truepre_response[[i]] <- sum_true_pre
       sum_post <- rowSums(response_post)
+      sumpost_response[[i]] <- sum_post
       sum_true_post <- rowSums(true_post)
-    
+      sum_Truepost_response[[i]] <- sum_true_post
       #####################################################################################################################################################
       # Methods for calculating reliability
       #
@@ -268,12 +290,21 @@ while (num_test <= nrow(df)){
     
     r_avg[p, ] <- colSums(r_simresults)/n_sim
     r_sd[p, ] <- apply(r_simresults, 2, sd)
+    
+    simResponses[[p]] <- list(pre_response, pre_response_true, post_response,
+                              post_response_true, post_response_carry, 
+                              sumpre_response, sum_Truepre_response, 
+                              sumpost_response, sum_Truepost_response)
+    
     p <- p+1
-  
+    
+    
   }
   
   restuls_conditions[[num_test]] <- list(sample_results, r_avg, r_sd)
+  simulatedRawdata[[num_test]] <- list(sample_theta, simResponses)
   num_test <- num_test + 1  
+  
   
 } # END OF WHILE
 
