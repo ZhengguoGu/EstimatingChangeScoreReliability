@@ -29,6 +29,7 @@ for (i in 1:108){
 }
 
 # plot pop_re
+plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "True Reliability", col='red', pch=19)
 
 plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "(Estimated) Reliability", col='red', pch=19)
 points(pop_re[, 3], pch=0)
