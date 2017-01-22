@@ -57,6 +57,7 @@ for(i in 1:108){
   }
 }
 
+df[, 6] <- weird_index
 
 #-- generate a data matrix for MANOVA
 datamanova <- matrix(NA, nrow = 1, ncol=(8+5))
