@@ -5,7 +5,7 @@
 ##########################################################################################
 
 # 1. load simulation results
-load('results20161223.RData')
+load('results20170122.RData')
 
 # 2. Review the structure of results
 
@@ -60,39 +60,17 @@ for(i in 1:108){
 
 df[, 6] <- weird_index
 
-#-- generate a data matrix for MANOVA
-datamanova <- matrix(NA, nrow = 1, ncol=(8+5))
-results <- data.matrix(df)
-for (i in 1:108){
-  conditions <- matrix(NA, nrow = 20, ncol = 5)
-  for (j in 1:20){
-    conditions[j, ] <- t(results[i, ])
-  }
-  datamanova <- rbind(datamanova, cbind(restuls_conditions[[i]][[2]], conditions))
-}
-datamanova <- datamanova[-1, ] #the first line is NA
+################################################################
 
-# remove the first column, as it is not in our analysis. 
-datamanova <- datamanova[, -1]
+# explore between-person and within-person variance for each cell
 
-# calculate the distance between each estimate and the true reliability
-str(datamanova)
-reliaManova <- matrix(NA, nrow=2160, ncol=11)
-for (k in 1:6){
-  reliaManova[, k] <- datamanova[, k+1] - datamanova[, 1]
-}
-reliaManova[, 7:11] <- datamanova[, 8:12]
-reliaManova <- data.frame(reliaManova)
-# columns 7:11 --> factors
-for (i in 7:11){
-  reliaManova[, i] <- factor(reliaManova[, i])
-}
-reliaManova[, 7]
-reliaManova[, 8]
-reliaManova[, 9]
-reliaManova[, 10]
-reliaManova[, 11]
+# explore the simulated raw data
+length(simulatedRawdata)  # 108 cells
+length(simulatedRawdata[[1]]) # 2 lists sample_theta, simResponses
+length(simulatedRawdata[[1]][[1]]) # 20 samples of persons
+length(simulatedRawdata[[1]][[2]]) # 20 samples of persons
 
-# MANOVA, no interactions
-fit <- manova(as.matrix(reliaManova[, 1:6]) ~ reliaManova[, 7] + reliaManova[, 8] + reliaManova[, 9] + reliaManova[, 10] + reliaManova[, 11])
-summary(fit)
+# Focus on simulated responses now
+length(simulatedRawdata[[1]][[2]][[1]]) #4 lists, given the 1st cell, 2nd list (i.e. simResponses), and 1st sample (out of 20 samples of persons)
+length(simulatedRawdata[[1]][[2]][[1]][[1]]) # 50 response datasets of sumpre_response, given the 1st cell, 2nd list (i.e. simResponses), and 1st sample (out of 20 samples of persons)
+length(simulatedRawdata[[1]][[2]][[1]][[1]][[50]]) #sumpre_response data (the 50th dataset), given the 1st cell, 2nd list (i.e. simResponses), and 1st sample (out of 20 samples of persons)
