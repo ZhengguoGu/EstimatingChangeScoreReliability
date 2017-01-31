@@ -102,3 +102,11 @@ for (c in 1:108){
   }
   BTinform[[c]] <- varDecomp
 }
+
+#since each cell contains 20 samples of persons, we average them per cell
+ratioCell <- array()
+for (c in 1:108){
+  ratioCell[c] <- mean(BTinform[[c]][, 4])
+}
+
+lines(ratioCell, type="l")
