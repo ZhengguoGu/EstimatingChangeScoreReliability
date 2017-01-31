@@ -75,3 +75,30 @@ length(simulatedRawdata[[1]][[2]][[1]]) #4 lists, given the 1st cell, 2nd list (
 length(simulatedRawdata[[1]][[2]][[1]][[1]]) # 50 response datasets of sumpre_response, given the 1st cell, 2nd list (i.e. simResponses), and 1st sample (out of 20 samples of persons)
 length(simulatedRawdata[[1]][[2]][[1]][[1]][[50]]) #sumpre_response data (the 50th dataset), given the 1st cell, 2nd list (i.e. simResponses), and 1st sample (out of 20 samples of persons)
 
+# For each sample of persons, 50 simulated responses are generated. --> these persons are measured 50 times with brain washing. 
+# Now we generate a matrix, the rows are the persons, the columns are the 50 change scores 
+
+
+BTinform <- list() #this list contains the between/within variances of all the 108 cases. 
+for (c in 1:108){
+  Matrixlist <- list()
+  varDecomp <- matrix(NA, 20, 4)
+  for (p in 1:20){
+    wbMatrix <- matrix(0, 1000, 50)
+    for (s in 1:50){
+      wbMatrix[, s] <- simulatedRawdata[[c]][[2]][[p]][[3]][[s]] - simulatedRawdata[[c]][[2]][[p]][[1]][[s]]
+    }
+    Matrixlist[[p]]<- wbMatrix
+    grandmean <- mean(wbMatrix)
+    personmean <- rowMeans(wbMatrix)
+    totalVar <- sum((wbMatrix-grandmean)^2)
+    betweenPVar <- sum(50*(personmean-grandmean)^2)
+    withinPVar <- sum((wbMatrix-personmean)^2)
+    btRatio <- betweenPVar/totalVar 
+    varDecomp[p, 1] <- totalVar
+    varDecomp[p, 2] <- betweenPVar
+    varDecomp[p, 3] <- withinPVar
+    varDecomp[p, 4] <- btRatio
+  }
+  BTinform[[c]] <- varDecomp
+}
