@@ -74,3 +74,4 @@ length(simulatedRawdata[[1]][[2]]) # 20 samples of persons
 length(simulatedRawdata[[1]][[2]][[1]]) #4 lists, given the 1st cell, 2nd list (i.e. simResponses), and 1st sample (out of 20 samples of persons)
 length(simulatedRawdata[[1]][[2]][[1]][[1]]) # 50 response datasets of sumpre_response, given the 1st cell, 2nd list (i.e. simResponses), and 1st sample (out of 20 samples of persons)
 length(simulatedRawdata[[1]][[2]][[1]][[1]][[50]]) #sumpre_response data (the 50th dataset), given the 1st cell, 2nd list (i.e. simResponses), and 1st sample (out of 20 samples of persons)
+
