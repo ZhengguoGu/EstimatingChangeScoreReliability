@@ -39,6 +39,9 @@ points(pop_re[, 6], pch=15, col='blue')
 points(pop_re[, 7], pch=19, col='blue')
 points(pop_re[, 8], pch=17, col='blue')
 
+for(i in 1:108){
+  abline(v=i, lty="dotted")
+}
 #############--------------------------------------
 # given the 108 cells, which cells generate negative reliabilites?
 
@@ -206,10 +209,17 @@ for(i in 1:108){
 
 plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "True Reliability", col='red', pch=19)
 lines(BTRmatrix[, 1], type = "b", col='green', pch=19)
-points(BTRmatrix[, 2], pch=0)
-points(BTRmatrix[, 3], pch=1)
-points(BTRmatrix[, 4], pch=2)
-points(BTRmatrix[, 5], pch=15, col='blue')
-points(BTRmatrix[, 6], pch=19, col='blue')
-points(BTRmatrix[, 7], pch=17, col='blue')
+points(BTRmatrix[, 2], pch=0, col='grey')
+points(BTRmatrix[, 3], pch=1, col='grey')
+points(BTRmatrix[, 4], pch=2, col='grey')
+points(BTRmatrix[, 5], pch=15, col='purple')
+points(BTRmatrix[, 6], pch=19, col='purple')
+points(BTRmatrix[, 7], pch=17, col='purple')
 
+#let's focus on carry over effects
+carryindex <- df[, 5]!=0
+plot(pop_re[, 2][carryindex], ylim = c(-5,1), ylab = "True Reliability", col='red', pch=19)
+lines(pop_re[, 3][carryindex], pch=0, type = 'b')
+abline(h=0)
+abline(h=.5)
+points(BTRmatrix[, 2][carryindex], pch=0, col='grey')
