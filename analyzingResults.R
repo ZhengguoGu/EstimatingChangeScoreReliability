@@ -223,3 +223,116 @@ lines(pop_re[, 3][carryindex], pch=0, type = 'b')
 abline(h=0)
 abline(h=.5)
 points(BTRmatrix[, 2][carryindex], pch=0, col='grey')
+
+###### New Analysis: distribution of esimated reliability of a sample (out of 20 samples)
+# The idea is that, since brain-washing is not possible, we have to estimate reliability based
+# on the reponses (which might not be the same if we measure again). The estimated reliability 
+# is expected to be close to the true reliability of that sample, but due to measurement errors, 
+# there will be deviation. 
+
+# Review the structure of results
+
+length(restuls_conditions)  # 108 --> total number of cells 
+length(restuls_conditions[[1]]) # 3 (lists)--> the first list contains all the reliability estimates for the 20 samples of persons
+# the second list contains the average reliability for each sample of persons (thus, 20 rows)
+# the third list contains the SD (might not be useful at this moment)
+
+length(restuls_conditions[[1]][[1]]) # 20 (lists) --> each list contains the reliability estimates for 50 samples of responses
+str(restuls_conditions[[1]][[1]][[1]]) # num [1:50, 1:8] 
+
+str(restuls_conditions[[1]][[2]]) # num [1:20, 1:8] --> reliability estimates of 20 samples from persons under condition cell 1 
+str(restuls_conditions[[1]][[3]]) # num [1:20, 1:8] --> standard deviation
+
+allplots <- list()
+for(cel in 1:108){
+  plotarray <- list()
+  y_min <- min(restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
+  y_max <- max(restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
+  plot(restuls_conditions[[cel]][[2]][, 2], xlab = "20 samples from the population", ylab = "True reliability +/- 1SE",
+     ylim = c(y_min, y_max), 
+     type = "p")
+  arrows(c(1:20), restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2]/sqrt(50), c(1:20), restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2]/sqrt(50), 
+       length = 0.05, angle = 90, code = 3)
+  abline(h=mean(restuls_conditions[[cel]][[2]][, 2]), lty=2)
+  plotarray[[1]] <- recordPlot()
+  for(i in 3:8){
+    if(i == 3){
+      differentN <- "Estimated reliability traditional - alpha"
+    }else if(i==4){
+      differentN <- "Estimated reliability traditional - lambda2"
+    }else if(i==5){
+      differentN <- "Estimated reliability traditional - lambda4"
+    }else if(i==6){
+      differentN <- "Estimated reliability new - alpha"
+    }else if(i==7){
+      differentN <- "Estimated reliability new - lambda2"
+    }else if(i==8){
+      differentN <- "Estimated reliability new - lambda4"
+    }
+  
+    y_min <- min(restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]/sqrt(50))
+    y_max <- max(restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]/sqrt(50))
+    plot(restuls_conditions[[cel]][[2]][, i], xlab = "20 samples from the population", ylab = differentN,
+     ylim = c(y_min, y_max), 
+     type = "p")
+    arrows(c(1:20), restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]/sqrt(50), c(1:20), restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]/sqrt(50), 
+       length = 0.05, angle = 90, code = 3)
+    abline(h=mean(restuls_conditions[[cel]][[2]][, i]), lty=2)
+    plotarray[[i-1]] <- recordPlot()
+  }
+  allplots[[cel]] <- plotarray
+}
+
+#display plots
+cel_index = 108
+for(i in 1:7){
+  print(allplots[[cel_index]][[i]])
+}
+
+
+############## all 6 methods are ploted in one pic
+   
+allplots <- list()
+for(cel in 1:108){  
+
+  y_min <- min(restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
+  y_max <- max(restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
+  
+  for(i in 6:8){
+    y_min <- min(y_min, min(restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]/sqrt(50)))
+    y_max <- max(y_max, max(restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]/sqrt(50)))
+  }
+  plot(restuls_conditions[[cel]][[2]][, 2], xlab = "20 samples from the population", ylab = "True reliability +/- 1SE",
+     ylim = c(y_min,y_max), 
+     type = "p")
+  arrows(c(1:20), restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2]/sqrt(50), c(1:20), restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2]/sqrt(50), 
+       length = 0.05, angle = 90, code = 3)
+  abline(h=mean(restuls_conditions[[cel]][[2]][, 2]), lty=2)
+  
+  for(i in 6:8){
+    if(i == 3){
+      col <- "blue"
+      pch <- 15
+    }else if(i==4){
+      col <- "blue"
+      pch <- 18
+    }else if(i==5){
+      col <- "blue"
+      pch <- 17
+    }else if(i==6){
+      col <- "Red"
+      pch <- 15
+    }else if(i==7){
+      col <- "Red"
+      pch <- 18
+    }else if(i==8){
+      col <- "Red"
+      pch <- 17
+    }
+    points(restuls_conditions[[cel]][[2]][, i], col=col, pch=pch)
+    arrows(c(1:20), restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]/sqrt(50), c(1:20), restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]/sqrt(50), 
+           length = 0.05, angle = 90, code = 3)
+    abline(h=mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col)
+  }
+  allplots[[cel]] <- recordPlot()
+}  
