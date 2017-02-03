@@ -298,7 +298,7 @@ for(cel in 1:108){
   y_min <- min(restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
   y_max <- max(restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
   
-  for(i in 6:8){
+  for(i in 3:5){
     y_min <- min(y_min, min(restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]/sqrt(50)))
     y_max <- max(y_max, max(restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]/sqrt(50)))
   }
@@ -309,7 +309,7 @@ for(cel in 1:108){
        length = 0.05, angle = 90, code = 3)
   abline(h=mean(restuls_conditions[[cel]][[2]][, 2]), lty=2)
   
-  for(i in 6:8){
+  for(i in 3:5){
     if(i == 3){
       col <- "blue"
       pch <- 15
