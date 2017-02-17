@@ -29,9 +29,9 @@ for (i in 1:108){
 }
 
 # plot pop_re
-plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "True Reliability", col='red', pch=19)
+plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "True Reliability", col='red', pch=13, cex=1.5)
 
-plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "(Estimated) Reliability", col='red', pch=19)
+plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "(Estimated) Reliability", col='red', pch=13, cex=1.5)
 points(pop_re[, 3], pch=0)
 points(pop_re[, 4], pch=1)
 points(pop_re[, 5], pch=2)
@@ -42,6 +42,12 @@ points(pop_re[, 8], pch=17, col='blue')
 for(i in 1:108){
   abline(v=i, lty="dotted")
 }
+
+legend(0,1, c("True reliability", "Traditional: alpha", "Traditional: lambda2", "Traditional: lambda4", 
+              "Item-score method: alpha", "Item-score method: lambda2", "Item-score method: lambda4"),
+       pch=c(13, 0, 1, 2, 15, 19, 17), col = c("red", "black", "black", "black", "blue", "blue", "blue"))
+
+
 #############--------------------------------------
 # given the 108 cells, which cells generate negative reliabilites?
 
