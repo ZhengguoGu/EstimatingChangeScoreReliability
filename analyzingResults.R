@@ -299,23 +299,28 @@ for(i in 1:7){
 ############## all 6 methods are ploted in one pic
    
 allplots <- list()
+#y_minF <- 0 #to see what's the minimal value across all the cells
 for(cel in 1:108){  
 
-  y_min <- min(restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
-  y_max <- max(restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
+  #y_min0 <- min(restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2])
+  #y_minF <- min(y_minF, y_min0)
+  #y_max0 <- max(restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2])
   
-  for(i in 3:5){
-    y_min <- min(y_min, min(restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]/sqrt(50)))
-    y_max <- max(y_max, max(restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]/sqrt(50)))
+  for(i in 3:8){
+    #y_min <- min(y_min0, min(restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]))
+    #y_minF <- min(y_minF, y_min)
+    #y_max <- max(y_max0, max(restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]))
+    y_min <- -5.5
+    y_max <- 1
   }
-  plot(restuls_conditions[[cel]][[2]][, 2], xlab = "20 samples from the population", ylab = "True reliability +/- 1SE",
+  plot(restuls_conditions[[cel]][[2]][, 2], xlab = "20 samples from the population", ylab = "True reliability +/- 1SD",
      ylim = c(y_min,y_max), 
      type = "p")
-  arrows(c(1:20), restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2]/sqrt(50), c(1:20), restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2]/sqrt(50), 
+  arrows(c(1:20), restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2], c(1:20), restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2], 
        length = 0.05, angle = 90, code = 3)
   abline(h=mean(restuls_conditions[[cel]][[2]][, 2]), lty=2)
   
-  for(i in 3:5){
+  for(i in 3:8){
     if(i == 3){
       col <- "blue"
       pch <- 15
@@ -336,7 +341,7 @@ for(cel in 1:108){
       pch <- 17
     }
     points(restuls_conditions[[cel]][[2]][, i], col=col, pch=pch)
-    arrows(c(1:20), restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]/sqrt(50), c(1:20), restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]/sqrt(50), 
+    arrows(c(1:20), restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i], c(1:20), restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i], 
            length = 0.05, angle = 90, code = 3)
     abline(h=mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col)
   }
