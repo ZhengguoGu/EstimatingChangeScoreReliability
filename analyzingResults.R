@@ -30,7 +30,7 @@ for (i in 1:108){
 }
 
 # plot pop_re
-
+plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "(Estimated) Change-Score Reliability", col='red', pch=8)
 points(pop_re[, 3], pch=0)
 points(pop_re[, 4], pch=1)
 points(pop_re[, 5], pch=2)
@@ -79,14 +79,14 @@ for (cel in 1:108){
 
 prop_sdP <- matrix(NA, 108, 6)
 for(cel in 1:108){
-  prop_sdP[cel, ] <- prop_sd[[cel]][3, ] #lets see what happens within 3 = 3SD of true reliability; 1=1SD, 2=2SD
+  prop_sdP[cel, ] <- prop_sd[[cel]][1, ] #lets see what happens within 3 = 3SD of true reliability; 1=1SD, 2=2SD
 }
 
 # plot
 
 layout(rbind(1,2), heights=c(9,1))# put legend on bottom 1/10th of the chart (note, this is from http://stackoverflow.com/questions/8929663/r-legend-placement-in-a-plot)
 plot(prop_sdP[, 1], type = 'b', ylim = c(0,1), 
-     col="black", pch=0, xlab = "108 cells", ylab = "Proportion estimated reliability within true reliability +/- 3SD")
+     col="black", pch=0, xlab = "108 cells", ylab = "Proportion estimated reliability within true reliability +/- 1SD")
 lines(prop_sdP[, 2], type = 'b', col="black", pch=1)
 lines(prop_sdP[, 3], type = 'b', col="black", pch=2)
 lines(prop_sdP[, 4], type = 'b', col="blue", pch=15)
@@ -95,19 +95,17 @@ lines(prop_sdP[, 6], type = 'b', col="blue", pch=17)
 abline(v=73, col="red")
 mtext("Cell no.1 ~ 72: Short (9 items) to medium (21 items) test", side = 3, line=0, at=35)
 mtext("Cell no.72 ~ 108: Long (36 items) test", side = 3, line=0, at=95)
+axis(1, at=73, labels="73")
 par(mar=c(0,0,0,0))
 plot.new()
 legend("center", "groups",
-       c("traditional method + alpha", "traditional method + lambda2","traditiona method + lambda4", 
-         "item-score method + alpha", "item-score method + lambda 2", "item-score method + lambda4"),
+       c("traditional method + alpha", "traditional method + lambda2","traditional method + lambda4", 
+         "item-score method + alpha", "item-score method + lambda2", "item-score method + lambda4"),
        pch=c(0, 1,2, 15, 19, 17),
        col=c("black", "black", "black", "blue", "blue", "blue"),
        ncol=3, bty = "n"
 )
 
-legend(0,1, c("True reliability", "Traditional: alpha", "Traditional: lambda2", "Traditional: lambda4", 
-              "Item-score method: alpha", "Item-score method: lambda2", "Item-score method: lambda4"),
-       pch=c(13, 0, 1, 2, 15, 19, 17), col = c("red", "black", "black", "black", "blue", "blue", "blue"))
 
 
 #############--------------------------------------
