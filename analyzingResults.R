@@ -58,8 +58,21 @@ legend(0, 1,
 sdTrue <- array()
 for (cel in 1:108){
   sdTrue[cel] <- sd(restuls_conditions[[cel]][[2]][, 2]) # true reliability and SD range
-  
 }
+
+True1sdmax <- pop_re[, 2] + sdTrue #True change score reliability + 1SD
+True1sdmin <- pop_re[, 2] - sdTrue #True change score reliability 1 1SD
+
+True3sdmax <- pop_re[, 2] + 3*sdTrue
+True3sdmin <- pop_re[, 2] - 3*sdTrue
+
+prop1sd <- array()
+prop3sd <- array()
+for(i in 3:8){
+  prop1sd[i-2] <- sum(pop_re[, i] <= True1sdmax & pop_re[, i] >= True1sdmin)/108
+  prop3sd[i-2] <- sum(pop_re[, i] <= True3sdmax & pop_re[, i] >= True3sdmin)/108
+}
+
 ############ The following will be re-used, but some part is wrong. 
 prop_sd <- list()
 sdTrue <- array()
