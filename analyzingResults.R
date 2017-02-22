@@ -5,7 +5,8 @@
 ##########################################################################################
 
 # 1. load simulation results
-load('results20170122.RData')
+#load('results20170122.RData')
+load('results20170222smallsample.RData')
 
 # 2. Review the structure of results
 
@@ -29,9 +30,9 @@ for (i in 1:108){
 }
 
 # plot pop_re
-plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "True Reliability", col='red', pch=19)
+plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "True Change-Score Reliability", col='red', pch=8)
 
-plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "(Estimated) Reliability", col='red', pch=19)
+plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "(Estimated) Change-Score Reliability", col='red', pch=8)
 points(pop_re[, 3], pch=0)
 points(pop_re[, 4], pch=1)
 points(pop_re[, 5], pch=2)
@@ -42,6 +43,70 @@ points(pop_re[, 8], pch=17, col='blue')
 for(i in 1:108){
   abline(v=i, lty="dotted")
 }
+
+legend(0, 1, 
+       c("true reliability", "traditional method + alpha", "traditional method + lambda2","traditiona method + lambda4", 
+         "item-score method + alpha", "item-score method + lambda 2", "item-score method + lambda4"),
+       pch=c(8, 0, 1,2, 15, 19, 17),
+       col=c("red", "black", "black", "black", "blue", "blue", "blue"),
+       cex=.6
+       )
+
+#############--------------------------------------
+# standard deviation of true change-score reliability
+
+prop_sd <- list()
+sdTrue <- array()
+for (cel in 1:108){
+  prop_sdCel <- matrix(NA, 3, 6)
+  sd_re <- sd(restuls_conditions[[cel]][[2]][, 2]) # true reliability and SD range
+  for(m in 3:8){ #3:traditional alpha, 8:item-score lambda4
+    
+    max_re1 <- pop_re[, 2] + 1*sd_re
+    min_re1 <- pop_re[, 2] - 1*sd_re
+    max_re2 <- pop_re[, 2] + 2*sd_re
+    min_re2 <- pop_re[, 2] - 2*sd_re
+    max_re3 <- pop_re[, 2] + 3*sd_re
+    min_re3 <- pop_re[, 2] - 3*sd_re
+    
+    prop_sdCel[1,m-2] <- sum(pop_re[, m] <= max_re1 & pop_re[, m]>= min_re1)/108
+    prop_sdCel[2,m-2] <- sum(pop_re[, m] <= max_re2 & pop_re[, m]>= min_re2)/108
+    prop_sdCel[3,m-2] <- sum(pop_re[, m] <= max_re3 & pop_re[, m]>= min_re3)/108
+    
+  }
+  prop_sd[[cel]] <- prop_sdCel
+  
+  sdTrue[cel] <- sd_re
+}
+
+prop_sdP <- matrix(NA, 108, 6)
+for(cel in 1:108){
+  prop_sdP[cel, ] <- prop_sd[[cel]][3, ] #lets see what happens within 3 = 3SD of true reliability; 1=1SD, 2=2SD
+}
+
+# plot
+
+layout(rbind(1,2), heights=c(9,1))# put legend on bottom 1/10th of the chart (note, this is from http://stackoverflow.com/questions/8929663/r-legend-placement-in-a-plot)
+plot(prop_sdP[, 1], type = 'b', ylim = c(0,1), 
+     col="black", pch=0, xlab = "108 cells", ylab = "Proportion estimated reliability within true reliability +/- 3SD")
+lines(prop_sdP[, 2], type = 'b', col="black", pch=1)
+lines(prop_sdP[, 3], type = 'b', col="black", pch=2)
+lines(prop_sdP[, 4], type = 'b', col="blue", pch=15)
+lines(prop_sdP[, 5], type = 'b', col="blue", pch=19)
+lines(prop_sdP[, 6], type = 'b', col="blue", pch=17)
+abline(v=73, col="red")
+mtext("Cell no.1 ~ 72: Short (9 items) to medium (21 items) test", side = 3, line=0, at=35)
+mtext("Cell no.72 ~ 108: Long (36 items) test", side = 3, line=0, at=95)
+par(mar=c(0,0,0,0))
+plot.new()
+legend("center", "groups",
+       c("traditional method + alpha", "traditional method + lambda2","traditiona method + lambda4", 
+         "item-score method + alpha", "item-score method + lambda 2", "item-score method + lambda4"),
+       pch=c(0, 1,2, 15, 19, 17),
+       col=c("black", "black", "black", "blue", "blue", "blue"),
+       ncol=3, bty = "n"
+)
+
 #############--------------------------------------
 # given the 108 cells, which cells generate negative reliabilites?
 
@@ -208,7 +273,7 @@ for(i in 1:108){
 
 
 plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "True Reliability", col='red', pch=19)
-lines(BTRmatrix[, 1], type = "b", col='green', pch=19)
+plot(BTRmatrix[, 1], type = "p", col='green', pch=19, ylim = c(0,1))
 points(BTRmatrix[, 2], pch=0, col='grey')
 points(BTRmatrix[, 3], pch=1, col='grey')
 points(BTRmatrix[, 4], pch=2, col='grey')
@@ -244,7 +309,8 @@ str(restuls_conditions[[1]][[2]]) # num [1:20, 1:8] --> reliability estimates of
 str(restuls_conditions[[1]][[3]]) # num [1:20, 1:8] --> standard deviation
 
 allplots <- list()
-for(cel in 1:108){
+
+for(cel in 2:2){
   plotarray <- list()
   y_min <- min(restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
   y_max <- max(restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
@@ -298,7 +364,7 @@ for(cel in 1:108){
   y_min <- min(restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
   y_max <- max(restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
   
-  for(i in 3:5){
+  for(i in 3:8){
     y_min <- min(y_min, min(restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]/sqrt(50)))
     y_max <- max(y_max, max(restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]/sqrt(50)))
   }
@@ -309,7 +375,7 @@ for(cel in 1:108){
        length = 0.05, angle = 90, code = 3)
   abline(h=mean(restuls_conditions[[cel]][[2]][, 2]), lty=2)
   
-  for(i in 3:5){
+  for(i in 3:8){
     if(i == 3){
       col <- "blue"
       pch <- 15
