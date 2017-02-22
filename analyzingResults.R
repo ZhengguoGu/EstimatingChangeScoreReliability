@@ -51,8 +51,16 @@ legend(0, 1,
        )
 
 #############--------------------------------------
-# standard deviation of true change-score reliability
+# standard deviation of true change-score reliability and the biasness
+# of each estimates 
 
+
+sdTrue <- array()
+for (cel in 1:108){
+  sdTrue[cel] <- sd(restuls_conditions[[cel]][[2]][, 2]) # true reliability and SD range
+  
+}
+############ The following will be re-used, but some part is wrong. 
 prop_sd <- list()
 sdTrue <- array()
 for (cel in 1:108){
