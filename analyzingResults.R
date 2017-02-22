@@ -30,9 +30,7 @@ for (i in 1:108){
 }
 
 # plot pop_re
-plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "True Change-Score Reliability", col='red', pch=8)
 
-plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "(Estimated) Change-Score Reliability", col='red', pch=8)
 points(pop_re[, 3], pch=0)
 points(pop_re[, 4], pch=1)
 points(pop_re[, 5], pch=2)
@@ -106,6 +104,11 @@ legend("center", "groups",
        col=c("black", "black", "black", "blue", "blue", "blue"),
        ncol=3, bty = "n"
 )
+
+legend(0,1, c("True reliability", "Traditional: alpha", "Traditional: lambda2", "Traditional: lambda4", 
+              "Item-score method: alpha", "Item-score method: lambda2", "Item-score method: lambda4"),
+       pch=c(13, 0, 1, 2, 15, 19, 17), col = c("red", "black", "black", "black", "blue", "blue", "blue"))
+
 
 #############--------------------------------------
 # given the 108 cells, which cells generate negative reliabilites?
@@ -359,19 +362,29 @@ for(i in 1:7){
 ############## all 6 methods are ploted in one pic
    
 allplots <- list()
+#y_minF <- 0 #to see what's the minimal value across all the cells
 for(cel in 1:108){  
 
-  y_min <- min(restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
-  y_max <- max(restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
+  #y_min0 <- min(restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2])
+  #y_minF <- min(y_minF, y_min0)
+  #y_max0 <- max(restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2])
   
   for(i in 3:8){
+<<<<<<< HEAD
     y_min <- min(y_min, min(restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]/sqrt(50)))
     y_max <- max(y_max, max(restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]/sqrt(50)))
+=======
+    #y_min <- min(y_min0, min(restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]))
+    #y_minF <- min(y_minF, y_min)
+    #y_max <- max(y_max0, max(restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]))
+    y_min <- -5.5
+    y_max <- 1
+>>>>>>> cf8e67baa3eacef36f84c137bf4b1bd14c0c91ab
   }
-  plot(restuls_conditions[[cel]][[2]][, 2], xlab = "20 samples from the population", ylab = "True reliability +/- 1SE",
+  plot(restuls_conditions[[cel]][[2]][, 2], xlab = "20 samples from the population", ylab = "True reliability +/- 1SD",
      ylim = c(y_min,y_max), 
      type = "p")
-  arrows(c(1:20), restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2]/sqrt(50), c(1:20), restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2]/sqrt(50), 
+  arrows(c(1:20), restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2], c(1:20), restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2], 
        length = 0.05, angle = 90, code = 3)
   abline(h=mean(restuls_conditions[[cel]][[2]][, 2]), lty=2)
   
@@ -396,7 +409,7 @@ for(cel in 1:108){
       pch <- 17
     }
     points(restuls_conditions[[cel]][[2]][, i], col=col, pch=pch)
-    arrows(c(1:20), restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]/sqrt(50), c(1:20), restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]/sqrt(50), 
+    arrows(c(1:20), restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i], c(1:20), restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i], 
            length = 0.05, angle = 90, code = 3)
     abline(h=mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col)
   }
