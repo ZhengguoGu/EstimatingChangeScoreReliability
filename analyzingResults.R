@@ -88,7 +88,7 @@ for(i in 3:8){
 
 allplots <- list()
 
-for(cel in 73:108){
+for(cel in 1:108){
 
   y_min <- 1
   y_max <- 1
@@ -154,66 +154,72 @@ for(cel in 73:108){
   dev.off()
 }
 
-allplots[[108]]
+allplots[[108]] #manually save all plots from 1 to 108.
 
-############ The following will be re-used, but some part is wrong. 
-prop_sd <- list()
-sdTrue <- array()
-for (cel in 1:108){
-  prop_sdCel <- matrix(NA, 3, 6)
-  sd_re <- sd(restuls_conditions[[cel]][[2]][, 2]) # true reliability and SD range
-  for(m in 3:8){ #3:traditional alpha, 8:item-score lambda4
-    
-    max_re1 <- pop_re[, 2] + 1*sd_re
-    min_re1 <- pop_re[, 2] - 1*sd_re
-    max_re2 <- pop_re[, 2] + 2*sd_re
-    min_re2 <- pop_re[, 2] - 2*sd_re
-    max_re3 <- pop_re[, 2] + 3*sd_re
-    min_re3 <- pop_re[, 2] - 3*sd_re
-    
-    prop_sdCel[1,m-2] <- sum(pop_re[, m] <= max_re1 & pop_re[, m]>= min_re1)/108
-    prop_sdCel[2,m-2] <- sum(pop_re[, m] <= max_re2 & pop_re[, m]>= min_re2)/108
-    prop_sdCel[3,m-2] <- sum(pop_re[, m] <= max_re3 & pop_re[, m]>= min_re3)/108
-    
+#6. pic a few representative plots to be included in the paper. the rest are in the supplementary matrial
+# We need to rerun the plots because this time ylim must be the same so that we can compare. 
+
+cel <- 24
+y_min <- 0
+y_max <- 1
+
+layout(rbind(1,2), heights=c(10,1))# put legend on bottom 1/10th of the chart (note, this is from http://stackoverflow.com/questions/8929663/r-legend-placement-in-a-plot)
+xtitle <- sprintf("20 samples from the population: Cell %d; Small sample size",cel)
+plot(restuls_conditions[[cel]][[2]][, 2], xlab = xtitle, ylab = "True and estimated change-score reliability +/- 1SD",
+     ylim = c(y_min,y_max), 
+     type = "p",
+     pch = 8,
+     col = "red",
+     cex = 1.5)
+arrows(c(1:20), restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2], c(1:20), restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2], 
+       length = 0.05, angle = 90, code = 3, col = 'red')
+abline(h=mean(restuls_conditions[[cel]][[2]][, 2]), lty=2, col="red")
+
+for(i in 3:8){
+  if(i == 3){
+    col <- "black"
+    pch <- 0
+  }else if(i==4){
+    col <- "black"
+    pch <- 1
+  }else if(i==5){
+    col <- "black"
+    pch <- 2
+  }else if(i==6){
+    col <- "blue"
+    pch <- 15
+  }else if(i==7){
+    col <- "blue"
+    pch <- 19
+  }else if(i==8){
+    col <- "blue"
+    pch <- 17
   }
-  prop_sd[[cel]] <- prop_sdCel
-  
-  sdTrue[cel] <- sd_re
+  points(restuls_conditions[[cel]][[2]][, i], col=col, pch=pch)
+  arrows(c(1:20), restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i], c(1:20), restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i], 
+         length = 0.05, angle = 90, code = 3, col=col)
+  #abline(h=mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col)
+  #segments(20.2, mean(restuls_conditions[[cel]][[2]][, i]), 21, mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col, cex=1.5, pch=pch)
+  #segments(0, mean(restuls_conditions[[cel]][[2]][, i]), .8 , mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col, cex=1.5, pch=pch)
 }
 
-prop_sdP <- matrix(NA, 108, 6)
-for(cel in 1:108){
-  prop_sdP[cel, ] <- prop_sd[[cel]][1, ] #lets see what happens within 3 = 3SD of true reliability; 1=1SD, 2=2SD
-}
-
-# plot
-
-layout(rbind(1,2), heights=c(9,1))# put legend on bottom 1/10th of the chart (note, this is from http://stackoverflow.com/questions/8929663/r-legend-placement-in-a-plot)
-plot(prop_sdP[, 1], type = 'b', ylim = c(0,1), 
-     col="black", pch=0, xlab = "108 cells", ylab = "Proportion estimated reliability within true reliability +/- 1SD")
-lines(prop_sdP[, 2], type = 'b', col="black", pch=1)
-lines(prop_sdP[, 3], type = 'b', col="black", pch=2)
-lines(prop_sdP[, 4], type = 'b', col="blue", pch=15)
-lines(prop_sdP[, 5], type = 'b', col="blue", pch=19)
-lines(prop_sdP[, 6], type = 'b', col="blue", pch=17)
-abline(v=73, col="red")
-mtext("Cell no.1 ~ 72: Short (9 items) to medium (21 items) test", side = 3, line=0, at=35)
-mtext("Cell no.72 ~ 108: Long (36 items) test", side = 3, line=0, at=95)
-axis(1, at=73, labels="73")
 par(mar=c(0,0,0,0))
 plot.new()
 legend("center", "groups",
-       c("traditional method + alpha", "traditional method + lambda2","traditional method + lambda4", 
-         "item-score method + alpha", "item-score method + lambda2", "item-score method + lambda4"),
-       pch=c(0, 1,2, 15, 19, 17),
-       col=c("black", "black", "black", "blue", "blue", "blue"),
-       ncol=3, bty = "n"
-)
+       c("true reliability", "traditional method + alpha", "traditional method + lambda2","traditiona method + lambda4", 
+         "item-score method + alpha", "item-score method + lambda2", "item-score method + lambda4", "averaged reliability"),
+       pch=c( 8, 0, 1, 2, 15, 19, 17, NA),
+       lty = c(NA, NA, NA, NA, NA, NA, NA, 3),
+       col=c( "red", "black", "black", "black", "blue", "blue", "blue", "red"),
+       ncol=4, bty = "n")
+
+dev.off()
+
 
 
 
 #############--------------------------------------
-# given the 108 cells, which cells generate negative reliabilites?
+#7.  given the 108 cells, which cells generate negative reliabilites?
 
 weird_index <- rep(0, 108)
 for(i in 1:108){
