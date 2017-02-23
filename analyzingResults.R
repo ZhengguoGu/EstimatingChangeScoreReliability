@@ -43,9 +43,9 @@ for(i in 1:108){
   abline(v=i, lty="dotted")
 }
 abline(v=c(37,73), col="red")
-mtext("Cell no.1 ~ 36: Short (9 items) test", side = 3, line=0, at=20)
-mtext("Cell no.37 ~ 72: Medium (21 items) test", side = 3, line=0, at=55)
-mtext("Cell no.73 ~ 108: Long (36 items) test", side = 3, line=0, at=90)
+mtext("Cell no.1 ~ 36: Short test (9 items)", side = 3, line=0, at=20)
+mtext("Cell no.37 ~ 72: Medium-length test (21 items)", side = 3, line=0, at=55)
+mtext("Cell no.73 ~ 108: Long test (36 items)", side = 3, line=0, at=90)
 axis(1, at=c(37,73), labels=c("37","73"))
 
 par(mar=c(0,0,0,0))
@@ -55,17 +55,16 @@ legend("center", "groups",
          "item-score method + alpha", "item-score method + lambda 2", "item-score method + lambda4"),
        pch=c(8, 0, 1,2, 15, 19, 17),
        col=c("red", "black", "black", "black", "blue", "blue", "blue"),
-       ncol=4, bty = "n"
-)
+       ncol=4, bty = "n")
 
 #############--------------------------------------
-# standard deviation of true change-score reliability and the biasness
+#4. standard deviation of true change-score reliability and the biasness
 # of each estimates 
 
 
 sdTrue <- array()
 for (cel in 1:108){
-  sdTrue[cel] <- sd(restuls_conditions[[cel]][[2]][, 2]) # true reliability and SD range
+  sdTrue[cel] <- sd(restuls_conditions[[cel]][[2]][, 2]) # true reliability's SD 
 }
 
 True1sdmax <- pop_re[, 2] + sdTrue #True change score reliability + 1SD
@@ -77,9 +76,85 @@ True3sdmin <- pop_re[, 2] - 3*sdTrue
 prop1sd <- array()
 prop3sd <- array()
 for(i in 3:8){
-  prop1sd[i-2] <- sum(pop_re[, i] <= True1sdmax & pop_re[, i] >= True1sdmin)/108
-  prop3sd[i-2] <- sum(pop_re[, i] <= True3sdmax & pop_re[, i] >= True3sdmin)/108
+  prop1sd[i-2] <- sum(pop_re[, i] <= True1sdmax & pop_re[, i] >= True1sdmin) #tells us how many cells out of 108 cells...
+  prop3sd[i-2] <- sum(pop_re[, i] <= True3sdmax & pop_re[, i] >= True3sdmin)
 }
+
+
+# 5. sample level: for each cell, we draw plots reliabilities 
+
+############## all 6 methods are ploted in one pic
+
+
+allplots <- list()
+
+for(cel in 73:108){
+
+  y_min <- 1
+  y_max <- 1
+  
+  for(i in 3:8){
+    
+    y_min <- min(y_min, min(restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]))
+    y_max <- max(y_max, max(restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]))
+
+  }
+  layout(rbind(1,2), heights=c(10,1))# put legend on bottom 1/10th of the chart (note, this is from http://stackoverflow.com/questions/8929663/r-legend-placement-in-a-plot)
+  xtitle <- sprintf("20 samples from the population: Cell %d",cel)
+  plot(restuls_conditions[[cel]][[2]][, 2], xlab = xtitle, ylab = "True and estimated change-score reliability +/- 1SD",
+       ylim = c(y_min,y_max), 
+       type = "p",
+       pch = 8,
+       col = "red",
+       cex = 1.5)
+  arrows(c(1:20), restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2], c(1:20), restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2], 
+         length = 0.05, angle = 90, code = 3, col = 'red')
+  abline(h=mean(restuls_conditions[[cel]][[2]][, 2]), lty=2, col="red")
+  
+  for(i in 3:8){
+    if(i == 3){
+      col <- "black"
+      pch <- 0
+    }else if(i==4){
+      col <- "black"
+      pch <- 1
+    }else if(i==5){
+      col <- "black"
+      pch <- 2
+    }else if(i==6){
+      col <- "blue"
+      pch <- 15
+    }else if(i==7){
+      col <- "blue"
+      pch <- 19
+    }else if(i==8){
+      col <- "blue"
+      pch <- 17
+    }
+    points(restuls_conditions[[cel]][[2]][, i], col=col, pch=pch)
+    arrows(c(1:20), restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i], c(1:20), restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i], 
+           length = 0.05, angle = 90, code = 3, col=col)
+    #abline(h=mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col)
+    #segments(20.2, mean(restuls_conditions[[cel]][[2]][, i]), 21, mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col, cex=1.5, pch=pch)
+    #segments(0, mean(restuls_conditions[[cel]][[2]][, i]), .8 , mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col, cex=1.5, pch=pch)
+  }
+  
+  par(mar=c(0,0,0,0))
+  plot.new()
+  legend("center", "groups",
+         c("true reliability", "traditional method + alpha", "traditional method + lambda2","traditiona method + lambda4", 
+            "item-score method + alpha", "item-score method + lambda2", "item-score method + lambda4", "averaged reliability"),
+         pch=c( 8, 0, 1, 2, 15, 19, 17, NA),
+         lty = c(NA, NA, NA, NA, NA, NA, NA, 3),
+         col=c( "red", "black", "black", "black", "blue", "blue", "blue", "red"),
+         ncol=4, bty = "n")
+
+  allplots[[cel]] <- recordPlot() #note that at this moment, I couldnt figure out how to print out all the plots automatically, with 6 plots on the same page. (save pics manually)
+  
+  dev.off()
+}
+
+allplots[[108]]
 
 ############ The following will be re-used, but some part is wrong. 
 prop_sd <- list()
@@ -386,59 +461,4 @@ for(i in 1:7){
 }
 
 
-############## all 6 methods are ploted in one pic
-   
-allplots <- list()
-#y_minF <- 0 #to see what's the minimal value across all the cells
-for(cel in 1:108){  
 
-  #y_min0 <- min(restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2])
-  #y_minF <- min(y_minF, y_min0)
-  #y_max0 <- max(restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2])
-  
-  for(i in 3:8){
-<<<<<<< HEAD
-    y_min <- min(y_min, min(restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]/sqrt(50)))
-    y_max <- max(y_max, max(restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]/sqrt(50)))
-=======
-    #y_min <- min(y_min0, min(restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]))
-    #y_minF <- min(y_minF, y_min)
-    #y_max <- max(y_max0, max(restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]))
-    y_min <- -5.5
-    y_max <- 1
->>>>>>> cf8e67baa3eacef36f84c137bf4b1bd14c0c91ab
-  }
-  plot(restuls_conditions[[cel]][[2]][, 2], xlab = "20 samples from the population", ylab = "True reliability +/- 1SD",
-     ylim = c(y_min,y_max), 
-     type = "p")
-  arrows(c(1:20), restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2], c(1:20), restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2], 
-       length = 0.05, angle = 90, code = 3)
-  abline(h=mean(restuls_conditions[[cel]][[2]][, 2]), lty=2)
-  
-  for(i in 3:8){
-    if(i == 3){
-      col <- "blue"
-      pch <- 15
-    }else if(i==4){
-      col <- "blue"
-      pch <- 18
-    }else if(i==5){
-      col <- "blue"
-      pch <- 17
-    }else if(i==6){
-      col <- "Red"
-      pch <- 15
-    }else if(i==7){
-      col <- "Red"
-      pch <- 18
-    }else if(i==8){
-      col <- "Red"
-      pch <- 17
-    }
-    points(restuls_conditions[[cel]][[2]][, i], col=col, pch=pch)
-    arrows(c(1:20), restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i], c(1:20), restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i], 
-           length = 0.05, angle = 90, code = 3)
-    abline(h=mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col)
-  }
-  allplots[[cel]] <- recordPlot()
-}  
