@@ -30,6 +30,7 @@ for (i in 1:108){
 }
 
 # plot pop_re
+layout(rbind(1,2), heights=c(10,1))# put legend on bottom 1/10th of the chart (note, this is from http://stackoverflow.com/questions/8929663/r-legend-placement-in-a-plot)
 plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "(Estimated) Change-Score Reliability", col='red', pch=8)
 points(pop_re[, 3], pch=0)
 points(pop_re[, 4], pch=1)
@@ -41,14 +42,21 @@ points(pop_re[, 8], pch=17, col='blue')
 for(i in 1:108){
   abline(v=i, lty="dotted")
 }
+abline(v=c(37,73), col="red")
+mtext("Cell no.1 ~ 36: Short (9 items) test", side = 3, line=0, at=20)
+mtext("Cell no.37 ~ 72: Medium (21 items) test", side = 3, line=0, at=55)
+mtext("Cell no.73 ~ 108: Long (36 items) test", side = 3, line=0, at=90)
+axis(1, at=c(37,73), labels=c("37","73"))
 
-legend(0, 1, 
+par(mar=c(0,0,0,0))
+plot.new()
+legend("center", "groups",
        c("true reliability", "traditional method + alpha", "traditional method + lambda2","traditiona method + lambda4", 
          "item-score method + alpha", "item-score method + lambda 2", "item-score method + lambda4"),
        pch=c(8, 0, 1,2, 15, 19, 17),
        col=c("red", "black", "black", "black", "blue", "blue", "blue"),
-       cex=.6
-       )
+       ncol=4, bty = "n"
+)
 
 #############--------------------------------------
 # standard deviation of true change-score reliability and the biasness
