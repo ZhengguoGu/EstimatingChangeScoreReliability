@@ -334,7 +334,7 @@ fit <- lm(biasANOVA$'trad alpha' ~ biasANOVA$'test length' +
             biasANOVA$'correlated facets'*biasANOVA$'size' +
             biasANOVA$'maginute of sd'*biasANOVA$'size'  +
             biasANOVA$'carry-over effects' *biasANOVA$'size')
-
+anova(fit)
 summary(fit)
 #The following are not used, but might be useful?
 #groupindex <- data.frame(biasANOVA[, 7:12])
