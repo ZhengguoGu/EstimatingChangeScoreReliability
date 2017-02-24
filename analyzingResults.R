@@ -307,5 +307,38 @@ biasANOVA$V9 <- factor(as.numeric(combANOVA$`correlated facets`))
 biasANOVA$V10 <- factor(as.numeric(combANOVA$`maginute of sd`))
 biasANOVA$V11 <- factor(as.numeric(combANOVA$`carry-over effects`))
 biasANOVA$V12 <- factor(combANOVA$size)
-
+names(biasANOVA) <- c("trad alpha", "trad lambda2", "trad lambda4", "item alpha", "item lambda2", "item lambda4",
+                      "test length", "parallel item", "correlated facets",  "maginute of sd", "carry-over effects", "size")
 save(biasANOVA, file="biasANOVAdata.RData")
+
+anova(lm(biasANOVA$'trad alpha' ~ biasANOVA$'test length' + 
+                                  biasANOVA$'parallel item' + 
+                                  biasANOVA$'correlated facets' +
+                                  biasANOVA$'maginute of sd' + 
+                                  biasANOVA$'carry-over effects' + 
+                                  biasANOVA$'size' +
+                                  biasANOVA$'test length'*biasANOVA$'size' +
+                                  biasANOVA$'parallel item'*biasANOVA$'size' +
+                                  biasANOVA$'correlated facets'*biasANOVA$'size' +
+                                  biasANOVA$'maginute of sd'*biasANOVA$'size'  +
+                                  biasANOVA$'carry-over effects' *biasANOVA$'size'))
+
+fit <- lm(biasANOVA$'trad alpha' ~ biasANOVA$'test length' + 
+            biasANOVA$'parallel item' + 
+            biasANOVA$'correlated facets' +
+            biasANOVA$'maginute of sd' + 
+            biasANOVA$'carry-over effects' + 
+            biasANOVA$'size' +
+            biasANOVA$'test length'*biasANOVA$'size' +
+            biasANOVA$'parallel item'*biasANOVA$'size' +
+            biasANOVA$'correlated facets'*biasANOVA$'size' +
+            biasANOVA$'maginute of sd'*biasANOVA$'size'  +
+            biasANOVA$'carry-over effects' *biasANOVA$'size')
+
+summary(fit)
+#The following are not used, but might be useful?
+#groupindex <- data.frame(biasANOVA[, 7:12])
+#groupindexNonDup <- groupindex[!duplicated(groupindex, margin=2),]
+#dim(groupindexNonDup)
+#splitANOVA <- split(biasANOVA, biasANOVA[, 7:12])
+#length(splitANOVA)
