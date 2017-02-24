@@ -156,7 +156,7 @@ for(cel in 1:108){
 
 allplots[[108]] #manually save all plots from 1 to 108.
 
-#6. pic a few representative plots to be included in the paper. the rest are in the supplementary matrial
+#6. pick a few representative plots to be included in the paper. the rest are in the supplementary matrial
 # We need to rerun the plots because this time ylim must be the same so that we can compare. 
 
 cel <- 24
@@ -221,250 +221,91 @@ dev.off()
 #############--------------------------------------
 #7.  given the 108 cells, which cells generate negative reliabilites?
 
-weird_index <- rep(0, 108)
+weird_index <- matrix(NA, 108, 6)
 for(i in 1:108){
-  allestimates <- matrix(unlist(restuls_conditions[[i]][2]), nrow = 20, ncol = 8) 
-  if(sum(allestimates < 0)>=1){
-    weird_index[i] <- 1
-  }
+  allestimates <- matrix(unlist(restuls_conditions[[i]][2]), nrow = 20, ncol = 8)[, c(-1,-2)] 
+  weird_index[i, ] = (colSums(allestimates < 0)>=1) #negative reliability
 }
+
+df[, 6:11] <- weird_index 
+names(df)[6:11] <- c("neg traditional alpha", "neg traditional lambda2", "neg traditional lambda4", 
+                     "neg item alpha", "neg item lambda2", "neg item lambda4")
+table(df$`carry-over effects`,df$`neg traditional alpha`)
+table(df$`carry-over effects`,df$`neg traditional lambda2`)
+table(df$`carry-over effects`,df$`neg traditional lambda4`)
 
 weird_index2 <- rep(0, 108)
 for(i in 1:108){
   allestimates <- matrix(unlist(restuls_conditions[[i]][2]), nrow = 20, ncol = 8) 
-  if(sum(allestimates[, 2:8] >1)>=1){
+  if(sum(allestimates[, 2:8] >1)>=1){ #reliability >1
     weird_index2[i] <- 1
   }
 }
+sum(weird_index2) # non of them have reliability > 1.
 
-df[, 6] <- weird_index
+#8. ANOVAs. The idea is to see how different conditions influence the bias of reliability estimates. 
+#Note that for each cell (in total 108), there are 20 samples; and for each sample, there are 50 reponse datasets. For each cell,
+#I randomly pick one sample, and combine the 108 samples together for ANOVAs.
 
-########################Below: not useful##########################
+load('results20170122.RData') #large sample case
 
-# explore between-person and within-person variance for each cell
+index_sample <- sample(1:20, 108, replace=TRUE) 
 
-# explore the simulated raw data
-#(simulatedRawdata)  # 108 cells
-#length(simulatedRawdata[[1]]) # 2 lists sample_theta, simResponses
-#length(simulatedRawdata[[1]][[1]]) # 20 samples of persons
-#length(simulatedRawdata[[1]][[2]]) # 20 samples of persons
-
-# Focus on simulated responses now
-#length(simulatedRawdata[[1]][[2]][[1]]) #4 lists, given the 1st cell, 2nd list (i.e. simResponses), and 1st sample (out of 20 samples of persons)
-#length(simulatedRawdata[[1]][[2]][[1]][[1]]) # 50 response datasets of sumpre_response, given the 1st cell, 2nd list (i.e. simResponses), and 1st sample (out of 20 samples of persons)
-#length(simulatedRawdata[[1]][[2]][[1]][[1]][[50]]) #sumpre_response data (the 50th dataset), given the 1st cell, 2nd list (i.e. simResponses), and 1st sample (out of 20 samples of persons)
-
-# For each sample of persons, 50 simulated responses are generated. --> these persons are measured 50 times with brain washing. 
-# Now we generate a matrix, the rows are the persons, the columns are the 50 change scores 
-
-
-#BTinform <- list() #this list contains the between/within variances of all the 108 cases. 
-#for (c in 1:108){
-#  Matrixlist <- list()
-#  varDecomp <- matrix(NA, 20, 4)
-#  for (p in 1:20){
-#    wbMatrix <- matrix(0, 1000, 50)
-#    for (s in 1:50){
-#      wbMatrix[, s] <- simulatedRawdata[[c]][[2]][[p]][[3]][[s]] - simulatedRawdata[[c]][[2]][[p]][[1]][[s]]
-#    }
-#    Matrixlist[[p]]<- wbMatrix
-#    grandmean <- mean(wbMatrix)
-#    personmean <- rowMeans(wbMatrix)
-#    totalVar <- sum((wbMatrix-grandmean)^2)
-#    betweenPVar <- sum(50*(personmean-grandmean)^2)
-#    withinPVar <- sum((wbMatrix-personmean)^2)
-#    btRatio <- betweenPVar/totalVar 
-#    varDecomp[p, 1] <- totalVar
-#    varDecomp[p, 2] <- betweenPVar
-#    varDecomp[p, 3] <- withinPVar
-#    varDecomp[p, 4] <- btRatio
-#  }
-#  BTinform[[c]] <- varDecomp
-#}
-
-#since each cell contains 20 samples of persons, we average them per cell
-#ratioCell <- array()
-#for (c in 1:108){
-#  ratioCell[c] <- mean(BTinform[[c]][, 4])
-#}
-
-#lines(ratioCell, type="l")
-#########################above: not useful####################
-
-
-######## New analysis: 2017-2-2 between-within variances 
-
-# Review the structure of results
-
-length(restuls_conditions)  # 108 --> total number of cells 
-length(restuls_conditions[[1]]) # 3 (lists)--> the first list contains all the reliability estimates for the 20 samples of persons
-# the second list contains the average reliability for each sample of persons (thus, 20 rows)
-# the third list contains the SD (might not be useful at this moment)
-
-length(restuls_conditions[[1]][[1]]) # 20 (lists) --> each list contains the reliability estimates for 50 samples of responses
-str(restuls_conditions[[1]][[1]][[1]]) # num [1:50, 1:8] 
-
-str(restuls_conditions[[1]][[2]]) # num [1:20, 1:8] --> reliability estimates of 20 samples from persons under condition cell 1 
-str(restuls_conditions[[1]][[3]]) # num [1:20, 1:8]
-
-# a function for calculating within/between var
-BTvar <- function(mat){
-  #each column is a group
-  num_row <- dim(mat)[1]
-  gmean <- mean(mat)
-  cmean <- colMeans(mat)
-  tvar <- sum((mat-gmean)^2)
-  betvar <- sum(num_row*(cmean-gmean)^2)
+reANOVA <- matrix(NA, 1, 13)
+for(cel in 1:108){
   
-  sum_a <- array() 
-  for(i in 1:num_row){
-    sum_a[i] <- sum((mat[i, ]-cmean)^2)
-  }
+  reSample <- restuls_conditions[[cel]][[1]][[index_sample[cel]]] 
+  reSample <- cbind(reSample, t(matrix(rep(df[cel,], 50), 5, 50)))
+  reANOVA <- rbind(reANOVA, reSample)
+
+}
+reANOVA <- reANOVA[-1,]
+save(reANOVA, file = "reANOVAlarge.RData")
+
+load('results20170222smallsample.RData') #small sample case
+
+index_sample <- sample(1:20, 108, replace=TRUE) 
+
+reANOVAs <- matrix(NA, 1, 13)
+for(cel in 1:108){
   
-  #witvar <- sum((mat-cmean)^2)
-  witvar <- sum(sum_a)
-  btRatio <- betvar/tvar
+  reSample <- restuls_conditions[[cel]][[1]][[index_sample[cel]]] 
+  reSample <- cbind(reSample, t(matrix(rep(df[cel,], 50), 5, 50)))
+  reANOVAs <- rbind(reANOVAs, reSample)
   
-  return_list <- list()
-  return_list$TotalVar <- tvar
-  return_list$BetweenVar <- betvar
-  return_list$WithinVar <- witvar
-  return_list$BTratio <- btRatio
-  return(return_list)
 }
+reANOVAs <- reANOVAs[-1,]
+save(reANOVAs, file = "reANOVAsmall.RData")
 
+load("~/EstimatingChangeScoreReliability/reANOVAlarge.RData")
+load("~/EstimatingChangeScoreReliability/reANOVAsmall.RData")
+names(df)
 
-BT_tru_relia <- list()
-BT_tradi_alpha <- list()
-BT_tradi_l2 <- list()
-BT_tradi_l4 <- list()
-BT_new_alpha <- list()
-BT_new_l2 <- list()
-BT_new_l4 <- list()
+reANOVA <- as.data.frame(reANOVA)
+names(reANOVA) <- c("useless", "true", "trad alpha", "trad lambda2", "trad lambda4", "item alpha", "item lambda2", "item lambda4",
+                    "test length", "parallel item", "correlated facets",  "maginute of sd", "carry-over effects")
+reANOVA$size <- "large"
+reANOVAs <- as.data.frame(reANOVAs)
+names(reANOVAs) <- c("useless", "true", "trad alpha", "trad lambda2", "trad lambda4", "item alpha", "item lambda2", "item lambda4",
+                    "test length", "parallel item", "correlated facets",  "maginute of sd", "carry-over effects")
+reANOVAs$size <- "small"
 
-for (c in 1:108){
-  
-  tru_relia <- matrix(0, 50, 20)
-  tradi_alpha <- matrix(0, 50, 20)
-  tradi_l2 <- matrix(0, 50, 20)
-  tradi_l4 <- matrix(0, 50, 20)
-  new_alpha <- matrix(0, 50, 20)
-  new_l2 <- matrix(0, 50, 20)
-  new_l4 <- matrix(0, 50, 20)
+combANOVA <- rbind(reANOVA,reANOVAs) # this is the raw data.. 
+#calculate the bias for each row, this is true - estimated
+biasANOVA <- matrix(NA, 10800, 12)
+biasANOVA[, 1] <- as.numeric(combANOVA$true) - as.numeric(combANOVA$`trad alpha`)
+biasANOVA[, 2] <- as.numeric(combANOVA$true) - as.numeric(combANOVA$`trad lambda2`)
+biasANOVA[, 3] <- as.numeric(combANOVA$true) - as.numeric(combANOVA$`trad lambda4`)
+biasANOVA[, 4] <- as.numeric(combANOVA$true) - as.numeric(combANOVA$`item alpha`)
+biasANOVA[, 5] <- as.numeric(combANOVA$true) - as.numeric(combANOVA$`item lambda2`)
+biasANOVA[, 6] <- as.numeric(combANOVA$true) - as.numeric(combANOVA$`item lambda4`)
+# note that biasANOVA[, 7:12] <- combANOVA[, 9:14] is not recommended! The resulting file will 31 GB. (although I dont know the reason why)
+biasANOVA <- as.data.frame(biasANOVA)
+biasANOVA$V7 <- factor(as.numeric(combANOVA$`test length`))
+biasANOVA$V8 <- factor(as.numeric(combANOVA$`parallel item`))
+biasANOVA$V9 <- factor(as.numeric(combANOVA$`correlated facets`))
+biasANOVA$V10 <- factor(as.numeric(combANOVA$`maginute of sd`))
+biasANOVA$V11 <- factor(as.numeric(combANOVA$`carry-over effects`))
+biasANOVA$V12 <- factor(combANOVA$size)
 
-  for (i in 1:20){
-   tru_relia[,i] <- restuls_conditions[[c]][[1]][[i]][, 2]
-   tradi_alpha[,i] <- restuls_conditions[[c]][[1]][[i]][, 3]
-   tradi_l2[,i] <- restuls_conditions[[c]][[1]][[i]][, 4]
-   tradi_l4[,i] <- restuls_conditions[[c]][[1]][[i]][, 5]
-   new_alpha[,i] <- restuls_conditions[[c]][[1]][[i]][, 6]
-   new_l2[,i] <- restuls_conditions[[c]][[1]][[i]][, 7]
-   new_l4[,i] <- restuls_conditions[[c]][[1]][[i]][, 8]
-  }
-
-  BT_tru_relia[[c]] <- BTvar(tru_relia)
-  BT_tradi_alpha[[c]] <- BTvar(tradi_alpha)
-  BT_tradi_l2[[c]] <- BTvar(tradi_l2)
-  BT_tradi_l4[[c]] <- BTvar(tradi_l4)
-  BT_new_alpha[[c]] <- BTvar(new_alpha)
-  BT_new_l2[[c]] <- BTvar(new_l2)
-  BT_new_l4[[c]] <- BTvar(new_l4)
-}
-
-BTRmatrix <- matrix(0, 108, 7)
-for(i in 1:108){
-  BTRmatrix[i, 1] <- unlist(BT_tru_relia[[i]][4])
-  BTRmatrix[i, 2] <- unlist(BT_tradi_alpha[[i]][4])
-  BTRmatrix[i, 3] <- unlist(BT_tradi_l2[[i]][4])
-  BTRmatrix[i, 4] <- unlist(BT_tradi_l4[[i]][4])
-  BTRmatrix[i, 5] <- unlist(BT_new_alpha[[i]][4])
-  BTRmatrix[i, 6] <- unlist(BT_new_l2[[i]][4])
-  BTRmatrix[i, 7] <- unlist(BT_new_l4[[i]][4])
-}
-
-
-plot(pop_re[, 2], xlim = c(0, 108), ylim = c(0,1), xlab = "108 cells", ylab = "True Reliability", col='red', pch=19)
-plot(BTRmatrix[, 1], type = "p", col='green', pch=19, ylim = c(0,1))
-points(BTRmatrix[, 2], pch=0, col='grey')
-points(BTRmatrix[, 3], pch=1, col='grey')
-points(BTRmatrix[, 4], pch=2, col='grey')
-points(BTRmatrix[, 5], pch=15, col='purple')
-points(BTRmatrix[, 6], pch=19, col='purple')
-points(BTRmatrix[, 7], pch=17, col='purple')
-
-#let's focus on carry over effects
-carryindex <- df[, 5]!=0
-plot(pop_re[, 2][carryindex], ylim = c(-5,1), ylab = "True Reliability", col='red', pch=19)
-lines(pop_re[, 3][carryindex], pch=0, type = 'b')
-abline(h=0)
-abline(h=.5)
-points(BTRmatrix[, 2][carryindex], pch=0, col='grey')
-
-###### New Analysis: distribution of esimated reliability of a sample (out of 20 samples)
-# The idea is that, since brain-washing is not possible, we have to estimate reliability based
-# on the reponses (which might not be the same if we measure again). The estimated reliability 
-# is expected to be close to the true reliability of that sample, but due to measurement errors, 
-# there will be deviation. 
-
-# Review the structure of results
-
-length(restuls_conditions)  # 108 --> total number of cells 
-length(restuls_conditions[[1]]) # 3 (lists)--> the first list contains all the reliability estimates for the 20 samples of persons
-# the second list contains the average reliability for each sample of persons (thus, 20 rows)
-# the third list contains the SD (might not be useful at this moment)
-
-length(restuls_conditions[[1]][[1]]) # 20 (lists) --> each list contains the reliability estimates for 50 samples of responses
-str(restuls_conditions[[1]][[1]][[1]]) # num [1:50, 1:8] 
-
-str(restuls_conditions[[1]][[2]]) # num [1:20, 1:8] --> reliability estimates of 20 samples from persons under condition cell 1 
-str(restuls_conditions[[1]][[3]]) # num [1:20, 1:8] --> standard deviation
-
-allplots <- list()
-
-for(cel in 2:2){
-  plotarray <- list()
-  y_min <- min(restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
-  y_max <- max(restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2]/sqrt(50))
-  plot(restuls_conditions[[cel]][[2]][, 2], xlab = "20 samples from the population", ylab = "True reliability +/- 1SE",
-     ylim = c(y_min, y_max), 
-     type = "p")
-  arrows(c(1:20), restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2]/sqrt(50), c(1:20), restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2]/sqrt(50), 
-       length = 0.05, angle = 90, code = 3)
-  abline(h=mean(restuls_conditions[[cel]][[2]][, 2]), lty=2)
-  plotarray[[1]] <- recordPlot()
-  for(i in 3:8){
-    if(i == 3){
-      differentN <- "Estimated reliability traditional - alpha"
-    }else if(i==4){
-      differentN <- "Estimated reliability traditional - lambda2"
-    }else if(i==5){
-      differentN <- "Estimated reliability traditional - lambda4"
-    }else if(i==6){
-      differentN <- "Estimated reliability new - alpha"
-    }else if(i==7){
-      differentN <- "Estimated reliability new - lambda2"
-    }else if(i==8){
-      differentN <- "Estimated reliability new - lambda4"
-    }
-  
-    y_min <- min(restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]/sqrt(50))
-    y_max <- max(restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]/sqrt(50))
-    plot(restuls_conditions[[cel]][[2]][, i], xlab = "20 samples from the population", ylab = differentN,
-     ylim = c(y_min, y_max), 
-     type = "p")
-    arrows(c(1:20), restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]/sqrt(50), c(1:20), restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]/sqrt(50), 
-       length = 0.05, angle = 90, code = 3)
-    abline(h=mean(restuls_conditions[[cel]][[2]][, i]), lty=2)
-    plotarray[[i-1]] <- recordPlot()
-  }
-  allplots[[cel]] <- plotarray
-}
-
-#display plots
-cel_index = 108
-for(i in 1:7){
-  print(allplots[[cel_index]][[i]])
-}
-
-
-
+save(biasANOVA, file="biasANOVAdata.RData")
