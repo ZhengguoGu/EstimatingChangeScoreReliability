@@ -249,6 +249,7 @@ sum(weird_index2) # non of them have reliability > 1.
 
 load('results20170122.RData') #large sample case
 
+set.seed(110) #important!
 index_sample <- sample(1:20, 108, replace=TRUE) 
 
 reANOVA <- matrix(NA, 1, 13)
@@ -263,7 +264,7 @@ reANOVA <- reANOVA[-1,]
 save(reANOVA, file = "reANOVAlarge.RData")
 
 load('results20170222smallsample.RData') #small sample case
-
+set.seed(110) #important!
 index_sample <- sample(1:20, 108, replace=TRUE) 
 
 reANOVAs <- matrix(NA, 1, 13)
