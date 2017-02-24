@@ -280,7 +280,6 @@ save(reANOVAs, file = "reANOVAsmall.RData")
 
 load("~/EstimatingChangeScoreReliability/reANOVAlarge.RData")
 load("~/EstimatingChangeScoreReliability/reANOVAsmall.RData")
-names(df)
 
 reANOVA <- as.data.frame(reANOVA)
 names(reANOVA) <- c("useless", "true", "trad alpha", "trad lambda2", "trad lambda4", "item alpha", "item lambda2", "item lambda4",
@@ -312,17 +311,6 @@ names(biasANOVA) <- c("trad alpha", "trad lambda2", "trad lambda4", "item alpha"
                       "test length", "parallel item", "correlated facets",  "maginute of sd", "carry-over effects", "size")
 save(biasANOVA, file="biasANOVAdata.RData")
 
-anova(lm(biasANOVA$'trad alpha' ~ biasANOVA$'test length' + 
-                                  biasANOVA$'parallel item' + 
-                                  biasANOVA$'correlated facets' +
-                                  biasANOVA$'maginute of sd' + 
-                                  biasANOVA$'carry-over effects' + 
-                                  biasANOVA$'size' +
-                                  biasANOVA$'test length'*biasANOVA$'size' +
-                                  biasANOVA$'parallel item'*biasANOVA$'size' +
-                                  biasANOVA$'correlated facets'*biasANOVA$'size' +
-                                  biasANOVA$'maginute of sd'*biasANOVA$'size'  +
-                                  biasANOVA$'carry-over effects' *biasANOVA$'size'))
 
 fit <- lm(biasANOVA$'trad alpha' ~ biasANOVA$'test length' + 
             biasANOVA$'parallel item' + 
