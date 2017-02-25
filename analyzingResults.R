@@ -325,6 +325,7 @@ fit <- lm(biasANOVA$'trad alpha' ~ biasANOVA$'test length' +
             biasANOVA$'carry-over effects' *biasANOVA$'size')
 anova(fit)
 summary(fit)
+
 #The following are not used, but might be useful?
 #groupindex <- data.frame(biasANOVA[, 7:12])
 #groupindexNonDup <- groupindex[!duplicated(groupindex, margin=2),]
