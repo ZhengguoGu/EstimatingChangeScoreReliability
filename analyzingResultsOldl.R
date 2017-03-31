@@ -10,7 +10,7 @@ load('results20170222smallsample.RData')
 
 # 2. Review the structure of results
 
-length(restuls_conditions)  # 108 --> total number of cells 
+length(restuls_conditions)  # 108 --> total number of cells (Note that there are two datasets, one for small sample one for large sample, and thus 108x2=216 cells)
 length(restuls_conditions[[1]]) # 3 (lists)--> the first list contains all the reliability estimates for the 20 samples of persons
 # the second list contains the average reliability for each sample of persons (thus, 20 rows)
 # the third list contains the SD (might not be useful at this moment)

@@ -152,20 +152,165 @@ legend("center", "groups",
        col=c("red", "black", "black", "black", "blue", "blue", "blue"),
        ncol=4, bty = "n")
 
+####################################################################
+#5.  given the 108 cells, which cells generate negative reliabilites?
+
+weird_index <- matrix(NA, 108, 6)
+for(i in 1:108){
+  allestimates <- matrix(unlist(restuls_conditions[[i]][2]), nrow = 20, ncol = 8)[, c(-1,-2)] 
+  weird_index[i, ] = (colSums(allestimates < 0)>=1) #negative reliability
+}
+
+df[, 6:11] <- weird_index 
+names(df)[6:11] <- c("neg traditional alpha", "neg traditional lambda2", "neg traditional lambda4", 
+                     "neg item alpha", "neg item lambda2", "neg item lambda4")
+table(df$`carry-over effects`,df$`neg traditional alpha`)
+table(df$`carry-over effects`,df$`neg traditional lambda2`)
+table(df$`carry-over effects`,df$`neg traditional lambda4`)
+
+weird_index2 <- rep(0, 108)
+for(i in 1:108){
+  allestimates <- matrix(unlist(restuls_conditions[[i]][2]), nrow = 20, ncol = 8) 
+  if(sum(allestimates[, 2:8] >1)>=1){ #reliability >1
+    weird_index2[i] <- 1
+  }
+}
+sum(weird_index2) # non of them have reliability > 1.
 
 #################################################################
-#####  ANOVA: compare the six methods. 
-#####  Let the item-level method with alpha be the reference (Does it make sense?)
+##### 6. Regression analysis
 #################################################################
-g1 <- pop_re[, 6]  # item-level, alpha
-g2 <- pop_re[, 7]  # item-level, lambda2
-g3 <- pop_re[, 8]  # item-level, lambda4
-g4 <- pop_re[, 3]  # traditional, alpha
-g5 <- pop_re[, 4]  # traditional, lambda2
-g6 <- pop_re[, 5]  # traditional, lambda4 
 
-g123456 <- c(g1, g2, g3, g4, g5, g6)
-groups <- factor(rep(c('g1', 'g2', 'g3', 'g4', 'g5', 'g6'), each = 108))
+set.seed(110) #important!
+index_sample <- sample(1:20, 108, replace=TRUE) 
 
-fit <- lm(formula = g123456 ~ groups)
+reANOVA <- matrix(NA, 1, 13)
+for(cel in 1:108){
+  
+  reSample <- restuls_conditions[[cel]][[1]][[index_sample[cel]]] 
+  reSample <- cbind(reSample, t(matrix(rep(df[cel,], 50), 5, 50)))
+  reANOVA <- rbind(reANOVA, reSample)
+  
+}
+reANOVA <- reANOVA[-1,]
+save(reANOVA, file = "reANOVAlarge.RData")
+
+load('results20170222smallsample.RData') #small sample case
+set.seed(110) #important!
+index_sample <- sample(1:20, 108, replace=TRUE) 
+
+reANOVAs <- matrix(NA, 1, 13)
+for(cel in 1:108){
+  
+  reSample <- restuls_conditions[[cel]][[1]][[index_sample[cel]]] 
+  reSample <- cbind(reSample, t(matrix(rep(df[cel,], 50), 5, 50)))
+  reANOVAs <- rbind(reANOVAs, reSample)
+  
+}
+reANOVAs <- reANOVAs[-1,]
+save(reANOVAs, file = "reANOVAsmall.RData")
+
+load("~/EstimatingChangeScoreReliability/reANOVAlarge.RData")
+load("~/EstimatingChangeScoreReliability/reANOVAsmall.RData")
+
+reANOVA <- as.data.frame(reANOVA)
+names(reANOVA) <- c("useless", "true", "trad alpha", "trad lambda2", "trad lambda4", "item alpha", "item lambda2", "item lambda4",
+                    "test length", "parallel item", "correlated facets",  "maginute of sd", "carry-over effects")
+reANOVA$size <- "large"
+reANOVAs <- as.data.frame(reANOVAs)
+names(reANOVAs) <- c("useless", "true", "trad alpha", "trad lambda2", "trad lambda4", "item alpha", "item lambda2", "item lambda4",
+                     "test length", "parallel item", "correlated facets",  "maginute of sd", "carry-over effects")
+reANOVAs$size <- "small"
+
+combANOVA <- rbind(reANOVA,reANOVAs) # this is the raw data.. 
+#calculate the distance (here i call bias) for each row, this is true - estimated
+biasANOVA <- matrix(NA, 10800, 12)
+biasANOVA[, 1] <- abs(as.numeric(combANOVA$true) - as.numeric(combANOVA$`trad alpha`))
+biasANOVA[, 2] <- abs(as.numeric(combANOVA$true) - as.numeric(combANOVA$`trad lambda2`))
+biasANOVA[, 3] <- abs(as.numeric(combANOVA$true) - as.numeric(combANOVA$`trad lambda4`))
+biasANOVA[, 4] <- abs(as.numeric(combANOVA$true) - as.numeric(combANOVA$`item alpha`))
+biasANOVA[, 5] <- abs(as.numeric(combANOVA$true) - as.numeric(combANOVA$`item lambda2`))
+biasANOVA[, 6] <- abs(as.numeric(combANOVA$true) - as.numeric(combANOVA$`item lambda4`))
+# note that biasANOVA[, 7:12] <- combANOVA[, 9:14] is not recommended! The resulting file will 31 GB. (although I dont know the reason why)
+biasANOVA <- as.data.frame(biasANOVA)
+biasANOVA$V7 <- factor(as.numeric(combANOVA$`test length`))
+biasANOVA$V8 <- factor(as.numeric(combANOVA$`parallel item`))
+biasANOVA$V9 <- factor(as.numeric(combANOVA$`correlated facets`))
+biasANOVA$V10 <- factor(as.numeric(combANOVA$`maginute of sd`))
+biasANOVA$V11 <- factor(as.numeric(combANOVA$`carry-over effects`))
+biasANOVA$V12 <- factor(combANOVA$size)
+names(biasANOVA) <- c("trad alpha", "trad lambda2", "trad lambda4", "item alpha", "item lambda2", "item lambda4",
+                      "test length", "parallel item", "correlated facets",  "maginute of sd", "carry-over effects", "size")
+save(biasANOVA, file="biasANOVAdata.RData")
+
+# what went wrong with the traditional method with alpha?
+fit <- lm(biasANOVA$'trad alpha' ~ biasANOVA$'test length' + 
+            biasANOVA$'parallel item' + 
+            biasANOVA$'correlated facets' +
+            biasANOVA$'maginute of sd' + 
+            biasANOVA$'carry-over effects' + 
+            biasANOVA$'size' +
+            biasANOVA$'test length'*biasANOVA$'size' +
+            biasANOVA$'parallel item'*biasANOVA$'size' +
+            biasANOVA$'correlated facets'*biasANOVA$'size' +
+            biasANOVA$'maginute of sd'*biasANOVA$'size'  +
+            biasANOVA$'carry-over effects' *biasANOVA$'size')
 anova(fit)
+fit.summary <- summary(fit)
+
+fit_tl2 <- lm(biasANOVA$'trad lambda2' ~ biasANOVA$'test length' + 
+                biasANOVA$'parallel item' + 
+                biasANOVA$'correlated facets' +
+                biasANOVA$'maginute of sd' + 
+                biasANOVA$'carry-over effects' + 
+                biasANOVA$'size' +
+                biasANOVA$'test length'*biasANOVA$'size' +
+                biasANOVA$'parallel item'*biasANOVA$'size' +
+                biasANOVA$'correlated facets'*biasANOVA$'size' +
+                biasANOVA$'maginute of sd'*biasANOVA$'size'  +
+                biasANOVA$'carry-over effects' *biasANOVA$'size')
+anova(fit_tl2)
+fit.summary <- summary(fit_tl2)
+
+fit_tl4 <- lm(biasANOVA$'trad lambda4' ~ biasANOVA$'test length' + 
+                biasANOVA$'parallel item' + 
+                biasANOVA$'correlated facets' +
+                biasANOVA$'maginute of sd' + 
+                biasANOVA$'carry-over effects' + 
+                biasANOVA$'size' +
+                biasANOVA$'test length'*biasANOVA$'size' +
+                biasANOVA$'parallel item'*biasANOVA$'size' +
+                biasANOVA$'correlated facets'*biasANOVA$'size' +
+                biasANOVA$'maginute of sd'*biasANOVA$'size'  +
+                biasANOVA$'carry-over effects' *biasANOVA$'size')
+anova(fit_tl4)
+fit.summary <- summary(fit_tl4)
+
+# Which factors influence the item-score method?
+fit2 <- lm(biasANOVA$'item alpha' ~ biasANOVA$'test length' + 
+             biasANOVA$'parallel item' + 
+             biasANOVA$'correlated facets' +
+             biasANOVA$'maginute of sd' + 
+             biasANOVA$'carry-over effects' + 
+             biasANOVA$'size' +
+             biasANOVA$'test length'*biasANOVA$'size' +
+             biasANOVA$'parallel item'*biasANOVA$'size' +
+             biasANOVA$'correlated facets'*biasANOVA$'size' +
+             biasANOVA$'maginute of sd'*biasANOVA$'size'  +
+             biasANOVA$'carry-over effects' *biasANOVA$'size')
+anova(fit2)
+fit.summary <- summary(fit2)
+
+fit3 <- lm(biasANOVA$'item lambda2' ~ biasANOVA$'test length' + 
+             biasANOVA$'parallel item' + 
+             biasANOVA$'correlated facets' +
+             biasANOVA$'maginute of sd' + 
+             biasANOVA$'carry-over effects' + 
+             biasANOVA$'size' +
+             biasANOVA$'test length'*biasANOVA$'size' +
+             biasANOVA$'parallel item'*biasANOVA$'size' +
+             biasANOVA$'correlated facets'*biasANOVA$'size' +
+             biasANOVA$'maginute of sd'*biasANOVA$'size'  +
+             biasANOVA$'carry-over effects' *biasANOVA$'size')
+anova(fit3)
+fit.summary <- summary(fit3)
