@@ -205,7 +205,7 @@ legend("center", "groups",
        ncol=4, bty = "n")
 dev.off()
 
-######### 3. distance measure:  ######################################
+######### 3. distance measure:  part 1 ######################################
 
 load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
 load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
@@ -285,7 +285,7 @@ dist_measureSD <- cbind(SD1sum_in_regionTraAlpha, SD3sum_in_regionTraAlpha, SD1s
                         SD1sum_in_regionItemL2, SD3sum_in_regionItemL2, SD1sum_in_regionItemL4, SD3sum_in_regionItemL4)/1000
 dist_measureSD <- cbind(pop_sd[, 2], dist_measureSD)  # this is the matrix containing the 
 colnames(dist_measureSD)[1] <- "1SD"
-
+dist_measureSD <- cbind(dist_measureSD, df)
 # 
 situation <- 1 # "Unidimensional + No Carryover"
 situation <- 2 # "Unidimensional + Carryover"
@@ -302,4 +302,36 @@ if(situation == 1){
   index <- df$`correlated facets`!=1 & df$`carry-over effects`!=0
 } 
 
-dist_measureSD[index, ]
+resultdistmeasureSD <- dist_measureSD[index, ]
+
+############# 4.  given the 108 cells, which cells generate negative reliabilites? ####################
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
+
+weird_index <- matrix(NA, 108, 6)
+for(i in 1:108){
+  allestimates <- matrix(unlist(restuls_conditions[[i]][2]), nrow = 20, ncol = 8)[, c(-1,-2)] 
+  weird_index[i, ] = (colSums(allestimates < 0)>=1) #negative reliability
+}
+
+df[, 6:11] <- weird_index 
+names(df)[6:11] <- c("neg traditional alpha", "neg traditional lambda2", "neg traditional lambda4", 
+                     "neg item alpha", "neg item lambda2", "neg item lambda4")
+table(df$`carry-over effects`,df$`neg traditional alpha`)
+table(df$`carry-over effects`,df$`neg traditional lambda2`)
+table(df$`carry-over effects`,df$`neg traditional lambda4`)
+
+weird_index2 <- rep(0, 108)
+for(i in 1:108){
+  allestimates <- matrix(unlist(restuls_conditions[[i]][2]), nrow = 20, ncol = 8) 
+  if(sum(allestimates[, 2:8] >1)>=1){ #reliability >1
+    weird_index2[i] <- 1
+  }
+}
+sum(weird_index2) # non of them have reliability > 1.
+
+############# 4.Extra: lets check Cell2 large sample size and see why negative estimated reliability happens
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
+
+restuls_conditions[[1]][[1]]
