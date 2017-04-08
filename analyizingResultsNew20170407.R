@@ -226,6 +226,21 @@ population_rel3SD_upper <- pop_re[, 2] + 3*pop_sd[, 2]  # +3SD
 SDrange1SD <- cbind(population_rel1SD_lower, population_rel1SD_upper)
 SDrange3SD <- cbind(population_rel3SD_lower, population_rel3SD_upper)
 
+SD1sum_in_regionTraAlpha <- array() # # of estimated reliablity within the region of +/- 1SD: traditional + alpha
+SD1sum_in_regionTraL2 <- array()    # # of estimated reliablity within the region of +/- 1SD: traditional + lambda 2
+SD1sum_in_regionTraL4 <- array()    # # of estimated reliablity within the region of +/- 1SD: traditional + lambda 4
+
+SD1sum_in_regionItemAlpha <- array() # # of estimated reliablity within the region of +/- 1SD: Item method + alpha
+SD1sum_in_regionItemL2 <- array()    # # of estimated reliablity within the region of +/- 1SD: Item method + lambda 2
+SD1sum_in_regionItemL4 <- array()    # # of estimated reliablity within the region of +/- 1SD: Item method + lambda 4
+
+SD3sum_in_regionTraAlpha <- array() # # of estimated reliablity within the region of +/- 3SD: traditional + alpha
+SD3sum_in_regionTraL2 <- array()    # # of estimated reliablity within the region of +/- 3SD: traditional + lambda 2
+SD3sum_in_regionTraL4 <- array()    # # of estimated reliablity within the region of +/- 3SD: traditional + lambda 4
+
+SD3sum_in_regionItemAlpha <- array() # # of estimated reliablity within the region of +/- 3SD: Item method + alpha
+SD3sum_in_regionItemL2 <- array()    # # of estimated reliablity within the region of +/- 3SD: Item method + lambda 2
+SD3sum_in_regionItemL4 <- array()    # # of estimated reliablity within the region of +/- 3SD: Item method + lambda 4
 
 for(cel in 1:108){
 
