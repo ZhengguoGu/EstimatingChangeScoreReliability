@@ -2,20 +2,6 @@
 #
 # This file contains the code for analyzing the results
 #
-# I analyize the results in the following steps:
-#
-############# PART I: Bias and precision  #################
-# 1. Results for unidimensional data 
-#    1) No carry-over effects
-#    2) Carry-over effects
-# 2. Results for multidimensional data
-#    1) No carry-over effects
-#    2) Carry-over effects
-##########################################################
-############# PART II: regression analysis ###############
-# 3. Design factors that influence the difference between 
-#    change-score reliability and its estimate.
-##########################################################
 #
 # Zhengguo Gu, Tilburg University
 # Last update: 07/04/2017
@@ -49,7 +35,10 @@ df$`correlated facets`!=1     # multidimensional data
 df$`carry-over effects`==0    # No Carry-over effects
 df$`carry-over effects`!=0    # Carry-over effects
 
-###### draw bias and precision plots - 4 situations
+
+
+######### 1. draw bias and precision plots - 4 situations: LEVEL 1 ##############
+
 situation <- 1 # "Unidimensional + No Carryover"
 situation <- 2 # "Unidimensional + Carryover"
 situation <- 3 # "Multidimensional + No Carryover"
@@ -135,4 +124,167 @@ for(j in 1:sum(index)){
   dev.off()
 }
 
+######### 2. Bias and precision - LEVEL 2 ###################
 
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
+
+
+pop_re <- matrix(NA, nrow = 108, ncol = 8)
+pop_sd <- matrix(NA, nrow = 108, ncol = 8)
+for (i in 1:108){
+  pop_re[i, ] <- colMeans(restuls_conditions[[i]][[2]])
+  pop_sd[i, ] <- apply(restuls_conditions[[i]][[2]], 2, sd)
+}
+
+
+situation <- 1 # "Unidimensional + No Carryover"
+situation <- 2 # "Unidimensional + Carryover"
+situation <- 3 # "Multidimensional + No Carryover"
+situation <- 4 #"Multidimensional + Carryover"
+
+if(situation == 1){
+  index <- df$`correlated facets`==1 & df$`carry-over effects`==0
+} else if (situation == 2){
+  index <- df$`correlated facets`==1 & df$`carry-over effects`!=0
+} else if (situation == 3){
+  index <- df$`correlated facets`!=1 & df$`carry-over effects`==0
+} else if (situation == 4){
+  index <- df$`correlated facets`!=1 & df$`carry-over effects`!=0
+}
+
+
+# plot pop_re
+cellseq <- seq(1:108)
+
+pop_reCOPY <- pop_re
+pop_reCOPY[setdiff(cellseq, cellseq[index]), ] <- NA
+pop_sdCOPY <- pop_sd
+pop_sdCOPY[setdiff(cellseq, cellseq[index]), ] <- NA
+
+
+layout(rbind(1,2), heights=c(10,1))# put legend on bottom 1/10th of the chart (note, this is from http://stackoverflow.com/questions/8929663/r-legend-placement-in-a-plot)
+ 
+ymin <- min(0, pop_reCOPY[, 3] - pop_sdCOPY[, 3], pop_reCOPY[, 4] - pop_sdCOPY[, 4],
+               pop_reCOPY[, 5] - pop_sdCOPY[, 5], pop_reCOPY[, 6] - pop_sdCOPY[, 6],
+               pop_reCOPY[, 7] - pop_sdCOPY[, 7], pop_reCOPY[, 8] - pop_sdCOPY[, 8],
+            na.rm = TRUE)
+plot(pop_reCOPY[ , 2], xaxt = 'n', ylim = c(ymin,1), xlab = "Simulation Cells", ylab = "(Estimated) Change-Score Reliability +/- 1SD", col='red', pch=8)
+axis(1, at=cellseq[index], las=2, cex.axis = .7)
+points(pop_reCOPY[, 3], pch=0)
+points(pop_reCOPY[, 4], pch=1)
+points(pop_reCOPY[, 5], pch=2)
+points(pop_reCOPY[, 6], pch=15, col='blue')
+points(pop_reCOPY[, 7], pch=19, col='blue')
+points(pop_reCOPY[, 8], pch=17, col='blue')
+arrows(c(1:108), pop_reCOPY[, 3] - pop_sdCOPY[, 3], c(1:108), pop_reCOPY[, 3] + pop_sdCOPY[, 3], length = 0.05, angle = 90, code = 3, col = 'black')
+arrows(c(1:108), pop_reCOPY[, 4] - pop_sdCOPY[, 4], c(1:108), pop_reCOPY[, 4] + pop_sdCOPY[, 4], length = 0.05, angle = 90, code = 3, col = 'black')
+arrows(c(1:108), pop_reCOPY[, 5] - pop_sdCOPY[, 5], c(1:108), pop_reCOPY[, 5] + pop_sdCOPY[, 5], length = 0.05, angle = 90, code = 3, col = 'black')
+arrows(c(1:108), pop_reCOPY[, 6] - pop_sdCOPY[, 6], c(1:108), pop_reCOPY[, 6] + pop_sdCOPY[, 6], length = 0.05, angle = 90, code = 3, col = 'blue')
+arrows(c(1:108), pop_reCOPY[, 7] - pop_sdCOPY[, 7], c(1:108), pop_reCOPY[, 7] + pop_sdCOPY[, 7], length = 0.05, angle = 90, code = 3, col = 'blue')
+arrows(c(1:108), pop_reCOPY[, 8] - pop_sdCOPY[, 8], c(1:108), pop_reCOPY[, 8] + pop_sdCOPY[, 8], length = 0.05, angle = 90, code = 3, col = 'blue')
+
+for(i in 1:108){
+  if(i %in% cellseq[index]){
+     abline(v=i, lty="dotted", lwd=.1)
+  }
+}
+abline(v=c(37,73), col="red")
+mtext("Cell no.1 ~ 36: Short test (9 items)", side = 3, line=0, at=20)
+mtext("Cell no.37 ~ 72: Medium-length test (21 items)", side = 3, line=0, at=55)
+mtext("Cell no.73 ~ 108: Long test (36 items)", side = 3, line=0, at=90)
+#axis(1, at=c(37,73), labels=c("37","73"))
+
+par(mar=c(0,0,0,0))
+plot.new()
+legend("center", "groups",
+       c("true reliability", "traditional method + alpha", "traditional method + lambda2","traditiona method + lambda4", 
+         "item-score method + alpha", "item-score method + lambda 2", "item-score method + lambda4"),
+       pch=c(8, 0, 1,2, 15, 19, 17),
+       col=c("red", "black", "black", "black", "blue", "blue", "blue"),
+       ncol=4, bty = "n")
+dev.off()
+
+######### 3. distance measure:  ######################################
+
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
+
+pop_re <- matrix(NA, nrow = 108, ncol = 8)
+pop_sd <- matrix(NA, nrow = 108, ncol = 8)
+for (i in 1:108){
+  pop_re[i, ] <- colMeans(restuls_conditions[[i]][[2]])
+  pop_sd[i, ] <- apply(restuls_conditions[[i]][[2]], 2, sd)
+}
+
+population_rel1SD_lower <- pop_re[, 2] - pop_sd[, 2]  # -1SD
+population_rel1SD_upper <- pop_re[, 2] + pop_sd[, 2]  # +1SD
+
+population_rel3SD_lower <- pop_re[, 2] - 3*pop_sd[, 2]  # -3SD
+population_rel3SD_upper <- pop_re[, 2] + 3*pop_sd[, 2]  # +3SD
+
+SDrange1SD <- cbind(population_rel1SD_lower, population_rel1SD_upper)
+SDrange3SD <- cbind(population_rel3SD_lower, population_rel3SD_upper)
+
+
+for(cel in 1:108){
+
+  SD1sum_in_regionTraAlpha[cel] <- 0 # # of estimated reliablity within the region of +/- 1SD: traditional + alpha
+  SD1sum_in_regionTraL2[cel] <- 0    # # of estimated reliablity within the region of +/- 1SD: traditional + lambda 2
+  SD1sum_in_regionTraL4[cel] <- 0    # # of estimated reliablity within the region of +/- 1SD: traditional + lambda 4
+
+  SD1sum_in_regionItemAlpha[cel] <- 0 # # of estimated reliablity within the region of +/- 1SD: Item method + alpha
+  SD1sum_in_regionItemL2[cel] <- 0    # # of estimated reliablity within the region of +/- 1SD: Item method + lambda 2
+  SD1sum_in_regionItemL4[cel] <- 0    # # of estimated reliablity within the region of +/- 1SD: Item method + lambda 4
+
+  SD3sum_in_regionTraAlpha[cel] <- 0 # # of estimated reliablity within the region of +/- 3SD: traditional + alpha
+  SD3sum_in_regionTraL2[cel] <- 0    # # of estimated reliablity within the region of +/- 3SD: traditional + lambda 2
+  SD3sum_in_regionTraL4[cel] <- 0    # # of estimated reliablity within the region of +/- 3SD: traditional + lambda 4
+
+  SD3sum_in_regionItemAlpha[cel] <- 0 # # of estimated reliablity within the region of +/- 3SD: Item method + alpha
+  SD3sum_in_regionItemL2[cel] <- 0    # # of estimated reliablity within the region of +/- 3SD: Item method + lambda 2
+  SD3sum_in_regionItemL4[cel] <- 0    # # of estimated reliablity within the region of +/- 3SD: Item method + lambda 4
+
+  for(l in 1:20){
+  
+    SD1sum_in_regionTraAlpha[cel] <- SD1sum_in_regionTraAlpha[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,3] <= SDrange1SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,3] >= SDrange1SD[cel, 1])
+    SD1sum_in_regionTraL2[cel] <- SD1sum_in_regionTraL2[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,4] <= SDrange1SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,4] >= SDrange1SD[cel, 1])
+    SD1sum_in_regionTraL4[cel] <- SD1sum_in_regionTraL4[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,5] <= SDrange1SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,5] >= SDrange1SD[cel, 1])
+  
+    SD3sum_in_regionTraAlpha[cel] <- SD3sum_in_regionTraAlpha[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,3] <= SDrange3SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,3] >= SDrange3SD[cel, 1])
+    SD3sum_in_regionTraL2[cel] <- SD3sum_in_regionTraL2[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,4] <= SDrange3SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,4] >= SDrange3SD[cel, 1])
+    SD3sum_in_regionTraL4[cel] <- SD3sum_in_regionTraL4[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,5] <= SDrange3SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,5] >= SDrange3SD[cel, 1])
+  
+    SD1sum_in_regionItemAlpha[cel] <- SD1sum_in_regionItemAlpha[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,6] <= SDrange1SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,6] >= SDrange1SD[cel, 1])
+    SD1sum_in_regionItemL2[cel] <- SD1sum_in_regionItemL2[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,7] <= SDrange1SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,7] >= SDrange1SD[cel, 1])
+    SD1sum_in_regionItemL4[cel] <- SD1sum_in_regionItemL4[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,8] <= SDrange1SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,8] >= SDrange1SD[cel, 1])
+  
+    SD3sum_in_regionItemAlpha[cel] <- SD3sum_in_regionItemAlpha[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,6] <= SDrange3SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,6] >= SDrange3SD[cel, 1])
+    SD3sum_in_regionItemL2[cel] <- SD3sum_in_regionItemL2[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,7] <= SDrange3SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,7] >= SDrange3SD[cel, 1])
+    SD3sum_in_regionItemL4[cel] <- SD3sum_in_regionItemL4[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,8] <= SDrange3SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,8] >= SDrange3SD[cel, 1])
+  }
+}  
+
+dist_measureSD <- cbind(SD1sum_in_regionTraAlpha, SD3sum_in_regionTraAlpha, SD1sum_in_regionTraL2, SD3sum_in_regionTraL2, 
+                        SD1sum_in_regionTraL4, SD3sum_in_regionTraL4, SD1sum_in_regionItemAlpha, SD3sum_in_regionItemAlpha,
+                        SD1sum_in_regionItemL2, SD3sum_in_regionItemL2, SD1sum_in_regionItemL4, SD3sum_in_regionItemL4)/1000
+dist_measureSD <- cbind(pop_sd[, 2], dist_measureSD)  # this is the matrix containing the 
+colnames(dist_measureSD)[1] <- "1SD"
+
+# 
+situation <- 1 # "Unidimensional + No Carryover"
+situation <- 2 # "Unidimensional + Carryover"
+situation <- 3 # "Multidimensional + No Carryover"
+situation <- 4 #"Multidimensional + Carryover"
+
+if(situation == 1){
+  index <- df$`correlated facets`==1 & df$`carry-over effects`==0
+} else if (situation == 2){
+  index <- df$`correlated facets`==1 & df$`carry-over effects`!=0
+} else if (situation == 3){
+  index <- df$`correlated facets`!=1 & df$`carry-over effects`==0
+} else if (situation == 4){
+  index <- df$`correlated facets`!=1 & df$`carry-over effects`!=0
+} 
+
+dist_measureSD[index, ]
