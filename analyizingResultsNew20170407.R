@@ -600,3 +600,57 @@ fit3 <- lm(distanceANOVA$'item lambda2' ~ distanceANOVA$'test length' +
              distanceANOVA$'size' )
 anova(fit3)
 fit.summary <- summary(fit3)
+
+
+############# 7. the toy example (table 1)  #############
+library(psychometric)
+num_items <- 3                
+dimension <- 1           # Unidimensional
+sd_change <- sqrt(.14)        # Small variance in change
+num_persons <- 15              # 1000 persons
+
+set.seed(120)
+# item parameter
+itempar <- matrix(NA,num_items,6)
+itempar[,1] <- runif(1,1.5,2.5)   # discrimination
+avg_beta <- runif(1, 0, 1.25)
+itempar[,2] <- avg_beta - 1
+itempar[,3] <- avg_beta - .5
+itempar[,4] <- avg_beta
+itempar[,5] <- avg_beta + .5
+itempar[,6] <- avg_beta + 1
+
+
+theta <- Unichange_sim(num_persons, sd_change) # make use of the Unichange_sim() funtion in ZhengguoFuntions.R
+theta_pre <- theta[[1]]
+theta_post <- theta[[2]]
+
+id <- vector()
+for(d in 1: dimension){
+  id <- cbind(id, rep(d, num_items/dimension))
+}
+id <- as.vector(id) 
+
+
+responses <- GRM_sim(theta_pre, itempar, id)  # make use of the GRM_sim() funtion in ZhengguoFuntions.R
+response_pre <- responses[[1]]
+sum_pre <- rowSums(response_pre) 
+
+
+responses <- GRM_sim(theta_post, itempar, id)
+response_post <- responses[[1]]
+sum_post <- rowSums(response_post)
+
+# item method
+item_change <- response_post - response_pre
+RELitem_method <- psychometric::alpha(item_change)
+
+# traditional method
+r_pre <- psychometric::alpha(response_pre)
+r_post <- psychometric::alpha(response_post)
+RELtraditional <- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
+
+toydata <- cbind(response_pre, response_post, item_change)
+toydata <- data.frame(toydata)
+colnames(toydata) <- c("item 1", "item 2", "item 3", "item 1", "item 2", "item 3", "item 1", "item 2", "item 3")
+write.table(toydata, file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170411 newversion2 NewSupplementary/toyexample.txt", sep = '\t')
