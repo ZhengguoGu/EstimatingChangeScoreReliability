@@ -1,7 +1,7 @@
 library(Lambda4)
 library(psychometric)
 
-# data simulation
+# data simulation  (copy from the Blade server where the data were simulated. )
 
 ################################################
 
@@ -161,11 +161,11 @@ while (num_test <= nrow(df)){
   
     r_simresults <- matrix(NA, n_sim, num_methods)  # 8 methods.
   
-    pre_response <- list()
-    pre_response_true <- list()
-    post_response <- list()
-    post_response_true <- list()
-    post_response_carry <- list()
+    #pre_response <- list()
+    #pre_response_true <- list()
+    #post_response <- list()
+    #post_response_true <- list()
+    #post_response_carry <- list()
     sumpre_response <- list()
     sum_Truepre_response <- list()
     sumpost_response <- list()
@@ -178,15 +178,15 @@ while (num_test <= nrow(df)){
     
       responses <- GRM_sim(theta_pre, itempar, id)
       response_pre <- responses[[1]]
-      pre_response[[i]] <- response_pre
+      #pre_response[[i]] <- response_pre
       true_pre <- responses[[2]]
-      pre_response_true[[i]] <- true_pre
+      #pre_response_true[[i]] <- true_pre
     
       responses <- GRM_sim(theta_post, itempar, id)
       response_post <- responses[[1]]
-      post_response[[i]] <- response_post
+      #post_response[[i]] <- response_post
       true_post <- responses[[2]]
-      post_response_true[[i]] <- true_post
+      #post_response_true[[i]] <- true_post
       
       carryover_results <- carry_over(response_pre, response_post)
       response_post_strong <- carryover_results[[1]]
@@ -201,7 +201,7 @@ while (num_test <= nrow(df)){
         }
       }
       
-      post_response_carry[[i]] <- response_post 
+      #post_response_carry[[i]] <- response_post 
       #--------------------------------------------------
       # Calculate inter-item covariance matrix
       # for observed scores
@@ -291,10 +291,8 @@ while (num_test <= nrow(df)){
     r_avg[p, ] <- colSums(r_simresults)/n_sim
     r_sd[p, ] <- apply(r_simresults, 2, sd)
     
-    simResponses[[p]] <- list(pre_response, pre_response_true, post_response,
-                              post_response_true, post_response_carry, 
-                              sumpre_response, sum_Truepre_response, 
-                              sumpost_response, sum_Truepost_response)
+    simResponses[[p]] <- list(sumpre_response, sum_Truepre_response, sumpost_response, sum_Truepost_response) #Note the following has been removed pre_response, pre_response_true, post_response,
+    #post_response_true, post_response_carry, 
     
     p <- p+1
     
