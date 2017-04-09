@@ -330,8 +330,273 @@ for(i in 1:108){
 }
 sum(weird_index2) # non of them have reliability > 1.
 
-############# 4.Extra: lets check Cell2 large sample size and see why negative estimated reliability happens
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
+############# 4.Extra: Why negative estimated reliabiity? A toy example  ################
+# Here we simulate toy example to see why negative estimated reliability happens. 
+library(psychometric)
+num_items <- 9                # short
+parallel_item <- 0               # Non parallel
+dimension <- 1           # Unidimensional
+sd_change <- sqrt(.14)        # Small variance in change
+strongweak_carry <- c(0, 10, 1)  # 0: no carryover, 1: weak, 2: strong
+num_persons <- 1000              # 1000 persons
 
-restuls_conditions[[1]][[1]]
+set.seed(110)
+# item parameter
+itempar <- matrix(NA,num_items,5)
+itempar[,1] <- runif(num_items,1.5,2.5)  # discrimination
+avg_beta <- runif(num_items, 0, 1.25)
+itempar[,2] <- avg_beta - 1
+itempar[,3] <- avg_beta - .5
+itempar[,4] <- avg_beta + .5
+itempar[,5] <- avg_beta + 1
+
+
+theta <- Unichange_sim(num_persons, sd_change) # make use of the Unichange_sim() funtion in ZhengguoFuntions.R
+theta_pre <- theta[[1]]
+theta_post <- theta[[2]]
+
+id <- vector()
+for(d in 1: dimension){
+  id <- cbind(id, rep(d, num_items/dimension))
+}
+id <- as.vector(id) 
+
+
+responses <- GRM_sim(theta_pre, itempar, id)  # make use of the GRM_sim() funtion in ZhengguoFuntions.R
+response_pre <- responses[[1]]
+true_pre <- responses[[2]]
+sum_pre <- rowSums(response_pre) 
+sum_true_pre <- rowSums(true_pre)
+E1 <- response_pre - true_pre
+sum_E1 <- rowSums(E1) 
+mean(sum_E1)
+responses <- GRM_sim(theta_post, itempar, id)
+response_post <- responses[[1]]
+true_post <- responses[[2]]
+sum_true_post <- rowSums(true_post)
+
+truechange_sumscores <- sum_true_post - sum_true_pre
+
+CarryoverEffect <- carry_over(response_pre, response_post) # if everyone showes carry-over
+
+true_rel_strong <- array()
+true_rel_weak <- array()
+r_post_strong <- array()
+r_post_weak <- array()
+rel_alpha_strong <- array()
+rel_alpha_weak <- array()
+true_relVar_strong <- array()
+true_relVar_weak <- array()
+var_post_strong <- array()
+corr_strong <- array()
+var_post_weak <- array()
+corr_weak <- array()
+numeritor_strong <- array()
+demominator_strong <- array()
+numeritor_weak <- array()
+demominator_weak <- array()
+cor_E1E2strong <- array()
+cor_E1E2weak <- array()
+j <- 1
+for(i in c(0, 100,  200,  300,  400,  500,  600,  700,  800,  900, 1000)){
+
+  subject_index <- sample(1:1000, size = i, replace = FALSE) #number of persons showed carry-over effect
+  
+  response_Strong <- response_post 
+  response_Strong[subject_index,] <- CarryoverEffect[[1]][subject_index,]  #strong
+  E2_strong <- response_Strong - true_post
+  sum_E2strong <- rowSums(E2_strong)
+  
+  response_Weak <- response_post
+  response_Weak[subject_index,] <- CarryoverEffect[[2]][subject_index,]  #weak
+  E2_weak <- response_Weak - true_post
+  sum_E2weak <- rowSums(E2_weak)
+  
+  cor_E1E2strong[j] <- cor(sum_E1, sum_E2strong)
+  cor_E1E2weak[j] <- cor(sum_E1, sum_E2weak)
+  
+  sum_post_strong <- rowSums(response_Strong)
+  sum_post_weak <- rowSums(response_Weak)
+  change_sumscores_strong <- sum_post_strong - sum_pre
+  change_sumscores_weak <- sum_post_weak - sum_pre
+  true_rel_strong[j] <- (cor(truechange_sumscores, change_sumscores_strong))^2
+  true_rel_weak[j] <- (cor(truechange_sumscores, change_sumscores_weak))^2
+  r_pre <- psychometric::alpha(response_pre)  # ! cronback alpha is used here. 
+  r_post_strong[j] <- psychometric::alpha(response_Strong)
+  r_post_weak[j] <- psychometric::alpha(response_Weak)
+  
+  var_post_strong[j] <- var(sum_post_strong)
+  corr_strong[j] <- cor(sum_pre, sum_post_strong)
+  numeritor_strong[j] <- (var(sum_pre) * r_pre + var(sum_post_strong) * r_post_strong[j] - 2 * cor(sum_pre, sum_post_strong) * sd(sum_pre) * sd(sum_post_strong))
+  demominator_strong[j] <- (var(sum_pre) + var(sum_post_strong) - 2 * cor(sum_pre, sum_post_strong) * sd(sum_pre) * sd(sum_post_strong))
+  rel_alpha_strong[j] <- numeritor_strong[j]/demominator_strong[j]
+  
+  var_post_weak[j] <- var(sum_post_weak)
+  corr_weak[j] <- cor(sum_pre, sum_post_weak)
+  numeritor_weak[j] <- (var(sum_pre) * r_pre + var(sum_post_weak) * r_post_weak[j] - 2 * cor(sum_pre, sum_post_weak) * sd(sum_pre) * sd(sum_post_weak))
+  demominator_weak[j] <- (var(sum_pre) + var(sum_post_weak) - 2 * cor(sum_pre, sum_post_weak) * sd(sum_pre) * sd(sum_post_weak))
+  rel_alpha_weak[j] <- numeritor_weak[j]/demominator_weak[j]
+  
+  j <- j+1
+}
+
+
+layout(rbind(1,2), heights=c(10,1))# put legend on bottom 1/10th of the chart (note, this is from http://stackoverflow.com/questions/8929663/r-legend-placement-in-a-plot)
+ymin <- min(rel_alpha_strong)
+plot(true_rel_strong, ylim = c(ymin, 1), type = "b", col = "red", xlab="Proportion of persons to whom strong/weak carry-over effects happen",
+     ylab = "Reliability", xaxt="n", pch=8)
+axis(1, at=1:11,labels=c("0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"))
+lines(rel_alpha_strong, type = "b", col = "blue", pch=15)
+lines(rel_alpha_weak, type = "b", col = "green", pch=16)
+abline(h=0, col = "black", lty=3)
+
+par(mar=c(0,0,0,0))
+plot.new()
+legend("center", "groups",
+       c("true change-score reliability", "estimated reliability (strong carry-over effects)", "estimated reliability (weak carry-over effects)"),
+       pch=c(8, 15, 16),
+       col=c("red", "blue", "green"),
+       ncol=1, bty = "n")
+dev.off()
+
+layout(rbind(1,2), heights=c(10,1))# put legend on bottom 1/10th of the chart (note, this is from http://stackoverflow.com/questions/8929663/r-legend-placement-in-a-plot)
+par(mar=c(5,4,4,5)+.1)
+plot(numeritor_strong, type = "b", ylim = c(min(numeritor_strong, demominator_strong), max(numeritor_strong, demominator_strong)), col="blue", pch = 15, 
+     xlab = "Proportion of persons to whom strong carry-over effects happen", ylab = "Numerical values of the numerator and denominator of equation (2)", xaxt="n")
+axis(1, at=1:11,labels=c("0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"))
+lines(demominator_strong, type = "b", col="blue", pch = 16)
+abline(h=0, col='blue', lty=3)
+par(new=TRUE)
+plot(rel_alpha_strong,type="b",col="red",xaxt="n",yaxt="n",xlab="",ylab="")
+abline(h=0, col="red", lty=3)
+axis(4)
+mtext("Estimated reliability",side=4,line=3)
+
+par(mar=c(0,0,0,0))
+plot.new()
+legend("center", "groups",
+       c("numerator of Equation (2)", "denominator of Equation (2)", "estimated reliability"),
+       pch=c(15, 16, 1),
+       col=c("blue", "blue", "red"),
+       ncol=3, bty = "n")
+dev.off()
+
+
+############### 6. Regression analysis  ##############################
+### Note that throughout the code below, many data matrices are called somethingANOVA, for example, "reANOVA" or "distance ANOVA". This is because
+### I wanted to do ANOVA at first and later on decided to do regression analysis. 
+### Please do not be confued by the names. 
+
+
+
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
+set.seed(110) #important!
+index_sample <- sample(1:20, 108, replace=TRUE) # replace is True here! important
+
+reANOVA <- matrix(NA, 1, 13)
+for(cel in 1:108){
+  
+  reSample <- restuls_conditions[[cel]][[1]][[index_sample[cel]]] # one of the 20 samples are saved to reSample
+  reSample <- cbind(reSample, t(matrix(rep(df[cel,], 50), 5, 50)))
+  reANOVA <- rbind(reANOVA, reSample)
+  
+}
+reANOVA <- reANOVA[-1,]
+save(reANOVA, file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170411 newversion2 NewSupplementary/reANOVAlarge.RData")
+
+###
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
+set.seed(110) #important!
+index_sample <- sample(1:20, 108, replace=TRUE) 
+
+reANOVAs <- matrix(NA, 1, 13)
+for(cel in 1:108){
+  
+  reSample <- restuls_conditions[[cel]][[1]][[index_sample[cel]]] 
+  reSample <- cbind(reSample, t(matrix(rep(df[cel,], 50), 5, 50)))
+  reANOVAs <- rbind(reANOVAs, reSample)
+  
+}
+reANOVAs <- reANOVAs[-1,]
+save(reANOVAs, file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170411 newversion2 NewSupplementary/reANOVAsmall.RData")
+
+#now the analysis
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170411 newversion2 NewSupplementary/reANOVAlarge.RData")
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170411 newversion2 NewSupplementary/reANOVAsmall.RData")
+
+reANOVA <- as.data.frame(reANOVA)
+names(reANOVA) <- c("useless", "true", "trad alpha", "trad lambda2", "trad lambda4", "item alpha", "item lambda2", "item lambda4",
+                    "test length", "parallel item", "correlated facets",  "maginute of sd", "carry-over effects")
+reANOVA$size <- "large"
+reANOVAs <- as.data.frame(reANOVAs)
+names(reANOVAs) <- c("useless", "true", "trad alpha", "trad lambda2", "trad lambda4", "item alpha", "item lambda2", "item lambda4",
+                     "test length", "parallel item", "correlated facets",  "maginute of sd", "carry-over effects")
+reANOVAs$size <- "small"
+
+combANOVA <- rbind(reANOVA,reANOVAs) # this is the raw data.. 10800 rows
+#calculate the distance for each row, this is estimated - true
+distanceANOVA <- matrix(NA, 10800, 12)
+distanceANOVA[, 1] <-  as.numeric(combANOVA$`trad alpha`) - as.numeric(combANOVA$true)
+distanceANOVA[, 2] <-  as.numeric(combANOVA$`trad lambda2`) - as.numeric(combANOVA$true)
+distanceANOVA[, 3] <-  as.numeric(combANOVA$`trad lambda4`) - as.numeric(combANOVA$true)
+distanceANOVA[, 4] <-  as.numeric(combANOVA$`item alpha`) - as.numeric(combANOVA$true)
+distanceANOVA[, 5] <-  as.numeric(combANOVA$`item lambda2`) - as.numeric(combANOVA$true)
+distanceANOVA[, 6] <-  as.numeric(combANOVA$`item lambda4`) - as.numeric(combANOVA$true)
+# note that distanceANOVA[, 7:12] <- combANOVA[, 9:14] is not recommended! The resulting file will 31 GB. (although I dont know the reason why)
+distanceANOVA <- as.data.frame(distanceANOVA)
+distanceANOVA$V7 <- factor(as.numeric(combANOVA$`test length`))
+distanceANOVA$V8 <- factor(as.numeric(combANOVA$`parallel item`))
+distanceANOVA$V9 <- factor(as.numeric(combANOVA$`correlated facets`))
+distanceANOVA$V10 <- factor(as.numeric(combANOVA$`maginute of sd`))
+distanceANOVA$V11 <- factor(as.numeric(combANOVA$`carry-over effects`))
+distanceANOVA$V12 <- factor(combANOVA$size)
+names(distanceANOVA) <- c("trad alpha", "trad lambda2", "trad lambda4", "item alpha", "item lambda2", "item lambda4",
+                      "test length", "parallel item", "correlated facets",  "maginute of sd", "carry-over effects", "size")
+save(distanceANOVA, file="D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170411 newversion2 NewSupplementary/distanceANOVAdata.RData")
+
+########## 6.1 Regression traditional method with alpha? ##########
+fit <- lm(distanceANOVA$'trad alpha' ~ distanceANOVA$'test length' + 
+            distanceANOVA$'parallel item' + 
+            distanceANOVA$'correlated facets' +
+            distanceANOVA$'maginute of sd' + 
+            distanceANOVA$'carry-over effects' + 
+            distanceANOVA$'size')
+anova(fit)
+fit.summary <- summary(fit)
+
+fit_tl2 <- lm(distanceANOVA$'trad lambda2' ~ distanceANOVA$'test length' + 
+                distanceANOVA$'parallel item' + 
+                distanceANOVA$'correlated facets' +
+                distanceANOVA$'maginute of sd' + 
+                distanceANOVA$'carry-over effects' + 
+                distanceANOVA$'size' )
+anova(fit_tl2)
+fit.summary <- summary(fit_tl2)
+
+fit_tl4 <- lm(distanceANOVA$'trad lambda4' ~ distanceANOVA$'test length' + 
+                distanceANOVA$'parallel item' + 
+                distanceANOVA$'correlated facets' +
+                distanceANOVA$'maginute of sd' + 
+                distanceANOVA$'carry-over effects' + 
+                distanceANOVA$'size' )
+anova(fit_tl4)
+fit.summary <- summary(fit_tl4)
+
+# Which factors influence the item-score method?
+fit2 <- lm(distanceANOVA$'item alpha' ~ distanceANOVA$'test length' + 
+             distanceANOVA$'parallel item' + 
+             distanceANOVA$'correlated facets' +
+             distanceANOVA$'maginute of sd' + 
+             distanceANOVA$'carry-over effects' + 
+             distanceANOVA$'size' )
+anova(fit2)
+fit.summary <- summary(fit2)
+
+fit3 <- lm(distanceANOVA$'item lambda2' ~ distanceANOVA$'test length' + 
+             distanceANOVA$'parallel item' + 
+             distanceANOVA$'correlated facets' +
+             distanceANOVA$'maginute of sd' + 
+             distanceANOVA$'carry-over effects' + 
+             distanceANOVA$'size' )
+anova(fit3)
+fit.summary <- summary(fit3)
