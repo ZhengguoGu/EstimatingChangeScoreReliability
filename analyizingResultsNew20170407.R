@@ -475,7 +475,7 @@ mtext("Estimated reliability",side=4,line=3)
 par(mar=c(0,0,0,0))
 plot.new()
 legend("center", "groups",
-       c("numerator of Equation (2)", "denominator of Equation (2)", "estimated reliability"),
+       c("numerator", "denominator", "estimated reliability"),
        pch=c(15, 16, 1),
        col=c("blue", "blue", "red"),
        ncol=3, bty = "n")
