@@ -4,7 +4,7 @@
 #
 #
 # Zhengguo Gu, Tilburg University
-# Last update: 07/04/2017
+# Last update: 03/June/2017
 #########################################################################################################
 
 
@@ -12,9 +12,9 @@
 
 ############### PART I: Bias and precision #######################################################################
 
-# 0.1 Load data - large sample size
+# 0.1 Load data - large sample size (run the following analysis and then repeat with small sample size)
 load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
+ #load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
 
 # 0.2 Review the structure of results
 
@@ -37,7 +37,70 @@ df$`carry-over effects`!=0    # Carry-over effects
 
 
 
-######### 1. draw bias and precision plots - 4 situations: LEVEL 1 ##############
+######### 1. draw bias and precision table - 4 situations: LEVEL 1 ##############
+
+# first large sample
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
+for(cel in 1:108){
+  
+  rel_data <- restuls_conditions[[cel]][[2]][, 2:8]
+  bias <- matrix(NA, 20, 6)
+  bias[, 1] <- rel_data[,2]-rel_data[,1]
+  bias[, 2] <- rel_data[,3]-rel_data[,1]
+  bias[, 3] <- rel_data[,4]-rel_data[,1]
+  bias[, 4] <- rel_data[,5]-rel_data[,1]
+  bias[, 5] <- rel_data[,6]-rel_data[,1]
+  bias[, 6] <- rel_data[,7]-rel_data[,1]
+  colnames(bias) <- c("trad_alpha", "trad_l2", "trad_l4", "item_alpha", "item_l2", "item_l4")
+  file_name <- paste("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/largeS/", "biaslargesample_", cel, ".txt", sep="")
+  write.table(bias, file_name, sep = "\t", col.names = T)  
+  
+  
+  rel_precision <- cbind(restuls_conditions[[cel]][[2]][, 2:8], restuls_conditions[[cel]][[3]][, 3:8])  #note that precision of true reliability is not needed, thus [, 3:8]
+  colnames(rel_precision) <- c("rel_true", "rel_trad_alpha", "rel_trad_l2", "rel_trad_l4", "rel_item_alpha", "rel_item_l2", "rel_item_l4", 
+                               "precision_trad_alpha", "precision_trad_l2", "precision_trad_l4", "precision_item_alpha", "precision_item_l2", "precision_item_l4")
+  file_name <- paste("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/largeS/", "precisionlargesample_", cel, ".txt", sep="")
+  write.table(rel_precision, file_name, sep = "\t", col.names = T) 
+}
+
+# now small sample
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
+for(cel in 1:108){
+  
+  
+  rel_data <- restuls_conditions[[cel]][[2]][, 2:8]
+  bias <- matrix(NA, 20, 6)
+  bias[, 1] <- rel_data[,2]-rel_data[,1]
+  bias[, 2] <- rel_data[,3]-rel_data[,1]
+  bias[, 3] <- rel_data[,4]-rel_data[,1]
+  bias[, 4] <- rel_data[,5]-rel_data[,1]
+  bias[, 5] <- rel_data[,6]-rel_data[,1]
+  bias[, 6] <- rel_data[,7]-rel_data[,1]
+  colnames(bias) <- c("trad_alpha", "trad_l2", "trad_l4", "item_alpha", "item_l2", "item_l4")
+  file_name <- paste("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/smallS/", "biassmallsample_", cel, ".txt", sep="")
+  write.table(bias, file_name, sep = "\t", col.names = T)  
+  
+  
+  rel_precision <- cbind(restuls_conditions[[cel]][[2]][, 2:8], restuls_conditions[[cel]][[3]][, 3:8])  #note that precision of true reliability is not needed, thus [, 3:8]
+  colnames(rel_precision) <- c("rel_true", "rel_trad_alpha", "rel_trad_l2", "rel_trad_l4", "rel_item_alpha", "rel_item_l2", "rel_item_l4", 
+                               "precision_trad_alpha", "precision_trad_l2", "precision_trad_l4", "precision_item_alpha", "precision_item_l2", "precision_item_l4")
+  file_name <- paste("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/smallS/", "precisionsmallsample_", cel, ".txt", sep="")
+  write.table(rel_precision, file_name, sep = "\t", col.names = T) 
+}
+
+
+
+######### 2. bias and precision table - 4 situations: LEVEL 2 ##############
+#large sample size
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
+
+pop_re <- matrix(NA, nrow = 108, ncol = 7)
+pop_sd <- matrix(NA, nrow = 108, ncol = 7)
+for (i in 1:108){
+  pop_re[i, ] <- colMeans(restuls_conditions[[i]][[2]][, 2:8])
+  pop_sd[i, ] <- apply(restuls_conditions[[i]][[2]][, 2:8], 2, sd)
+}
+
 
 situation <- 1 # "Unidimensional + No Carryover"
 situation <- 2 # "Unidimensional + Carryover"
@@ -55,155 +118,52 @@ if(situation == 1){
 }
 
 
-for(j in 1:sum(index)){
-  
-  
-  cel <- which(index == 1)[j]
-  y_min <- 0
-  y_max <- 1
-  
-  for(i in 3:8){
-    
-    y_min <- min(y_min, min(restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]))  #note that restuls_conditions[[cel]][[3]][, i]) contains the sd (corrected with n-1)
-    y_max <- max(y_max, max(restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]))
-    
-  }
-  filename <- paste("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170411 newversion2/Cell_", cel, ".png", sep = "")
-  png(file=filename, width = 1200, height = 800, units = "px")
-  layout(rbind(1,2), heights=c(10,1))# put legend on bottom 1/10th of the chart (note, this is from http://stackoverflow.com/questions/8929663/r-legend-placement-in-a-plot)
-  xtitle <- sprintf("20 samples from the population: Cell %d",cel)
-  plot(restuls_conditions[[cel]][[2]][, 2], xlab = xtitle, ylab = "True and estimated change-score reliability +/- 1SD",
-       ylim = c(y_min,y_max), 
-       type = "p",
-       pch = 8,
-       col = "red",
-       cex = 1.5)
-  arrows(c(1:20), restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2], c(1:20), restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2], 
-         length = 0.05, angle = 90, code = 3, col = 'red')
-  abline(h=mean(restuls_conditions[[cel]][[2]][, 2]), lty=2, col="red")
-  
-  for(i in 3:8){
-    if(i == 3){
-      col <- "black"
-      pch <- 0
-    }else if(i==4){
-      col <- "black"
-      pch <- 1
-    }else if(i==5){
-      col <- "black"
-      pch <- 2
-    }else if(i==6){
-      col <- "blue"
-      pch <- 15
-    }else if(i==7){
-      col <- "blue"
-      pch <- 19
-    }else if(i==8){
-      col <- "blue"
-      pch <- 17
-    }
-    points(restuls_conditions[[cel]][[2]][, i], col=col, pch=pch)
-    arrows(c(1:20), restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i], c(1:20), restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i], 
-           length = 0.05, angle = 90, code = 3, col=col)
-    #abline(h=mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col)
-    #segments(20.2, mean(restuls_conditions[[cel]][[2]][, i]), 21, mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col, cex=1.5, pch=pch)
-    #segments(0, mean(restuls_conditions[[cel]][[2]][, i]), .8 , mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col, cex=1.5, pch=pch)
-  }
-  
-  par(mar=c(0,0,0,0))
-  plot.new()
-  legend("center", "groups",
-         c("true reliability", "traditional method + alpha", "traditional method + lambda2","traditional method + lambda4", 
-           "item-score method + alpha", "item-score method + lambda2", "item-score method + lambda4", "averaged true reliability"),
-         pch=c( 8, 0, 1, 2, 15, 19, 17, NA),
-         lty = c(NA, NA, NA, NA, NA, NA, NA, 3),
-         col=c( "red", "black", "black", "black", "blue", "blue", "blue", "red"),
-         ncol=4, bty = "n")
-  
-  
-  dev.off()
-}
+rel_bias <- matrix(NA, 108, 6)
+rel_bias[, 1] <- pop_re[,2] - pop_re[,1]
+rel_bias[, 2] <- pop_re[,3] - pop_re[,1]
+rel_bias[, 3] <- pop_re[,4] - pop_re[,1]
+rel_bias[, 4] <- pop_re[,5] - pop_re[,1]
+rel_bias[, 5] <- pop_re[,6] - pop_re[,1]
+rel_bias[, 6] <- pop_re[,7] - pop_re[,1]
+colnames(rel_bias) <- c("trad_alpha", "trad_l2", "trad_l4", "item_alpha", "item_l2", "item_l4")
+write.table(rel_bias, "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasLargeLevel2.txt", sep = "\t", col.names = T) 
 
-######### 2. Bias and precision - LEVEL 2 ###################
+rel_precision <- cbind(pop_re, pop_sd[, 2:7])
+colnames(rel_precision) <- c("rel_true", "rel_trad_alpha", "rel_trad_l2", "rel_trad_l4", "rel_item_alpha", "rel_item_l2", "rel_item_l4", 
+                             "precision_trad_alpha", "precision_trad_l2", "precision_trad_l4", "precision_item_alpha", "precision_item_l2", "precision_item_l4")
 
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
+write.table(rel_precision, "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionLargeLevel2.txt", sep = "\t", col.names = T) 
+
+#small sample size
 load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
 
-
-pop_re <- matrix(NA, nrow = 108, ncol = 8)
-pop_sd <- matrix(NA, nrow = 108, ncol = 8)
+pop_re <- matrix(NA, nrow = 108, ncol = 7)
+pop_sd <- matrix(NA, nrow = 108, ncol = 7)
 for (i in 1:108){
-  pop_re[i, ] <- colMeans(restuls_conditions[[i]][[2]])
-  pop_sd[i, ] <- apply(restuls_conditions[[i]][[2]], 2, sd)
+  pop_re[i, ] <- colMeans(restuls_conditions[[i]][[2]][, 2:8])
+  pop_sd[i, ] <- apply(restuls_conditions[[i]][[2]][, 2:8], 2, sd)
 }
 
+rel_bias <- matrix(NA, 108, 6)
+rel_bias[, 1] <- pop_re[,2] - pop_re[,1]
+rel_bias[, 2] <- pop_re[,3] - pop_re[,1]
+rel_bias[, 3] <- pop_re[,4] - pop_re[,1]
+rel_bias[, 4] <- pop_re[,5] - pop_re[,1]
+rel_bias[, 5] <- pop_re[,6] - pop_re[,1]
+rel_bias[, 6] <- pop_re[,7] - pop_re[,1]
+colnames(rel_bias) <- c("trad_alpha", "trad_l2", "trad_l4", "item_alpha", "item_l2", "item_l4")
+write.table(rel_bias, "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasSmallLevel2.txt", sep = "\t", col.names = T) 
 
-situation <- 1 # "Unidimensional + No Carryover"
-situation <- 2 # "Unidimensional + Carryover"
-situation <- 3 # "Multidimensional + No Carryover"
-situation <- 4 #"Multidimensional + Carryover"
+rel_precision <- cbind(pop_re, pop_sd[, 2:7])
+colnames(rel_precision) <- c("rel_true", "rel_trad_alpha", "rel_trad_l2", "rel_trad_l4", "rel_item_alpha", "rel_item_l2", "rel_item_l4", 
+                             "precision_trad_alpha", "precision_trad_l2", "precision_trad_l4", "precision_item_alpha", "precision_item_l2", "precision_item_l4")
 
-if(situation == 1){
-  index <- df$`correlated facets`==1 & df$`carry-over effects`==0
-} else if (situation == 2){
-  index <- df$`correlated facets`==1 & df$`carry-over effects`!=0
-} else if (situation == 3){
-  index <- df$`correlated facets`!=1 & df$`carry-over effects`==0
-} else if (situation == 4){
-  index <- df$`correlated facets`!=1 & df$`carry-over effects`!=0
-}
-
-
-# plot pop_re
-cellseq <- seq(1:108)
-
-pop_reCOPY <- pop_re
-pop_reCOPY[setdiff(cellseq, cellseq[index]), ] <- NA
-pop_sdCOPY <- pop_sd
-pop_sdCOPY[setdiff(cellseq, cellseq[index]), ] <- NA
+write.table(rel_precision, "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionSmallLevel2.txt", sep = "\t", col.names = T) 
 
 
-layout(rbind(1,2), heights=c(10,1))# put legend on bottom 1/10th of the chart (note, this is from http://stackoverflow.com/questions/8929663/r-legend-placement-in-a-plot)
- 
-ymin <- min(0, pop_reCOPY[, 3] - pop_sdCOPY[, 3], pop_reCOPY[, 4] - pop_sdCOPY[, 4],
-               pop_reCOPY[, 5] - pop_sdCOPY[, 5], pop_reCOPY[, 6] - pop_sdCOPY[, 6],
-               pop_reCOPY[, 7] - pop_sdCOPY[, 7], pop_reCOPY[, 8] - pop_sdCOPY[, 8],
-            na.rm = TRUE)
-plot(pop_reCOPY[ , 2], xaxt = 'n', ylim = c(ymin,1), xlab = "Simulation Cells", ylab = "(Estimated) Change-Score Reliability +/- 1SD", col='red', pch=8)
-axis(1, at=cellseq[index], las=2, cex.axis = .7)
-points(pop_reCOPY[, 3], pch=0)
-points(pop_reCOPY[, 4], pch=1)
-points(pop_reCOPY[, 5], pch=2)
-points(pop_reCOPY[, 6], pch=15, col='blue')
-points(pop_reCOPY[, 7], pch=19, col='blue')
-points(pop_reCOPY[, 8], pch=17, col='blue')
-arrows(c(1:108), pop_reCOPY[, 3] - pop_sdCOPY[, 3], c(1:108), pop_reCOPY[, 3] + pop_sdCOPY[, 3], length = 0.05, angle = 90, code = 3, col = 'black')
-arrows(c(1:108), pop_reCOPY[, 4] - pop_sdCOPY[, 4], c(1:108), pop_reCOPY[, 4] + pop_sdCOPY[, 4], length = 0.05, angle = 90, code = 3, col = 'black')
-arrows(c(1:108), pop_reCOPY[, 5] - pop_sdCOPY[, 5], c(1:108), pop_reCOPY[, 5] + pop_sdCOPY[, 5], length = 0.05, angle = 90, code = 3, col = 'black')
-arrows(c(1:108), pop_reCOPY[, 6] - pop_sdCOPY[, 6], c(1:108), pop_reCOPY[, 6] + pop_sdCOPY[, 6], length = 0.05, angle = 90, code = 3, col = 'blue')
-arrows(c(1:108), pop_reCOPY[, 7] - pop_sdCOPY[, 7], c(1:108), pop_reCOPY[, 7] + pop_sdCOPY[, 7], length = 0.05, angle = 90, code = 3, col = 'blue')
-arrows(c(1:108), pop_reCOPY[, 8] - pop_sdCOPY[, 8], c(1:108), pop_reCOPY[, 8] + pop_sdCOPY[, 8], length = 0.05, angle = 90, code = 3, col = 'blue')
 
-for(i in 1:108){
-  if(i %in% cellseq[index]){
-     abline(v=i, lty="dotted", lwd=.1)
-  }
-}
-abline(v=c(37,73), col="red")
-mtext("Cell no.1 ~ 36: Short test (9 items)", side = 3, line=0, at=20)
-mtext("Cell no.37 ~ 72: Medium-length test (21 items)", side = 3, line=0, at=55)
-mtext("Cell no.73 ~ 108: Long test (36 items)", side = 3, line=0, at=90)
-#axis(1, at=c(37,73), labels=c("37","73"))
 
-par(mar=c(0,0,0,0))
-plot.new()
-legend("center", "groups",
-       c("true reliability", "traditional method + alpha", "traditional method + lambda2","traditiona method + lambda4", 
-         "item-score method + alpha", "item-score method + lambda 2", "item-score method + lambda4"),
-       pch=c(8, 0, 1,2, 15, 19, 17),
-       col=c("red", "black", "black", "black", "blue", "blue", "blue"),
-       ncol=4, bty = "n")
-dev.off()
+
 
 ######### 3. distance measure:  part 1 ######################################
 
@@ -654,3 +614,180 @@ toydata <- cbind(response_pre, response_post, item_change)
 toydata <- data.frame(toydata)
 colnames(toydata) <- c("item 1", "item 2", "item 3", "item 1", "item 2", "item 3", "item 1", "item 2", "item 3")
 write.table(toydata, file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170411 newversion2 NewSupplementary/toyexample.txt", sep = '\t')
+
+
+
+
+##################### EXTRA: not included in the paper, but can be useful
+
+#### Extra 1: draw bias and precision plots at level 1
+
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
+
+#note run simulation <- 1, and then the analysis, then simulation <- 2....
+situation <- 1 # "Unidimensional + No Carryover"
+situation <- 2 # "Unidimensional + Carryover"
+situation <- 3 # "Multidimensional + No Carryover"
+situation <- 4 #"Multidimensional + Carryover"
+
+if(situation == 1){
+  index <- df$`correlated facets`==1 & df$`carry-over effects`==0
+} else if (situation == 2){
+  index <- df$`correlated facets`==1 & df$`carry-over effects`!=0
+} else if (situation == 3){
+  index <- df$`correlated facets`!=1 & df$`carry-over effects`==0
+} else if (situation == 4){
+  index <- df$`correlated facets`!=1 & df$`carry-over effects`!=0
+}
+
+
+for(j in 1:sum(index)){
+  
+  
+  cel <- which(index == 1)[j]
+  y_min <- 0
+  y_max <- 1
+  
+  for(i in 3:8){
+    
+    y_min <- min(y_min, min(restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i]))  #note that restuls_conditions[[cel]][[3]][, i]) contains the sd (corrected with n-1)
+    y_max <- max(y_max, max(restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i]))
+    
+  }
+  filename <- paste("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170411 newversion2/Cell_", cel, ".png", sep = "")
+  png(file=filename, width = 1200, height = 800, units = "px")
+  layout(rbind(1,2), heights=c(10,1))# put legend on bottom 1/10th of the chart (note, this is from http://stackoverflow.com/questions/8929663/r-legend-placement-in-a-plot)
+  xtitle <- sprintf("20 samples from the population: Cell %d",cel)
+  plot(restuls_conditions[[cel]][[2]][, 2], xlab = xtitle, ylab = "True and estimated change-score reliability +/- 1SD",
+       ylim = c(y_min,y_max), 
+       type = "p",
+       pch = 8,
+       col = "red",
+       cex = 1.5)
+  arrows(c(1:20), restuls_conditions[[cel]][[2]][, 2] - restuls_conditions[[cel]][[3]][, 2], c(1:20), restuls_conditions[[cel]][[2]][, 2] + restuls_conditions[[cel]][[3]][, 2], 
+         length = 0.05, angle = 90, code = 3, col = 'red')
+  abline(h=mean(restuls_conditions[[cel]][[2]][, 2]), lty=2, col="red")
+  
+  for(i in 3:8){
+    if(i == 3){
+      col <- "black"
+      pch <- 0
+    }else if(i==4){
+      col <- "black"
+      pch <- 1
+    }else if(i==5){
+      col <- "black"
+      pch <- 2
+    }else if(i==6){
+      col <- "blue"
+      pch <- 15
+    }else if(i==7){
+      col <- "blue"
+      pch <- 19
+    }else if(i==8){
+      col <- "blue"
+      pch <- 17
+    }
+    points(restuls_conditions[[cel]][[2]][, i], col=col, pch=pch)
+    arrows(c(1:20), restuls_conditions[[cel]][[2]][, i] - restuls_conditions[[cel]][[3]][, i], c(1:20), restuls_conditions[[cel]][[2]][, i] + restuls_conditions[[cel]][[3]][, i], 
+           length = 0.05, angle = 90, code = 3, col=col)
+    #abline(h=mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col)
+    #segments(20.2, mean(restuls_conditions[[cel]][[2]][, i]), 21, mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col, cex=1.5, pch=pch)
+    #segments(0, mean(restuls_conditions[[cel]][[2]][, i]), .8 , mean(restuls_conditions[[cel]][[2]][, i]), lty=2, col=col, cex=1.5, pch=pch)
+  }
+  
+  par(mar=c(0,0,0,0))
+  plot.new()
+  legend("center", "groups",
+         c("true reliability", "traditional method + alpha", "traditional method + lambda2","traditional method + lambda4", 
+           "item-score method + alpha", "item-score method + lambda2", "item-score method + lambda4", "averaged true reliability"),
+         pch=c( 8, 0, 1, 2, 15, 19, 17, NA),
+         lty = c(NA, NA, NA, NA, NA, NA, NA, 3),
+         col=c( "red", "black", "black", "black", "blue", "blue", "blue", "red"),
+         ncol=4, bty = "n")
+  
+  
+  dev.off()
+}
+
+######### Extra 2. plots for Bias and precision - LEVEL 2 ###################
+
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
+
+
+pop_re <- matrix(NA, nrow = 108, ncol = 8)
+pop_sd <- matrix(NA, nrow = 108, ncol = 8)
+for (i in 1:108){
+  pop_re[i, ] <- colMeans(restuls_conditions[[i]][[2]])
+  pop_sd[i, ] <- apply(restuls_conditions[[i]][[2]], 2, sd)
+}
+
+
+situation <- 1 # "Unidimensional + No Carryover"
+situation <- 2 # "Unidimensional + Carryover"
+situation <- 3 # "Multidimensional + No Carryover"
+situation <- 4 #"Multidimensional + Carryover"
+
+if(situation == 1){
+  index <- df$`correlated facets`==1 & df$`carry-over effects`==0
+} else if (situation == 2){
+  index <- df$`correlated facets`==1 & df$`carry-over effects`!=0
+} else if (situation == 3){
+  index <- df$`correlated facets`!=1 & df$`carry-over effects`==0
+} else if (situation == 4){
+  index <- df$`correlated facets`!=1 & df$`carry-over effects`!=0
+}
+
+
+# plot pop_re
+cellseq <- seq(1:108)
+
+pop_reCOPY <- pop_re
+pop_reCOPY[setdiff(cellseq, cellseq[index]), ] <- NA
+pop_sdCOPY <- pop_sd
+pop_sdCOPY[setdiff(cellseq, cellseq[index]), ] <- NA
+
+
+layout(rbind(1,2), heights=c(10,1))# put legend on bottom 1/10th of the chart (note, this is from http://stackoverflow.com/questions/8929663/r-legend-placement-in-a-plot)
+
+ymin <- min(0, pop_reCOPY[, 3] - pop_sdCOPY[, 3], pop_reCOPY[, 4] - pop_sdCOPY[, 4],
+            pop_reCOPY[, 5] - pop_sdCOPY[, 5], pop_reCOPY[, 6] - pop_sdCOPY[, 6],
+            pop_reCOPY[, 7] - pop_sdCOPY[, 7], pop_reCOPY[, 8] - pop_sdCOPY[, 8],
+            na.rm = TRUE)
+plot(pop_reCOPY[ , 2], xaxt = 'n', ylim = c(ymin,1), xlab = "Simulation Cells", ylab = "(Estimated) Change-Score Reliability +/- 1SD", col='red', pch=8)
+axis(1, at=cellseq[index], las=2, cex.axis = .7)
+points(pop_reCOPY[, 3], pch=0)
+points(pop_reCOPY[, 4], pch=1)
+points(pop_reCOPY[, 5], pch=2)
+points(pop_reCOPY[, 6], pch=15, col='blue')
+points(pop_reCOPY[, 7], pch=19, col='blue')
+points(pop_reCOPY[, 8], pch=17, col='blue')
+arrows(c(1:108), pop_reCOPY[, 3] - pop_sdCOPY[, 3], c(1:108), pop_reCOPY[, 3] + pop_sdCOPY[, 3], length = 0.05, angle = 90, code = 3, col = 'black')
+arrows(c(1:108), pop_reCOPY[, 4] - pop_sdCOPY[, 4], c(1:108), pop_reCOPY[, 4] + pop_sdCOPY[, 4], length = 0.05, angle = 90, code = 3, col = 'black')
+arrows(c(1:108), pop_reCOPY[, 5] - pop_sdCOPY[, 5], c(1:108), pop_reCOPY[, 5] + pop_sdCOPY[, 5], length = 0.05, angle = 90, code = 3, col = 'black')
+arrows(c(1:108), pop_reCOPY[, 6] - pop_sdCOPY[, 6], c(1:108), pop_reCOPY[, 6] + pop_sdCOPY[, 6], length = 0.05, angle = 90, code = 3, col = 'blue')
+arrows(c(1:108), pop_reCOPY[, 7] - pop_sdCOPY[, 7], c(1:108), pop_reCOPY[, 7] + pop_sdCOPY[, 7], length = 0.05, angle = 90, code = 3, col = 'blue')
+arrows(c(1:108), pop_reCOPY[, 8] - pop_sdCOPY[, 8], c(1:108), pop_reCOPY[, 8] + pop_sdCOPY[, 8], length = 0.05, angle = 90, code = 3, col = 'blue')
+
+for(i in 1:108){
+  if(i %in% cellseq[index]){
+    abline(v=i, lty="dotted", lwd=.1)
+  }
+}
+abline(v=c(37,73), col="red")
+mtext("Cell no.1 ~ 36: Short test (9 items)", side = 3, line=0, at=20)
+mtext("Cell no.37 ~ 72: Medium-length test (21 items)", side = 3, line=0, at=55)
+mtext("Cell no.73 ~ 108: Long test (36 items)", side = 3, line=0, at=90)
+#axis(1, at=c(37,73), labels=c("37","73"))
+
+par(mar=c(0,0,0,0))
+plot.new()
+legend("center", "groups",
+       c("true reliability", "traditional method + alpha", "traditional method + lambda2","traditiona method + lambda4", 
+         "item-score method + alpha", "item-score method + lambda 2", "item-score method + lambda4"),
+       pch=c(8, 0, 1,2, 15, 19, 17),
+       col=c("red", "black", "black", "black", "blue", "blue", "blue"),
+       ncol=4, bty = "n")
+dev.off()
