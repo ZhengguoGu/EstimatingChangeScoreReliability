@@ -102,21 +102,6 @@ for (i in 1:108){
 }
 
 
-situation <- 1 # "Unidimensional + No Carryover"
-situation <- 2 # "Unidimensional + Carryover"
-situation <- 3 # "Multidimensional + No Carryover"
-situation <- 4 #"Multidimensional + Carryover"
-
-if(situation == 1){
-  index <- df$`correlated facets`==1 & df$`carry-over effects`==0
-} else if (situation == 2){
-  index <- df$`correlated facets`==1 & df$`carry-over effects`!=0
-} else if (situation == 3){
-  index <- df$`correlated facets`!=1 & df$`carry-over effects`==0
-} else if (situation == 4){
-  index <- df$`correlated facets`!=1 & df$`carry-over effects`!=0
-}
-
 
 rel_bias <- matrix(NA, 108, 6)
 rel_bias[, 1] <- pop_re[,2] - pop_re[,1]
@@ -126,13 +111,37 @@ rel_bias[, 4] <- pop_re[,5] - pop_re[,1]
 rel_bias[, 5] <- pop_re[,6] - pop_re[,1]
 rel_bias[, 6] <- pop_re[,7] - pop_re[,1]
 colnames(rel_bias) <- c("trad_alpha", "trad_l2", "trad_l4", "item_alpha", "item_l2", "item_l4")
-write.table(rel_bias, "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasLargeLevel2.txt", sep = "\t", col.names = T) 
 
 rel_precision <- cbind(pop_re, pop_sd[, 2:7])
 colnames(rel_precision) <- c("rel_true", "rel_trad_alpha", "rel_trad_l2", "rel_trad_l4", "rel_item_alpha", "rel_item_l2", "rel_item_l4", 
                              "precision_trad_alpha", "precision_trad_l2", "precision_trad_l4", "precision_item_alpha", "precision_item_l2", "precision_item_l4")
 
-write.table(rel_precision, "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionLargeLevel2.txt", sep = "\t", col.names = T) 
+celnr <- 1:108
+situation <- 1 # "Unidimensional + No Carryover"
+index <- df$`correlated facets`==1 & df$`carry-over effects`==0
+write.table(cbind(celnr[index], rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasLargeLevel2SIT1.txt", sep = "\t", col.names = T) 
+write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionLargeLevel2SIT1.txt", sep = "\t", col.names = T) 
+
+
+situation <- 2 # "Unidimensional + Carryover"
+index <- df$`correlated facets`==1 & df$`carry-over effects`!=0
+write.table(cbind(celnr[index],rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasLargeLevel2SIT2.txt", sep = "\t", col.names = T) 
+write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionLargeLevel2SIT2.txt", sep = "\t", col.names = T) 
+
+situation <- 3 # "Multidimensional + No Carryover"
+index <- df$`correlated facets`!=1 & df$`carry-over effects`==0
+write.table(cbind(celnr[index],rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasLargeLevel2SIT3.txt", sep = "\t", col.names = T) 
+write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionLargeLevel2SIT3.txt", sep = "\t", col.names = T) 
+
+situation <- 4 #"Multidimensional + Carryover"
+index <- df$`correlated facets`!=1 & df$`carry-over effects`!=0
+write.table(cbind(celnr[index],rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasLargeLevel2SIT4.txt", sep = "\t", col.names = T) 
+write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionLargeLevel2SIT4.txt", sep = "\t", col.names = T) 
+
+
+
+
+
 
 #small sample size
 load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
@@ -144,6 +153,8 @@ for (i in 1:108){
   pop_sd[i, ] <- apply(restuls_conditions[[i]][[2]][, 2:8], 2, sd)
 }
 
+
+
 rel_bias <- matrix(NA, 108, 6)
 rel_bias[, 1] <- pop_re[,2] - pop_re[,1]
 rel_bias[, 2] <- pop_re[,3] - pop_re[,1]
@@ -152,13 +163,32 @@ rel_bias[, 4] <- pop_re[,5] - pop_re[,1]
 rel_bias[, 5] <- pop_re[,6] - pop_re[,1]
 rel_bias[, 6] <- pop_re[,7] - pop_re[,1]
 colnames(rel_bias) <- c("trad_alpha", "trad_l2", "trad_l4", "item_alpha", "item_l2", "item_l4")
-write.table(rel_bias, "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasSmallLevel2.txt", sep = "\t", col.names = T) 
 
 rel_precision <- cbind(pop_re, pop_sd[, 2:7])
 colnames(rel_precision) <- c("rel_true", "rel_trad_alpha", "rel_trad_l2", "rel_trad_l4", "rel_item_alpha", "rel_item_l2", "rel_item_l4", 
                              "precision_trad_alpha", "precision_trad_l2", "precision_trad_l4", "precision_item_alpha", "precision_item_l2", "precision_item_l4")
 
-write.table(rel_precision, "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionSmallLevel2.txt", sep = "\t", col.names = T) 
+celnr <- 1:108
+situation <- 1 # "Unidimensional + No Carryover"
+index <- df$`correlated facets`==1 & df$`carry-over effects`==0
+write.table(cbind(celnr[index], rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasSmallLevel2SIT1.txt", sep = "\t", col.names = T) 
+write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionSmallLevel2SIT1.txt", sep = "\t", col.names = T) 
+
+
+situation <- 2 # "Unidimensional + Carryover"
+index <- df$`correlated facets`==1 & df$`carry-over effects`!=0
+write.table(cbind(celnr[index],rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasSmallLevel2SIT2.txt", sep = "\t", col.names = T) 
+write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionSmallLevel2SIT2.txt", sep = "\t", col.names = T) 
+
+situation <- 3 # "Multidimensional + No Carryover"
+index <- df$`correlated facets`!=1 & df$`carry-over effects`==0
+write.table(cbind(celnr[index],rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasSmallLevel2SIT3.txt", sep = "\t", col.names = T) 
+write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionSmallLevel2SIT3.txt", sep = "\t", col.names = T) 
+
+situation <- 4 #"Multidimensional + Carryover"
+index <- df$`correlated facets`!=1 & df$`carry-over effects`!=0
+write.table(cbind(celnr[index],rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasSmallLevel2SIT4.txt", sep = "\t", col.names = T) 
+write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionSmallLevel2SIT4.txt", sep = "\t", col.names = T) 
 
 
 
