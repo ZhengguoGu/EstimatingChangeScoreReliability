@@ -1,7 +1,7 @@
 library(Lambda4)
 library(psychometric)
 
-# data simulation  (copy from the Blade server where the data were simulated. )
+#Update: 2017-09-28
 
 ################################################
 
@@ -53,6 +53,7 @@ write.csv(df, 'conditions.csv', sep=',')
 
 restuls_conditions <- list()
 simulatedRawdata <- list()  #this include the simulated theta's and responses. 
+ITEM_PAR <- list()
 num_test <- 1
 
 while (num_test <= nrow(df)){
@@ -110,6 +111,8 @@ while (num_test <= nrow(df)){
   
   }
 
+  ITEM_PAR[[num_test]] <- itempar
+  
   id <- vector()
   for(d in 1: dimension){
     id <- cbind(id, rep(d, num_items/dimension))
