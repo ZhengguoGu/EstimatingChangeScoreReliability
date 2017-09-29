@@ -271,7 +271,7 @@ Qpoints <- function(n_person, mu, sd, bd){
 }
 
 #-----------------------------------------------------------------------
-# quadrature points, multivariate gaussian
+# quadrature points, multivariate gaussian (3 dimensional)
 #-----------------------------------------------------------------------
 Qmvpoints <- function(n_person, mu, sigma, bd){
   
@@ -286,19 +286,21 @@ Qmvpoints <- function(n_person, mu, sigma, bd){
   #     is mu[1] +/- sqrt(sigma[1,1])*bd. 
   
   n_dim <- length(mu)
+  if(n_dim != 3){
+    stop("This fuction is for 3 dimensional mvtnormal!")
+  }
   q_point <- matrix(NA, n_person, n_dim)
   for(i in 1:n_dim){
-    
     q_point[, i] <- seq(mu[i] - sqrt(sigma[i,i])*bd, mu[i] + sqrt(sigma[i,i])*bd, length.out = n_person)
-  
   }
   
-  q_point_final <- expand.grid(q_point[, 1], q_point[, 2])
-  for(i in 3:n_dim){
-    q_point_final <- expand.grid(q_point_final, q_point[, i])
-  }
+  q_point_final <- expand.grid(q_point[, 1], q_point[, 2], q_point[, 3])
   
+  densities <- dmvnorm(q_point_final, mean = mu, sigma = sigma)
+  q_weight <- densities*abs(q_point[1, 1]-q_point[2, 1])*abs(q_point[1, 2]-q_point[2, 2])*abs(q_point[1, 3]-q_point[2, 3])/sum(densities*abs(q_point[1, 1]-q_point[2, 1])*abs(q_point[1, 2]-q_point[2, 2])*abs(q_point[1, 3]-q_point[2, 3]))
+
+  q_result <- list(q_point_final, q_weight)
+  names(q_result) <- c("points", "weights")
   
-  
-  
+  return(q_result)
 } 
