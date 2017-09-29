@@ -11,7 +11,7 @@
 
 
 library(MASS)
-
+library(mvtnorm)
 #-----------------------------------------------------------------
 # GRM_sim: simulate response data based on the graded response
 # model (Samejima, 1969)
@@ -248,4 +248,57 @@ Phi_D <- function(Prob_pre, Prob_post){
   return(list(D_true, D_obs))
 }
 
+#-----------------------------------------------------------------------
+# quadrature points, gaussian 
+#-----------------------------------------------------------------------
+Qpoints <- function(n_person, mu, sd, bd){
+  
+  # description:
+  #
+  # n_person: number of thetas to be simulated
+  # mu: the average of theta distribution
+  # sd: the sd of theta distribution
+  # bd: for defining the upper and lower bound of theta: 
+  #     upper bound: mu + bd*sd
+  #     lower bound: mu - bd*sd
+  
+  q_point <- seq(mu - bd*sd, mu + bd*sd, length.out = n_person)
+  q_weight <- dnorm(q_point, mean = mu, sd = sd)*abs(q_point[1]-q_point[2])/sum(dnorm(q_point, mean = mu, sd = sd)*abs(q_point[1]-q_point[2]))
 
+  q_result <- list(q_point, q_weight)
+  names(q_result) <- c("points", "weights")
+  return(q_result)
+}
+
+#-----------------------------------------------------------------------
+# quadrature points, multivariate gaussian
+#-----------------------------------------------------------------------
+Qmvpoints <- function(n_person, mu, sigma, bd){
+  
+  # description:
+  # requires package 'mvtnorm'
+  #
+  # n_person: number of theta's
+  # mu: the mean vector
+  # sigma: the covariance matrix; here we assume equal-variance along 
+  #        the main diagnal (see the paper)
+  # bd: bound. The the upper/lower bound is defind along the first dimension 
+  #     is mu[1] +/- sqrt(sigma[1,1])*bd. 
+  
+  n_dim <- length(mu)
+  q_point <- matrix(NA, n_person, n_dim)
+  for(i in 1:n_dim){
+    
+    q_point[, i] <- seq(mu[i] - sqrt(sigma[i,i])*bd, mu[i] + sqrt(sigma[i,i])*bd, length.out = n_person)
+  
+  }
+  
+  q_point_final <- expand.grid(q_point[, 1], q_point[, 2])
+  for(i in 3:n_dim){
+    q_point_final <- expand.grid(q_point_final, q_point[, i])
+  }
+  
+  
+  
+  
+} 
