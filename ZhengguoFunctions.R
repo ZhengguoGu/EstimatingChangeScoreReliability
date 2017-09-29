@@ -92,8 +92,9 @@ GRM_sim_1theta <- function(theta, itempar){
   numeritor <- exp(itempar[, 1]*(theta - itempar[, -1]))
   P_star <- numeritor/(1+numeritor) # this is the "true response"
   P <- cbind(1, P_star)
-  P[, 1:4] <- P[, 1:4] - P_star    
-  return(P)  #returns the probability of answering each category 
+  P[, 1:4] <- P[, 1:4] - P_star  
+  true_sum <- sum(P_star) # this is the true sum score (given theta)
+  return(list(P, true_sum))  #returns the probability of answering each category 
 }
 
 
@@ -221,8 +222,10 @@ Phi_D <- function(Prob_pre, Prob_post){
   
   # Description
   #
-  # Prob_pre: the probabilities of answering X+ = 0, 1, 2, ..., of a person at pretest
-  # Prob_post: the probabilities of answering X+ = 0, 1, 2, ..., of a person at posttest
+  # Prob_pre: the probabilities of answering X+ = 0, 1, 2, ..., of a person at pretest, 
+  #           which can be obtained by Phi_X()
+  # Prob_post: the probabilities of answering X+ = 0, 1, 2, ..., of a person at posttest,
+  #           which can be obtained by Phi_X()
   
   
   cate_pre <- 0:(length(Prob_pre)-1)
@@ -238,7 +241,11 @@ Phi_D <- function(Prob_pre, Prob_post){
   for(j in 1:dim(prob_Dfinal)[2]){
     prob_Dfinal[1, j] <- sum(prob_D[D_scores == D_index[j]]) # probabilities corresponding to D_index
   }
-  return(D_index, prob_Dfinal)
+  
+  D_true <- rbind(D_index, prob_Dfinal)
+  D_obs <- rbind(D_scores, prob_D, cate_expand[, 1], cate_expand[, 2])
+  row.names(D_obs) <- c("change scores", "probability", "pretest", "posttest")
+  return(list(D_true, D_obs))
 }
 
 
