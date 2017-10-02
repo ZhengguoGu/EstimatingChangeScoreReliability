@@ -235,6 +235,12 @@ Phi_D <- function(Prob_pre, Prob_post, car_eff){
   
   cate_expand <- expand.grid(cate_pre, cate_post)
   !!!!!!!!!!!!!!
+  
+  if(car_eff == "weak" | car_eff == "strong"){
+       carry_over(cate_expand[, 1], cate_expand[, 2])
+    
+    }??????????????
+    
   D_scores <- cate_expand[, 2] - cate_expand[, 1]
   prob_expand <- expand.grid(Prob_pre, Prob_post)
   prob_D <- prob_expand[, 1] * prob_expand[, 2]
