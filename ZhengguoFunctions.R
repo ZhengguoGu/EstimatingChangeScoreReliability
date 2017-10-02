@@ -185,6 +185,7 @@ Phi_X <- function(P){
   #    It is a matrix, with rows representing items, and columns representing
   #    answer categories.
 
+
   # initial step:
   p1 <- P[1, ]
   p2 <- P[2, ]
@@ -218,7 +219,7 @@ Phi_X <- function(P){
 # Last update 2017-9-29
 #----------------------------------------------------------------------
 
-Phi_D <- function(Prob_pre, Prob_post){
+Phi_D <- function(Prob_pre, Prob_post, car_eff){
   
   # Description
   #
@@ -226,12 +227,14 @@ Phi_D <- function(Prob_pre, Prob_post){
   #           which can be obtained by Phi_X()
   # Prob_post: the probabilities of answering X+ = 0, 1, 2, ..., of a person at posttest,
   #           which can be obtained by Phi_X()
+  # car_eff: Carry-over effect: weak/strong/no effect
   
-  
+
   cate_pre <- 0:(length(Prob_pre)-1)
   cate_post <- 0:(length(Prob_post)-1)
   
   cate_expand <- expand.grid(cate_pre, cate_post)
+  !!!!!!!!!!!!!!
   D_scores <- cate_expand[, 2] - cate_expand[, 1]
   prob_expand <- expand.grid(Prob_pre, Prob_post)
   prob_D <- prob_expand[, 1] * prob_expand[, 2]
