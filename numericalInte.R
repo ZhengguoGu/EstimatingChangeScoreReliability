@@ -43,10 +43,24 @@ colnames(df) <- c('test length', 'parallel item', 'correlated facets',
                   'maginute of sd', 'carry-over effects')
 
 itempar <- load("D:/TilburgOffice/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20170929 itemPar/itemparLarge.RData")
+itempar <- load("/Users/zhengguogu/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170929 itemPar/itemparLarge.RData")  #macbook pro
 n_person <- 1000  #! need to manually set n_person = 1000 or 100, which corresponds to itempar data.
+
+
+
 
 for(sim in 1: num_condition){
   cond <- df[sim, ]
+
+  ######## w.r.t. observed change scores ##########
+  if(cond[3] == 1){
+    # in this case, unidimensional
+    if(cond[4] == sqrt(.14)){
+      # in this case small change in theta: .14
+      qpoint <- Qpoints(n_person=1000, mu=0, sd=1, bd=3)
+    }
+  }
+  
   
 }
 
