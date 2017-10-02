@@ -1,6 +1,6 @@
 #########################################################
 #
-# reliability of change scores at the population level\
+# reliability of change scores at the population level
 # via numerical integration
 #
 # Zhengguo Gu
