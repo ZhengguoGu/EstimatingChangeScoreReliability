@@ -42,8 +42,8 @@ df <- data.frame(matrix(unlist(conditions), nrow=num_condition, byrow = T))
 colnames(df) <- c('test length', 'parallel item', 'correlated facets',
                   'maginute of sd', 'carry-over effects')
 
-itempar <- load("D:/TilburgOffice/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20170929 itemPar/itemparLarge.RData")
-itempar <- load("/Users/zhengguogu/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170929 itemPar/itemparLarge.RData")  #macbook pro
+load("D:/TilburgOffice/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20170929 itemPar/itemparLarge.RData")
+load("/Users/zhengguogu/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170929 itemPar/itemparLarge.RData")  #macbook pro
 n_person <- 1000  #! need to manually set n_person = 1000 or 100, which corresponds to itempar data.
 
 
@@ -57,7 +57,23 @@ for(sim in 1: num_condition){
     # in this case, unidimensional
     if(cond[4] == sqrt(.14)){
       # in this case small change in theta: .14
-      qpoint <- Qpoints(n_person=1000, mu=0, sd=1, bd=3)
+      qpoint_pre <- Qpoints(n_person=1000, mu=0, sd=1, bd=3)
+      qpoint_post <- Qpoints(n_person=1000, mu=0, sd=sqrt(1.14), bd=3)
+      for(q in 1:1000){
+        P_pre <- GRM_sim_1theta(theta = qpoint_pre[[1]][q], itempar =  ITEM_PAR[[5]])[[1]]
+        w_pre <- Phi_X(P_pre)
+        
+        P_post <- GRM_sim_1theta(theta = qpoint_post[[1]][q], itempar =  ITEM_PAR[[5]])[[1]]
+        w_post <- Phi_X(P_post)
+        
+        if(cond[5] == 10){
+          aa <- Phi_D(w_pre, w_post, car_eff="strong")
+        }
+        
+      }
+      
+      
+      
     }
   }
   

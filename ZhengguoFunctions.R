@@ -229,31 +229,44 @@ Phi_D <- function(Prob_pre, Prob_post, car_eff){
   #           which can be obtained by Phi_X()
   # car_eff: Carry-over effect: weak/strong/no effect
   
-
   cate_pre <- 0:(length(Prob_pre)-1)
   cate_post <- 0:(length(Prob_post)-1)
   
   cate_expand <- expand.grid(cate_pre, cate_post)
-  !!!!!!!!!!!!!!
   
-  if(car_eff == "weak" | car_eff == "strong"){
-       carry_over(cate_expand[, 1], cate_expand[, 2])
+  Dtrue_scores <- cate_expand[, 2] - cate_expand[, 1] #not influenced by carry-over effects
+  Dobs_scores <- Dtrue_scores  #will be overwritten if carry-over effects exist
+  
+  if(car_eff == "weak"){
+    cate_expand[, 2] <- carry_over(cate_expand[, 1], cate_expand[, 2])[[2]]
+    Dobs_scores <- cate_expand[, 2] - cate_expand[, 1]
+  }else if (car_eff == "strong"){
+    cate_expand[, 2] <- carry_over(cate_expand[, 1], cate_expand[, 2])[[1]]
+    Dobs_scores <- cate_expand[, 2] - cate_expand[, 1]
+  }
     
-    }??????????????
-    
-  D_scores <- cate_expand[, 2] - cate_expand[, 1]
+  
   prob_expand <- expand.grid(Prob_pre, Prob_post)
   prob_D <- prob_expand[, 1] * prob_expand[, 2]
   
-  prob_Dfinal <- matrix(NA, 1, length(unique(D_scores)))
-  D_index <- sort(unique(D_scores)) #change score sorted from min to max
-  for(j in 1:dim(prob_Dfinal)[2]){
-    prob_Dfinal[1, j] <- sum(prob_D[D_scores == D_index[j]]) # probabilities corresponding to D_index
+  #If there would be no carry-over effects 
+  prob_DtrueFinal <- matrix(NA, 1, length(unique(Dtrue_scores)))
+  D_index <- sort(unique(Dtrue_scores))
+  for(j in 1:dim(prob_DtrueFinal)[2]){
+    prob_DtrueFinal[1, j] <- sum(prob_D[Dtrue_scores == D_index[j]]) # probabilities corresponding to D_index
   }
   
-  D_true <- rbind(D_index, prob_Dfinal)
-  D_obs <- rbind(D_scores, prob_D, cate_expand[, 1], cate_expand[, 2])
-  row.names(D_obs) <- c("change scores", "probability", "pretest", "posttest")
+  #Taking into account the carry-over effects
+  prob_Dobsfinal <- matrix(NA, 1, length(unique(Dobs_scores)))
+  Dobs_index <- sort(unique(Dobs_scores)) #change score sorted from min to max
+  for(j in 1:dim(prob_Dobsfinal)[2]){
+    prob_Dobsfinal[1, j] <- sum(prob_D[Dobs_scores == Dobs_index[j]]) # probabilities corresponding to D_index
+  }
+  
+  D_true <- rbind(D_index, prob_DtrueFinal)  #probability distribution of change scores without taking into account the carry over effect
+  row.names(D_true) <- c("score", "probability")
+  D_obs <- rbind(Dobs_index, prob_Dobsfinal) #probability distributio of change scores. 
+  row.names(D_obs) <- c("score", "probability")
   return(list(D_true, D_obs))
 }
 
