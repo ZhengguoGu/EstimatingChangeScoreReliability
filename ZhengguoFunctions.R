@@ -265,7 +265,7 @@ Phi_D <- function(Prob_pre, Prob_post, car_eff){
   
   D_true <- rbind(D_index, prob_DtrueFinal)  #probability distribution of change scores without taking into account the carry over effect
   row.names(D_true) <- c("score", "probability")
-  D_obs <- rbind(Dobs_index, prob_Dobsfinal) #probability distributio of change scores. 
+  D_obs <- rbind(Dobs_index, prob_Dobsfinal) #probability distribution of change scores. 
   row.names(D_obs) <- c("score", "probability")
   return(list(D_true, D_obs))
 }
@@ -326,3 +326,40 @@ Qmvpoints <- function(n_person, mu, sigma, bd){
   
   return(q_result)
 } 
+
+
+#---------------------------------------------------------------------
+# quadrature points, bivariate gaussian (for pretest and change) 
+# based on Rieman Rule
+#---------------------------------------------------------------------
+Qbipoints <- function(n_person, mu, sigma, bd){
+  # description:
+  # requires package 'mvtnorm'
+  #
+  # n_person: number of theta's
+  # mu: the mean vector
+  # sigma: the covariance matrix (between pretest and change); Note: covariance between pretest and change == 0!
+  # bd: bound. The the upper/lower bound is defind along the first dimension 
+  #     is mu[1] +/- sqrt(sigma[1,1])*bd; and for the second dimension
+  #     mu[2] +/- sqrt(sigma[2,2])*bd
+  
+  if(length(mu) != 2){
+    stop("This fuction is for bivariate mvtnormal!")
+  }
+  q_point <- matrix(NA, n_person, 2)
+  
+  for(i in 1:2){
+    q_point[, i] <- seq(mu[i] - sqrt(sigma[i,i])*bd, mu[i] + sqrt(sigma[i,i])*bd, length.out = n_person)
+  }
+  
+  q_point_final <- expand.grid(q_point[, 1], q_point[, 2])
+  
+  densities <- dmvnorm(q_point_final, mean = mu, sigma = sigma)
+  q_weight <- densities*abs(q_point[1, 1]-q_point[2, 1])*abs(q_point[1, 2]-q_point[2, 2])/sum(densities*abs(q_point[1, 1]-q_point[2, 1])*abs(q_point[1, 2]-q_point[2, 2]))
+  
+  q_result <- list(q_point_final, q_weight)
+  names(q_result) <- c("points", "weights")
+  
+  return(q_result)
+  
+}
