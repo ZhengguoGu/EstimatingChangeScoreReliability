@@ -7,6 +7,7 @@
 #
 ##########################################################
 
+library(mvtnorm)
 set.seed(110)
 
 #------------------------------------------------------------------------------ 
@@ -42,9 +43,9 @@ df <- data.frame(matrix(unlist(conditions), nrow=num_condition, byrow = T))
 colnames(df) <- c('test length', 'parallel item', 'correlated facets',
                   'maginute of sd', 'carry-over effects')
 
-load("D:/TilburgOffice/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20170929 itemPar/itemparLarge.RData")
+load("D:\\Dropbox\\Tilburg office\\Research Individual change\\Project 3 - item difference scores\\20170929 itemPar/itemparLarge.RData")  #desktop at home
 load("/Users/zhengguogu/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170929 itemPar/itemparLarge.RData")  #macbook pro
-n_person <- 1000  #! need to manually set n_person = 1000 or 100, which corresponds to itempar data.
+
 
 
 rel <- array()  #reliability at the population level
@@ -52,50 +53,73 @@ rel <- array()  #reliability at the population level
 for(sim in 1: num_condition){
   cond <- df[sim, ]
 
-  ######## w.r.t. observed change scores ##########
-  if(cond[3] == 1){
+  if(as.numeric(cond[3]) == 1){
     # in this case, unidimensional
-    if(cond[4] == sqrt(.14)){
-      # in this case small change in theta: .14
-      qbipoints <- Qbipoints(n_person=1000, mu=c(0,0), sigma=matrix(c(1, 0, 0, .14), 2, 2), bd=3)
-      theta_pre <-  qbipoints[[1]][, 1]
-      theta_post <- rowSums(qbipoints[[1]])  #because Qbipoints negerates quodrature points for pretest and change
-      
-      Expect_D <- array()
-      Expect_D2 <- array()
-      for(q in 1:1000){
-        P_pre <- GRM_sim_1theta(theta = theta_pre[q], itempar =  ITEM_PAR[[5]])[[1]]
-        w_pre <- Phi_X(P_pre)
-        
-        P_post <- GRM_sim_1theta(theta = theta_post[q], itempar =  ITEM_PAR[[5]])[[1]]
-        w_post <- Phi_X(P_post)
-        
-        if(cond[5] == 10){
-          car_eff <- "strong"
-        }else if(cond[5] == 1){
-          car_eff <- "weak"
-        }else{
-          car_eff <- "no"
+    if(as.numeric(cond[5])==0){
+      # in this case, no carry-over effects
+      qpoint <- Qbipoints(n_person = 100, mu = c(0, 0), sigma = matrix(c(1, 0, 0, as.numeric(cond[4])), 2, 2), bd=3)  #simulate quadrature points for pretest and change
+      variance_d <- 0  # variance of observed change scores over the entire distribution
+      expectation_trueD <-0  #expectation of true change score
+      expectation_trueD2 <- 0 ##expectation of true change score^2
+        for(q in 1:length(qpoint$weights)){
+          pre_theta <- qpoint$points[q,][1]
+          post_theta <- sum(qpoint$points[q,])
+          
+          pre_obs_prob <- GRM_sim_1theta(pre_theta, itempar = ITEM_PAR[[sim]])[[1]]
+          post_obs_prob <- GRM_sim_1theta(post_theta, itempar = ITEM_PAR[[sim]])[[1]]
+          
+          pre_distribution <- Phi_X(pre_obs_prob)
+          post_distribution <- Phi_X(post_obs_prob)
+          
+          d_distribution <- Phi_D(pre_distribution, post_distribution)
+          
+          expectation_d <- sum(d_distribution[1,] * d_distribution[2,])
+          expectation_d2 <- sum(d_distribution[1,]^2 * d_distribution[2,])
+          variance_d <- variance_d + (expectation_d2 - expectation_d^2) * qpoint$weights[q]
+          
+          expectation_trueD <- expectation_trueD * expectation_d * qpoint$weights[q]
+          expectation_trueD2 <- expectation_trueD2 * expectation_d^2 * qpoint$weights[q]
         }
-        
-        observed_D <- Phi_D(w_pre, w_post, car_eff=car_eff)[[2]]
-        Expect_D[q] <- sum(observed_D[1,]*observed_D[2,])
-        observed_D2 <- observed_D[1,] ^ 2
-        Expect_D2[q] <- sum(observed_D2*observed_D[2,])
-        
+      variance_trueD <- expectation_trueD2 - expectation_trueD^2
+      rel[sim] <- variance_trueD/variance_d 
+    }else{
+      #in this case, carry-over effect
+      #we simulate 1m persons 
+      theta_matrix <- rmvnorm(n = 1000000, mean = c(0, 0), sigma = matrix(c(1, 0, 0, as.numeric(cond[4])), 2, 2))
+      
+      responses <- GRM_sim(theta_matrix[, 1], ITEM_PAR[[sim]], id = 1)
+      response_pre <- responses[[1]]
+      true_pre <- responses[[2]]
+      
+      responses <- GRM_sim(theta_matrix[, 2], ITEM_PAR[[sim]], id = 1)
+      response_post <- responses[[1]]
+      true_post <- responses[[2]]
+      
+      carryover_results <- carry_over(response_pre, response_post)
+      response_post_strong <- carryover_results[[1]]
+      response_post_weak <- carryover_results[[2]]
+      
+      if (as.matrix(cond[5]) == 10){
+          response_post <- response_post_strong #replace with scores with strong carryover effects
+      } else if (as.matrix(cond[5]) == 1){
+          response_post <- response_post_weak #replace with scores with weak carryover effects
       }
       
-      Expect_Dpop_obs <- sum(Expect_D*qbipoints[[2]])
-      Expect_D2pop_obs <- sum(Expect_D2*qbipoints[[2]])
-      Var_Dpop_obs <- Expect_D2pop - Expect_Dpop^2
-      
-      Expect_Dpop_true <- sum(Expect_D*qbipoints[[2]])
-      Expect_D2pop_true <- sum(Expect_D^2*qbipoints[[2]])
-      Var_D2pop_true <- Expect_D2pop_true - Expect_Dpop_true^2
-      
-      rel[sim] <- Var_Dpop_obs/Var_D2pop_true
-      
+      sum_pre <- rowSums(response_pre)
+      sum_true_pre <- rowSums(true_pre)
+      sum_post <- rowSums(response_post)
+      sum_true_post <- rowSums(true_post)
+      truechange_sumscores <- sum_true_post - sum_true_pre
+      change_sumscores <- sum_post - sum_pre
+      rel[sim] <- var(truechange_sumscores)/var(change_sumscores)
     }
+  } else{
+    # in this case, 3 dimensional
+     if(as.numeric(cond[5])==0){
+      # in this case, no carry-over effects
+       
+     }
+    
   }
   
   

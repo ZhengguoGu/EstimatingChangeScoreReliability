@@ -87,6 +87,8 @@ GRM_sim_1theta <- function(theta, itempar){
   #
   # This function is designed for items with more than 2 answer alternatives!
   
+  theta <- as.numeric(theta) 
+  
   true_response <- matrix(NA, 1, nrow(itempar))
   
   numeritor <- exp(itempar[, 1]*(theta - itempar[, -1]))
@@ -171,8 +173,8 @@ carry_over <- function(pre, post){
   
 
 #----------------------------------------------------------------------
-# Recursive algorithm for expanding Phi(X+|theta) for polytomous items,
-# which include GRM_sim_1theta, 
+# Recursive algorithm for expanding Phi(X+|theta) for polytomous items
+# 
 #
 # Last update 2017-9-29
 #----------------------------------------------------------------------
@@ -219,7 +221,7 @@ Phi_X <- function(P){
 # Last update 2017-9-29
 #----------------------------------------------------------------------
 
-Phi_D <- function(Prob_pre, Prob_post, car_eff){
+Phi_D <- function(Prob_pre, Prob_post){
   
   # Description
   #
@@ -227,47 +229,26 @@ Phi_D <- function(Prob_pre, Prob_post, car_eff){
   #           which can be obtained by Phi_X()
   # Prob_post: the probabilities of answering X+ = 0, 1, 2, ..., of a person at posttest,
   #           which can be obtained by Phi_X()
-  # car_eff: Carry-over effect: weak/strong/no effect
   
   cate_pre <- 0:(length(Prob_pre)-1)
   cate_post <- 0:(length(Prob_post)-1)
-  
   cate_expand <- expand.grid(cate_pre, cate_post)
-  
-  Dtrue_scores <- cate_expand[, 2] - cate_expand[, 1] #not influenced by carry-over effects
-  Dobs_scores <- Dtrue_scores  #will be overwritten if carry-over effects exist
-  
-  if(car_eff == "weak"){
-    cate_expand[, 2] <- carry_over(cate_expand[, 1], cate_expand[, 2])[[2]]
-    Dobs_scores <- cate_expand[, 2] - cate_expand[, 1]
-  }else if (car_eff == "strong"){
-    cate_expand[, 2] <- carry_over(cate_expand[, 1], cate_expand[, 2])[[1]]
-    Dobs_scores <- cate_expand[, 2] - cate_expand[, 1]
-  }
-    
+  Dtrue_scores <- cate_expand[, 2] - cate_expand[, 1] 
   
   prob_expand <- expand.grid(Prob_pre, Prob_post)
   prob_D <- prob_expand[, 1] * prob_expand[, 2]
   
-  #If there would be no carry-over effects 
+  
   prob_DtrueFinal <- matrix(NA, 1, length(unique(Dtrue_scores)))
   D_index <- sort(unique(Dtrue_scores))
   for(j in 1:dim(prob_DtrueFinal)[2]){
     prob_DtrueFinal[1, j] <- sum(prob_D[Dtrue_scores == D_index[j]]) # probabilities corresponding to D_index
   }
   
-  #Taking into account the carry-over effects
-  prob_Dobsfinal <- matrix(NA, 1, length(unique(Dobs_scores)))
-  Dobs_index <- sort(unique(Dobs_scores)) #change score sorted from min to max
-  for(j in 1:dim(prob_Dobsfinal)[2]){
-    prob_Dobsfinal[1, j] <- sum(prob_D[Dobs_scores == Dobs_index[j]]) # probabilities corresponding to D_index
-  }
-  
-  D_true <- rbind(D_index, prob_DtrueFinal)  #probability distribution of change scores without taking into account the carry over effect
+  D_true <- rbind(D_index, prob_DtrueFinal)  
   row.names(D_true) <- c("score", "probability")
-  D_obs <- rbind(Dobs_index, prob_Dobsfinal) #probability distribution of change scores. 
-  row.names(D_obs) <- c("score", "probability")
-  return(list(D_true, D_obs))
+
+  return(D_true)
 }
 
 #-----------------------------------------------------------------------
