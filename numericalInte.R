@@ -8,6 +8,7 @@
 ##########################################################
 
 library(mvtnorm)
+library(Matrix)
 set.seed(110)
 
 #------------------------------------------------------------------------------ 
@@ -65,8 +66,8 @@ for(sim in 1: num_condition){
           pre_theta <- qpoint$points[q,][1]
           post_theta <- sum(qpoint$points[q,])
           
-          pre_obs_prob <- GRM_sim_1theta(pre_theta, itempar = ITEM_PAR[[sim]])[[1]]
-          post_obs_prob <- GRM_sim_1theta(post_theta, itempar = ITEM_PAR[[sim]])[[1]]
+          pre_obs_prob <- GRM_sim_1theta(pre_theta, itempar = ITEM_PAR[[sim]])
+          post_obs_prob <- GRM_sim_1theta(post_theta, itempar = ITEM_PAR[[sim]])
           
           pre_distribution <- Phi_X(pre_obs_prob)
           post_distribution <- Phi_X(post_obs_prob)
@@ -115,8 +116,49 @@ for(sim in 1: num_condition){
     }
   } else{
     # in this case, 3 dimensional
+    dimension <- 3
+    id <- vector()
+    for(d in 1: dimension){
+      id <- cbind(id, rep(d, as.numeric(cond[1])/dimension))
+    }
+    id <- as.vector(id)
+    
      if(as.numeric(cond[5])==0){
       # in this case, no carry-over effects
+       sigma_pre <- diag(1, 3)
+       sigma_pre[which(sigma_pre==0)] <- as.numeric(cond[3])
+       sigma_d <- diag(as.numeric(cond[4])^2, 3)
+       sigma_d[which(sigma_d==0)] <- as.numeric(cond[4])^2 * as.numeric(cond[3])
+       
+       sigma_pre_d <- as.matrix(Matrix::bdiag(sigma_pre, sigma_d))
+       qpoint <- mgauss.hermite(n = 10, mu = c(0, 0, 0, 0, 0, 0), sigma = sigma_pre_d, prune=.2)
+       
+       variance_d <- 0  # variance of observed change scores over the entire distribution
+       expectation_trueD <-0  #expectation of true change score
+       expectation_trueD2 <- 0 ##expectation of true change score^2
+       
+       for(q in 1:length(qpoint$weights)){
+         pre_theta <- qpoint$points[q,][1:3]
+         post_theta <- qpoint$points[q,][1:3] + qpoint$points[q,][4:6]
+         
+         pre_obs_prob <- GRM_sim_1theta(pre_theta, itempar = ITEM_PAR[[sim]], id = id)
+         post_obs_prob <- GRM_sim_1theta(post_theta, itempar = ITEM_PAR[[sim]], id = id)
+         
+         pre_distribution <- Phi_X(pre_obs_prob)
+         post_distribution <- Phi_X(post_obs_prob)
+         
+         d_distribution <- Phi_D(pre_distribution, post_distribution)
+         
+         expectation_d <- sum(d_distribution[1,] * d_distribution[2,])
+         expectation_d2 <- sum(d_distribution[1,]^2 * d_distribution[2,])
+         variance_d <- variance_d + (expectation_d2 - expectation_d^2) * qpoint$weights[q]
+         
+         expectation_trueD <- expectation_trueD * expectation_d * qpoint$weights[q]
+         expectation_trueD2 <- expectation_trueD2 * expectation_d^2 * qpoint$weights[q]
+       }
+       
+       variance_trueD <- expectation_trueD2 - expectation_trueD^2
+       rel[sim] <- variance_trueD/variance_d 
        
      }
     

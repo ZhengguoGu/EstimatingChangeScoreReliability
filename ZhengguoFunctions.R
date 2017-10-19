@@ -78,7 +78,7 @@ GRM_sim <- function(ability, itempar, id){
 # model (Samejima, 1969), given 1 theta
 #-----------------------------------------------------------------
 
-GRM_sim_1theta <- function(theta, itempar){
+GRM_sim_1theta <- function(theta, itempar, id){
   
   # description:
   #
@@ -88,15 +88,28 @@ GRM_sim_1theta <- function(theta, itempar){
   # This function is designed for items with more than 2 answer alternatives!
   
   theta <- as.numeric(theta) 
+  if(missing(id)){
+    
+    true_response <- matrix(NA, 1, nrow(itempar))
+    
+    numeritor <- exp(itempar[, 1]*(theta - itempar[, -1]))
+    P_star <- numeritor/(1+numeritor) # this is the "true response"
+    P <- cbind(1, P_star)
+    P[, 1:4] <- P[, 1:4] - P_star  
+    
   
-  true_response <- matrix(NA, 1, nrow(itempar))
+    }else{
+    
+    theta <- theta[id]
+    numeritor <- exp(sweep((theta-itempar[, -1]), 1, itempar[, 1], "*"))
+    P_star <- numeritor/(1+numeritor) # this is the "true response"
+    
+    P <- cbind(1, P_star)
+    P[, 1:4] <- P[, 1:4] - P_star
   
-  numeritor <- exp(itempar[, 1]*(theta - itempar[, -1]))
-  P_star <- numeritor/(1+numeritor) # this is the "true response"
-  P <- cbind(1, P_star)
-  P[, 1:4] <- P[, 1:4] - P_star  
-  true_sum <- sum(P_star) # this is the true sum score (given theta)
-  return(list(P, true_sum))  #returns the probability of answering each category 
+  }
+    
+  return(P)  #returns the probability of answering each category 
 }
 
 
@@ -273,40 +286,6 @@ Qpoints <- function(n_person, mu, sd, bd){
   return(q_result)
 }
 
-#-----------------------------------------------------------------------
-# quadrature points, multivariate gaussian (3 dimensional)
-#-----------------------------------------------------------------------
-Qmvpoints <- function(n_person, mu, sigma, bd){
-  
-  # description:
-  # requires package 'mvtnorm'
-  #
-  # n_person: number of theta's
-  # mu: the mean vector
-  # sigma: the covariance matrix; here we assume equal-variance along 
-  #        the main diagnal (see the paper)
-  # bd: bound. The the upper/lower bound is defind along the first dimension 
-  #     is mu[1] +/- sqrt(sigma[1,1])*bd. 
-  
-  n_dim <- length(mu)
-  if(n_dim != 3){
-    stop("This fuction is for 3 dimensional mvtnormal!")
-  }
-  q_point <- matrix(NA, n_person, n_dim)
-  for(i in 1:n_dim){
-    q_point[, i] <- seq(mu[i] - sqrt(sigma[i,i])*bd, mu[i] + sqrt(sigma[i,i])*bd, length.out = n_person)
-  }
-  
-  q_point_final <- expand.grid(q_point[, 1], q_point[, 2], q_point[, 3])
-  
-  densities <- dmvnorm(q_point_final, mean = mu, sigma = sigma)
-  q_weight <- densities*abs(q_point[1, 1]-q_point[2, 1])*abs(q_point[1, 2]-q_point[2, 2])*abs(q_point[1, 3]-q_point[2, 3])/sum(densities*abs(q_point[1, 1]-q_point[2, 1])*abs(q_point[1, 2]-q_point[2, 2])*abs(q_point[1, 3]-q_point[2, 3]))
-
-  q_result <- list(q_point_final, q_weight)
-  names(q_result) <- c("points", "weights")
-  
-  return(q_result)
-} 
 
 
 #---------------------------------------------------------------------
@@ -361,6 +340,34 @@ hermite <- function (points, z) {
   }
   pp <- sqrt(2 * points) * p2
   c(p1, pp)
+}
+
+gauss.hermite <- function (points, iterlim = 50) {
+  x <- w <- rep(0, points)
+  m <- (points + 1)/2
+  for (i in 1:m) {
+    z <- if (i == 1) 
+      sqrt(2 * points + 1) - 2 * (2 * points + 1)^(-1/6)
+    else if (i == 2) 
+      z - sqrt(points)/z
+    else if (i == 3 || i == 4) 
+      1.9 * z - 0.9 * x[i - 2]
+    else 2 * z - x[i - 2]
+    for (j in 1:iterlim) {
+      z1 <- z
+      p <- hermite(points, z)
+      z <- z1 - p[1]/p[2]
+      if (abs(z - z1) <= 1e-15) 
+        break
+    }
+    if (j == iterlim) 
+      warning("iteration limit exceeded")
+    x[points + 1 - i] <- -(x[i] <- z)
+    w[i] <- w[points + 1 - i] <- 2/p[2]^2
+  }
+  r <- cbind(x * sqrt(2), w/sum(w))
+  colnames(r) <- c("Points", "Weights")
+  r
 }
 
 # compute multivariate Gaussian quadrature points
