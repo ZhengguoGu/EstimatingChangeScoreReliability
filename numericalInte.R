@@ -58,7 +58,7 @@ for(sim in 1: num_condition){
     # in this case, unidimensional
     if(as.numeric(cond[5])==0){
       # in this case, no carry-over effects
-      qpoint <- Qbipoints(n_person = 100, mu = c(0, 0), sigma = matrix(c(1, 0, 0, as.numeric(cond[4])), 2, 2), bd=3)  #simulate quadrature points for pretest and change
+      qpoint <- Qbipoints(n_person = 100, mu = c(0, 0), sigma = matrix(c(1, 0, 0, as.numeric(cond[4])^2), 2, 2), bd=3)  #simulate quadrature points for pretest and change
       variance_d <- 0  # variance of observed change scores over the entire distribution
       expectation_trueD <-0  #expectation of true change score
       expectation_trueD2 <- 0 ##expectation of true change score^2
@@ -86,7 +86,7 @@ for(sim in 1: num_condition){
     }else{
       #in this case, carry-over effect
       #we simulate 1m persons 
-      theta_matrix <- rmvnorm(n = 1000000, mean = c(0, 0), sigma = matrix(c(1, 0, 0, as.numeric(cond[4])), 2, 2))
+      theta_matrix <- rmvnorm(n = 1000000, mean = c(0, 0), sigma = matrix(c(1, 0, 0, as.numeric(cond[4])^2), 2, 2))
       
       responses <- GRM_sim(theta_matrix[, 1], ITEM_PAR[[sim]], id = 1)
       response_pre <- responses[[1]]
@@ -160,6 +160,46 @@ for(sim in 1: num_condition){
        variance_trueD <- expectation_trueD2 - expectation_trueD^2
        rel[sim] <- variance_trueD/variance_d 
        
+     }else{
+       #carry-over effect
+       #we simulate 1m persons 
+       
+       sigma_pre <- matrix(rep(as.numeric(cond[3]), 9), 3, 3)
+       diag(sigma_pre) <- 1
+       sigma_change <- matrix(rep(as.numeric(cond[4])^2 * as.numeric(cond[3]), 9), 3, 3)
+       diag(sigma_change) <- as.numeric(cond[4])^2
+       
+       
+       as.matrix(Matrix::bdiag(sigma_pre, sigma_change))
+       
+       
+       theta_matrix <- mvtnorm::rmvnorm(n = 1000000, mean = rep(0, 6), sigma = as.matrix(Matrix::bdiag(sigma_pre, sigma_change)))
+       
+       responses <- GRM_sim(theta_matrix[, 1:3], ITEM_PAR[[sim]], id = id)
+       response_pre <- responses[[1]]
+       true_pre <- responses[[2]]
+       
+       responses <- GRM_sim(theta_matrix[, 4:6], ITEM_PAR[[sim]], id = id)
+       response_post <- responses[[1]]
+       true_post <- responses[[2]]
+       
+       carryover_results <- carry_over(response_pre, response_post)
+       response_post_strong <- carryover_results[[1]]
+       response_post_weak <- carryover_results[[2]]
+       
+       if (as.matrix(cond[5]) == 10){
+         response_post <- response_post_strong #replace with scores with strong carryover effects
+       } else if (as.matrix(cond[5]) == 1){
+         response_post <- response_post_weak #replace with scores with weak carryover effects
+       }
+       
+       sum_pre <- rowSums(response_pre)
+       sum_true_pre <- rowSums(true_pre)
+       sum_post <- rowSums(response_post)
+       sum_true_post <- rowSums(true_post)
+       truechange_sumscores <- sum_true_post - sum_true_pre
+       change_sumscores <- sum_post - sum_pre
+       rel[sim] <- var(truechange_sumscores)/var(change_sumscores)
      }
     
   }
