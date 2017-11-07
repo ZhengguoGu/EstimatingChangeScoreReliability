@@ -8,6 +8,7 @@
 ##########################################################
 
 library(mvtnorm)
+library(MASS)
 library(Matrix)
 set.seed(110)
 
@@ -160,6 +161,49 @@ for(sim in 1: num_condition){
        variance_trueD <- expectation_trueD2 - expectation_trueD^2
        rel[sim] <- variance_trueD/variance_d 
        
+     }else{
+       #in this case, carry-over effect
+       #we simulate 1m persons 
+       
+       if (as.numeric(cond[3]) == .6){
+         cov_pretest <- .6
+       } else if (as.numeric(cond[3]) == .8){
+         cov_pretest <- .8
+       }
+
+       theta <- Mulchange_sim(num_persons=10000000, dimension = 3, cov_pretest, as.numeric(cond[4]), EMP = FALSE)
+       
+       theta_pre <- theta[[1]]
+       theta_post <- theta[[2]]
+       
+       responses <- GRM_sim(theta_pre, ITEM_PAR[[sim]], id)
+       response_pre <- responses[[1]]
+       true_pre <- responses[[2]]
+       
+       responses <- GRM_sim(theta_post, ITEM_PAR[[sim]], id)
+       response_post <- responses[[1]]
+       true_post <- responses[[2]]
+       
+       carryover_results <- carry_over(response_pre, response_post)
+       response_post_strong <- carryover_results[[1]]
+       response_post_weak <- carryover_results[[2]]
+       
+       
+       if (as.numeric(cond[5]) == 10){
+           response_post <- response_post_strong #replace with scores with strong carryover effects
+        } else if (as.numeric(cond[5]) == 1){
+           response_post <- response_post_weak #replace with scores with weak carryover effects
+        }
+       
+       
+       
+       sum_pre <- rowSums(response_pre)
+       sum_true_pre <- rowSums(true_pre)
+       sum_post <- rowSums(response_post)
+       sum_true_post <- rowSums(true_post)
+       truechange_sumscores <- sum_true_post - sum_true_pre
+       change_sumscores <- sum_post - sum_pre
+       rel[sim] <- var(truechange_sumscores)/var(change_sumscores)
      }
     
   }
