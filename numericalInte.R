@@ -171,7 +171,7 @@ for(sim in 1: num_condition){
          cov_pretest <- .8
        }
 
-       theta <- Mulchange_sim(num_persons=10000000, dimension = 3, cov_pretest, as.numeric(cond[4]), EMP = FALSE)
+       theta <- Mulchange_sim(10000000, dimension = 3, cov_pretest, as.numeric(cond[4]), EMP = FALSE)
        
        theta_pre <- theta[[1]]
        theta_post <- theta[[2]]
