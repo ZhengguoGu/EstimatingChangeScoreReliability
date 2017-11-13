@@ -1,7 +1,7 @@
 library(Lambda4)
 library(psychometric)
 
-#Update: 2017-09-28
+#Update: 2017-11-13
 
 ################################################
 
@@ -37,11 +37,11 @@ for(i in 1:length(test_length)){
 
 
 df <- data.frame(matrix(unlist(conditions), nrow=num_condition, byrow = T))
-colnames(df) <- c('test length', 'parallel item', 'correlated facets',
-                  'maginute of sd', 'carry-over effects')
-library(xlsx)
-library(rJava)
-write.csv(df, 'conditions.csv', sep=',')
+#colnames(df) <- c('test length', 'parallel item', 'correlated facets',
+                 # 'maginute of sd', 'carry-over effects')
+#library(xlsx)
+#library(rJava)
+#write.csv(df, 'conditions.csv', sep=',')
 
 
 
@@ -239,6 +239,9 @@ while (num_test <= nrow(df)){
 
     
       ######## method 0.1: ture-change reliability - cor(true change, observed change) ###########
+      
+      truechange_sumscores <- sum_true_post - sum_true_pre
+      change_sumscores <- sum_post - sum_pre
     
       r_simresults[i, 1] <- (cor(truechange_sumscores, change_sumscores))^2
     
@@ -362,5 +365,5 @@ while (num_test <= nrow(df)){
 
 
 
-save(r_pop, restuls_conditions, simulatedRawdata, file = "D:/ZhengguoProj3/ReproduceSmallSample201704011.RData")
+save(r_pop, ITEM_PAR, restuls_conditions, simulatedRawdata, file = "D:/ZhengguoProj3/ReproduceSmallSample201704011.RData")
 
