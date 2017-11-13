@@ -86,28 +86,27 @@ while (num_test <= nrow(df)){
 
 
 
-
-  #------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------
 
   if (parallel_items == 1) {
   
     itempar <- matrix(NA,num_items,5)
     itempar[,1] <- runif(1,1.5,2.5)   # discrimination
     avg_beta <- runif(1, 0, 1.25)
-    itempar[,2] <- avg_beta - 1
-    itempar[,3] <- avg_beta - .5
-    itempar[,4] <- avg_beta + .5
-    itempar[,5] <- avg_beta + 1
+    itempar[,2] <- avg_beta - .75
+    itempar[,3] <- avg_beta - .25
+    itempar[,4] <- avg_beta + .25
+    itempar[,5] <- avg_beta + .75
   
   } else {
   
     itempar <- matrix(NA,num_items,5)
     itempar[,1] <- runif(num_items,1.5,2.5)  # discrimination
     avg_beta <- runif(num_items, 0, 1.25)
-    itempar[,2] <- avg_beta - 1
-    itempar[,3] <- avg_beta - .5
-    itempar[,4] <- avg_beta + .5
-    itempar[,5] <- avg_beta + 1
+    itempar[,2] <- avg_beta - .75
+    itempar[,3] <- avg_beta - .25
+    itempar[,4] <- avg_beta + .25
+    itempar[,5] <- avg_beta + .75
   
   }
 
@@ -129,7 +128,7 @@ while (num_test <= nrow(df)){
   maxp <- 20  # thus 100 samples (each with 1000 persons) were simulated
   num_persons <- 1000 # number of subjects
   n_sim <- 50 # simulate 1000 datasets
-  num_methods <- 8 #see below, method 0.1 to 2.3
+  num_methods <- 7 #see below, method 0.1 to 2.3
   r_avg <- matrix(NA, maxp, num_methods)
   r_sd <- matrix(NA, maxp, num_methods)
   sample_results <- list()
@@ -153,22 +152,19 @@ while (num_test <= nrow(df)){
     
       EMP <- FALSE
       theta <- Mulchange_sim(num_persons, dimension, cov_pretest, sd_change, EMP)
-    
+      theta_pre <- theta[[1]]
+      theta_post <- theta[[2]]
+      
     }
   
-    theta_pre <- theta[[1]]
-    theta_post <- theta[[2]]
+    
     sample_theta[[p]] <- list(theta_pre, theta_post)
   #-------------------------------------------------------------------
   
   
-    r_simresults <- matrix(NA, n_sim, num_methods)  # 8 methods.
+    r_simresults <- matrix(NA, n_sim, num_methods)  # 7 methods.
   
-    #pre_response <- list()
-    #pre_response_true <- list()
-    #post_response <- list()
-    #post_response_true <- list()
-    #post_response_carry <- list()
+    
     sumpre_response <- list()
     sum_Truepre_response <- list()
     sumpost_response <- list()
@@ -181,15 +177,15 @@ while (num_test <= nrow(df)){
     
       responses <- GRM_sim(theta_pre, itempar, id)
       response_pre <- responses[[1]]
-      #pre_response[[i]] <- response_pre
+   
       true_pre <- responses[[2]]
-      #pre_response_true[[i]] <- true_pre
+    
     
       responses <- GRM_sim(theta_post, itempar, id)
       response_post <- responses[[1]]
-      #post_response[[i]] <- response_post
+   
       true_post <- responses[[2]]
-      #post_response_true[[i]] <- true_post
+   
       
       carryover_results <- carry_over(response_pre, response_post)
       response_post_strong <- carryover_results[[1]]
@@ -229,8 +225,7 @@ while (num_test <= nrow(df)){
       #####################################################################################################################################################
       # Methods for calculating reliability
       #
-      # method 0.1: ture-change reliability - var(true change)/var(observed change)
-      # method 0.2: ture-change reliability - cor(true change, observed change)
+      # method 0.1: ture-change reliability - cor(true change, observed change)
       # 
       # method 1.1: estimated reliability - alpha (i.e. pre and post reliability estimated by alpha )
       # method 1.2: estimated reliability - lambda2 (i.e. pre and post reliability estimated by lambda2)
@@ -241,51 +236,46 @@ while (num_test <= nrow(df)){
       # method 2.3: estimated reliability (item-level) - lambda4 (i.e. change scores at item level are used to estimate reliability by means of lambda4) 
       ###################################################################################################################################################
     
-      ######## method 0.1: ture-change reliability - var(true change)/var(observed change) ###########
+
     
-      truechange_sumscores <- sum_true_post - sum_true_pre
-      change_sumscores <- sum_post - sum_pre
+      ######## method 0.1: ture-change reliability - cor(true change, observed change) ###########
     
-      r_simresults[i, 1] <- var(truechange_sumscores)/var(change_sumscores)
-    
-      ######## method 0.2: ture-change reliability - cor(true change, observed change) ###########
-    
-      r_simresults[i, 2] <- (cor(truechange_sumscores, change_sumscores))^2
+      r_simresults[i, 1] <- (cor(truechange_sumscores, change_sumscores))^2
     
       ######## method 1.1: estimated reliability - alpha (i.e. pre and post reliability estimated by alpha )  #########################
     
       r_pre <- psychometric::alpha(response_pre)  # ! cronback alpha is used here. 
       r_post <- psychometric::alpha(response_post)
     
-      r_simresults[i, 3] <- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
+      r_simresults[i, 2] <- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
       
       ######## method 1.2: estimated reliability - lambda2 (i.e. pre and post reliability estimated by lambda2) #######
     
       r_pre <- Lambda4::lambda2(response_pre)  # ! lambda2 is used here. 
       r_post <- Lambda4::lambda2(response_post)
     
-      r_simresults[i, 4] <- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
+      r_simresults[i, 3] <- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
     
       ######## method 1.3: estimated reliability - lambda4 (i.e. pre and post reliability estimated by lambda4)
     
       r_pre <- Lambda4::quant.lambda4(response_pre)$lambda4.quantile
       r_post <- Lambda4::quant.lambda4(response_post)$lambda4.quantile
       
-      r_simresults[i, 5] <- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
+      r_simresults[i, 4] <- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
     
       ######## method 2.1: estimated reliability (item-level) - alpha (i.e. change scores at item level are used to estimate reliability by means of alpha)   #########################
     
       response_change <- response_post - response_pre
       
-      r_simresults[i, 6] <- psychometric::alpha(response_change)
+      r_simresults[i, 5] <- psychometric::alpha(response_change)
     
       ######## method 2.2: estimated reliability (item-level) - lambda2 (i.e. change scores at item level are used to estimate reliability by means of lambda2) ################
     
-      r_simresults[i, 7] <- Lambda4::lambda2(response_change)
+      r_simresults[i, 6] <- Lambda4::lambda2(response_change)
     
       ########method 2.3: estimated reliability (item-level) - lambda4 (i.e. change scores at item level are used to estimate reliability by means of lambda4) 
      
-      r_simresults[i, 8] <- Lambda4::quant.lambda4(response_change)$lambda4.quantile
+      r_simresults[i, 7] <- Lambda4::quant.lambda4(response_change)$lambda4.quantile
     
     }
     
@@ -307,9 +297,70 @@ while (num_test <= nrow(df)){
   num_test <- num_test + 1  
   
   
+  ############ Calculate population reliability ##################################
+  ### Here we use 1m people to approximate the population reliability
+  
+  if (dimension == 1){
+    
+    theta_pop <- Unichange_sim(1000000, sd_change)
+    theta_pre_pop <- theta_pop[[1]]
+    theta_post_pop <- theta_pop[[2]]
+    
+  } else{
+    
+    EMP <- FALSE
+    theta_pop <- Mulchange_sim(1000000, dimension, cov_pretest, sd_change, EMP)
+    theta_pre_pop <- theta_pop[[1]]
+    theta_post_pop <- theta_pop[[2]]
+  }
+  
+  r_pop <- array()
+   #-------------------------------------------------
+   # simulate graded response data
+   #-------------------------------------------------
+  
+   responses_pop <- GRM_sim(theta_pre_pop, itempar, id)
+   response_pre_pop <- responses_pop[[1]]
+ 
+   true_pre_pop <- responses_pop[[2]]
+   
+   responses_pop <- GRM_sim(theta_post_pop, itempar, id)
+   response_post_pop <- responses_pop[[1]]
+ 
+   true_post_pop <- responses_pop[[2]]
+  
+   carryover_results_pop <- carry_over(response_pre_pop, response_post_pop)
+   response_post_strong_pop <- carryover_results_pop[[1]]
+   response_post_weak_pop <- carryover_results_pop[[2]]
+  
+   
+   if (existence_carryover == 1){
+     if (strong_weak == 1){
+       response_post_pop <- response_post_strong_pop #replace with scores with strong carryover effects
+     } else if (strong_weak == -1){
+       response_post_pop <- response_post_weak_pop #replace with scores with weak carryover effects
+     }
+   }
+  
+  
+   # sum scores
+  
+   sum_pre_pop <- rowSums(response_pre_pop)
+   sum_true_pre_pop <- rowSums(true_pre_pop)
+   sum_post_pop <- rowSums(response_post_pop)
+   sum_true_post_pop <- rowSums(true_post_pop)
+   
+   truechange_sumscores_pop <- sum_true_post_pop - sum_true_pre_pop
+   change_sumscores_pop <- sum_post_pop - sum_pre_pop
+ 
+   r_pop[num_test] <- (cor(truechange_sumscores_pop, change_sumscores_pop))^2
+  
+  
+  
+  
 } # END OF WHILE
 
 
 
-
+save(r_pop, restuls_conditions, simulatedRawdata, file = "D:/ZhengguoProj3/ReproduceSmallSample201704011.RData")
 

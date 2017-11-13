@@ -8,6 +8,7 @@
 ##########################################################
 
 library(mvtnorm)
+library(MASS)
 library(Matrix)
 set.seed(110)
 
@@ -46,7 +47,7 @@ colnames(df) <- c('test length', 'parallel item', 'correlated facets',
 
 load("D:\\Dropbox\\Tilburg office\\Research Individual change\\Project 3 - item difference scores\\20170929 itemPar/itemparLarge.RData")  #desktop at home
 load("/Users/zhengguogu/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170929 itemPar/itemparLarge.RData")  #macbook pro
-
+load("D:\\Dropbox\\Dropbox\\tilburg office\\Research Individual change\\Project 3 - item difference scores\\20170929 itemPar/itemparLarge.RData") #laptop in office
 
 
 rel <- array()  #reliability at the population level
@@ -64,9 +65,9 @@ for(sim in 1: num_condition){
       expectation_trueD2 <- 0 ##expectation of true change score^2
         for(q in 1:length(qpoint$weights)){
           pre_theta <- qpoint$points[q,][1]
-          post_theta <- sum(qpoint$points[q,])
+          post_theta <- sum(qpoint$points[q,])  #i.e., pretest + change
           
-          pre_obs_prob <- GRM_sim_1theta(pre_theta, itempar = ITEM_PAR[[sim]])
+          pre_obs_prob <- GRM_sim_1theta(pre_theta, itempar = ITEM_PAR[[sim]])  #the probabilities of answering each category
           post_obs_prob <- GRM_sim_1theta(post_theta, itempar = ITEM_PAR[[sim]])
           
           pre_distribution <- Phi_X(pre_obs_prob)
@@ -78,15 +79,19 @@ for(sim in 1: num_condition){
           expectation_d2 <- sum(d_distribution[1,]^2 * d_distribution[2,])
           variance_d <- variance_d + (expectation_d2 - expectation_d^2) * qpoint$weights[q]
           
-          expectation_trueD <- expectation_trueD * expectation_d * qpoint$weights[q]
-          expectation_trueD2 <- expectation_trueD2 * expectation_d^2 * qpoint$weights[q]
+          expectation_trueD <- expectation_trueD + expectation_d * qpoint$weights[q]
+          expectation_trueD2 <- expectation_trueD2 + expectation_d^2 * qpoint$weights[q]
         }
       variance_trueD <- expectation_trueD2 - expectation_trueD^2
       rel[sim] <- variance_trueD/variance_d 
     }else{
       #in this case, carry-over effect
       #we simulate 1m persons 
+<<<<<<< HEAD
       theta_matrix <- rmvnorm(n = 1000000, mean = c(0, 0), sigma = matrix(c(1, 0, 0, as.numeric(cond[4])^2), 2, 2))
+=======
+      theta_matrix <- rmvnorm(n = 1000000, mean = c(0, 0), sigma = matrix(c(1, 0, 0, as.numeric(cond[4]))^2, 2, 2))
+>>>>>>> 95369da6084061bd62accc4bf9e85fdb6eea18a7
       
       responses <- GRM_sim(theta_matrix[, 1], ITEM_PAR[[sim]], id = 1)
       response_pre <- responses[[1]]
@@ -139,7 +144,7 @@ for(sim in 1: num_condition){
        
        for(q in 1:length(qpoint$weights)){
          pre_theta <- qpoint$points[q,][1:3]
-         post_theta <- qpoint$points[q,][1:3] + qpoint$points[q,][4:6]
+         post_theta <- qpoint$points[q,][1:3] + qpoint$points[q,][4:6] #pretest + change
          
          pre_obs_prob <- GRM_sim_1theta(pre_theta, itempar = ITEM_PAR[[sim]], id = id)
          post_obs_prob <- GRM_sim_1theta(post_theta, itempar = ITEM_PAR[[sim]], id = id)
@@ -153,14 +158,15 @@ for(sim in 1: num_condition){
          expectation_d2 <- sum(d_distribution[1,]^2 * d_distribution[2,])
          variance_d <- variance_d + (expectation_d2 - expectation_d^2) * qpoint$weights[q]
          
-         expectation_trueD <- expectation_trueD * expectation_d * qpoint$weights[q]
-         expectation_trueD2 <- expectation_trueD2 * expectation_d^2 * qpoint$weights[q]
+         expectation_trueD <- expectation_trueD + expectation_d * qpoint$weights[q]
+         expectation_trueD2 <- expectation_trueD2 + expectation_d^2 * qpoint$weights[q]
        }
        
        variance_trueD <- expectation_trueD2 - expectation_trueD^2
        rel[sim] <- variance_trueD/variance_d 
        
      }else{
+<<<<<<< HEAD
        #carry-over effect
        #we simulate 1m persons 
        
@@ -180,6 +186,27 @@ for(sim in 1: num_condition){
        true_pre <- responses[[2]]
        
        responses <- GRM_sim(theta_matrix[, 4:6], ITEM_PAR[[sim]], id = id)
+=======
+       #in this case, carry-over effect
+       #we simulate 1m persons 
+       
+       if (as.numeric(cond[3]) == .6){
+         cov_pretest <- .6
+       } else if (as.numeric(cond[3]) == .8){
+         cov_pretest <- .8
+       }
+
+       theta <- Mulchange_sim(10000000, dimension = 3, cov_pretest, as.numeric(cond[4]), EMP = FALSE)
+       
+       theta_pre <- theta[[1]]
+       theta_post <- theta[[2]]
+       
+       responses <- GRM_sim(theta_pre, ITEM_PAR[[sim]], id)
+       response_pre <- responses[[1]]
+       true_pre <- responses[[2]]
+       
+       responses <- GRM_sim(theta_post, ITEM_PAR[[sim]], id)
+>>>>>>> 95369da6084061bd62accc4bf9e85fdb6eea18a7
        response_post <- responses[[1]]
        true_post <- responses[[2]]
        
@@ -187,11 +214,22 @@ for(sim in 1: num_condition){
        response_post_strong <- carryover_results[[1]]
        response_post_weak <- carryover_results[[2]]
        
+<<<<<<< HEAD
        if (as.matrix(cond[5]) == 10){
          response_post <- response_post_strong #replace with scores with strong carryover effects
        } else if (as.matrix(cond[5]) == 1){
          response_post <- response_post_weak #replace with scores with weak carryover effects
        }
+=======
+       
+       if (as.numeric(cond[5]) == 10){
+           response_post <- response_post_strong #replace with scores with strong carryover effects
+        } else if (as.numeric(cond[5]) == 1){
+           response_post <- response_post_weak #replace with scores with weak carryover effects
+        }
+       
+       
+>>>>>>> 95369da6084061bd62accc4bf9e85fdb6eea18a7
        
        sum_pre <- rowSums(response_pre)
        sum_true_pre <- rowSums(true_pre)
