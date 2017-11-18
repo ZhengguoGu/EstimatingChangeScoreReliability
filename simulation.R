@@ -307,6 +307,9 @@ while (num_test <= nrow(df)){
   ############ Calculate population reliability ##################################
   ### Here we use 1m people to approximate the population reliability
   
+  #note that I planned to use Monte Carlo, but Wilco suggest that simulating a super 
+  #large sample suffices. But I keep the parallel computing commands here (in case)
+  
   #c2 <- makeCluster(12)
   #registerDoSNOW(c2)
   
