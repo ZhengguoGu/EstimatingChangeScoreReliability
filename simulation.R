@@ -1,8 +1,8 @@
 library(Lambda4)
 library(psychometric)
-library(foreach)
-library(doSNOW)
-library(doRNG)
+#library(foreach)
+#library(doSNOW)
+#library(doRNG)
 
 #Update: 2017-11-13
 
@@ -307,74 +307,74 @@ while (num_test <= nrow(df)){
   ############ Calculate population reliability ##################################
   ### Here we use 1m people to approximate the population reliability
   
-  c2 <- makeCluster(12)
-  registerDoSNOW(c2)
+  #c2 <- makeCluster(12)
+  #registerDoSNOW(c2)
   
-  #note that set.seed() and %dorng% ensure that parallel computing generates reproducable results.
-  set.seed(112)
-  sim_result <- foreach(i = 1:1000, .combine='cbind') %dorng% {
+  #set.seed(112)
+  #sim_result <- foreach(i = 1:1000, .combine='cbind') %dorng% {
+   
+  if (dimension == 1){
     
-    if (dimension == 1){
+    theta_pop <- Unichange_sim(1000000, sd_change)
+    theta_pre_pop <- theta_pop[[1]]
+    theta_post_pop <- theta_pop[[2]]
     
-      theta_pop <- Unichange_sim(1000000, sd_change)
-      theta_pre_pop <- theta_pop[[1]]
-      theta_post_pop <- theta_pop[[2]]
-    
-    } else{
+  } else{
       
-     EMP <- FALSE
-      theta_pop <- Mulchange_sim(1000000, dimension, cov_pretest, sd_change, EMP)
-      theta_pre_pop <- theta_pop[[1]]
-      theta_post_pop <- theta_pop[[2]]
-    }
+    EMP <- FALSE
+    theta_pop <- Mulchange_sim(1000000000, dimension, cov_pretest, sd_change, EMP)
+    theta_pre_pop <- theta_pop[[1]]
+    theta_post_pop <- theta_pop[[2]]
+  }
   
   
-    #-------------------------------------------------
-    # simulate graded response data
-    #-------------------------------------------------
+  #-------------------------------------------------
+  # simulate graded response data
+  #-------------------------------------------------
   
-    responses_pop <- GRM_sim(theta_pre_pop, itempar, id)
-    response_pre_pop <- responses_pop[[1]]
+  responses_pop <- GRM_sim(theta_pre_pop, itempar, id)
+  response_pre_pop <- responses_pop[[1]]
  
-    true_pre_pop <- responses_pop[[2]]
+  true_pre_pop <- responses_pop[[2]]
    
-    responses_pop <- GRM_sim(theta_post_pop, itempar, id)
-    response_post_pop <- responses_pop[[1]]
+  responses_pop <- GRM_sim(theta_post_pop, itempar, id)
+  response_post_pop <- responses_pop[[1]]
  
-    true_post_pop <- responses_pop[[2]]
+  true_post_pop <- responses_pop[[2]]
   
-    carryover_results_pop <- carry_over(response_pre_pop, response_post_pop)
-    response_post_strong_pop <- carryover_results_pop[[1]]
-    response_post_weak_pop <- carryover_results_pop[[2]]
+  carryover_results_pop <- carry_over(response_pre_pop, response_post_pop)
+  response_post_strong_pop <- carryover_results_pop[[1]]
+  response_post_weak_pop <- carryover_results_pop[[2]]
   
    
-    if (existence_carryover == 1){
-      if (strong_weak == 1){
-         response_post_pop <- response_post_strong_pop #replace with scores with strong carryover effects
-       } else if (strong_weak == -1){
-         response_post_pop <- response_post_weak_pop #replace with scores with weak carryover effects
-      }
+  if (existence_carryover == 1){
+    if (strong_weak == 1){
+      response_post_pop <- response_post_strong_pop #replace with scores with strong carryover effects
+    } else if (strong_weak == -1){
+      response_post_pop <- response_post_weak_pop #replace with scores with weak carryover effects
     }
+  }
   
   
     # sum scores
   
-    sum_pre_pop <- rowSums(response_pre_pop)
-    sum_true_pre_pop <- rowSums(true_pre_pop)
-    sum_post_pop <- rowSums(response_post_pop)
-    sum_true_post_pop <- rowSums(true_post_pop)
+  sum_pre_pop <- rowSums(response_pre_pop)
+  sum_true_pre_pop <- rowSums(true_pre_pop)
+  sum_post_pop <- rowSums(response_post_pop)
+  sum_true_post_pop <- rowSums(true_post_pop)
    
-    truechange_sumscores_pop <- sum_true_post_pop - sum_true_pre_pop
-    change_sumscores_pop <- sum_post_pop - sum_pre_pop
+  truechange_sumscores_pop <- sum_true_post_pop - sum_true_pre_pop
+  change_sumscores_pop <- sum_post_pop - sum_pre_pop
  
-    r_population <- (cor(truechange_sumscores_pop, change_sumscores_pop))^2
+  #r_population <- (cor(truechange_sumscores_pop, change_sumscores_pop))^2
   
-    return(r_population)
-  }
-  stopCluster(c2)
+    #return(r_population)
+  #}
+  #stopCluster(c2)
   
-  r_pop[num_test] <- mean(sim_result)
-
+  #r_pop[num_test] <- mean(sim_result)
+  r_pop[num_test] <- (cor(truechange_sumscores_pop, change_sumscores_pop))^2
+  
 } # END OF WHILE
 
 
