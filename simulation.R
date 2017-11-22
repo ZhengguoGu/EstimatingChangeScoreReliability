@@ -382,5 +382,5 @@ while (num_test <= nrow(df)){
 
 
 
-save(r_pop, restuls_conditions, simulatedRawdata, file = "D:/ZhengguoProj3/ReproduceSmallSample201704011.RData")
+save(r_pop, restuls_conditions, simulatedRawdata, file = "D:/ZG/LargeSample20171122.RData")
 
