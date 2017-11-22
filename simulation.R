@@ -56,7 +56,7 @@ df <- data.frame(matrix(unlist(conditions), nrow=num_condition, byrow = T))
 
 restuls_conditions <- list()
 simulatedRawdata <- list()  #this include the simulated theta's and responses. 
-ITEM_PAR <- list()
+#ITEM_PAR <- list()
 r_pop <- array()
 num_test <- 1
 
@@ -114,7 +114,7 @@ while (num_test <= nrow(df)){
   
   }
 
-  ITEM_PAR[[num_test]] <- itempar
+  #ITEM_PAR[[num_test]] <- itempar
   
   id <- vector()
   for(d in 1: dimension){
@@ -382,5 +382,5 @@ while (num_test <= nrow(df)){
 
 
 
-save(r_pop, ITEM_PAR, restuls_conditions, simulatedRawdata, file = "D:/ZhengguoProj3/ReproduceSmallSample201704011.RData")
+save(r_pop, restuls_conditions, simulatedRawdata, file = "D:/ZhengguoProj3/ReproduceSmallSample201704011.RData")
 
