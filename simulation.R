@@ -16,7 +16,7 @@ set.seed(110)
 
 test_length <- c(9, 21, 36)
 parallel_item <- c(1, 0) # 1== yes, 0 == no
-correlated_facets <- c(1, .6, .8) #if == 1, then dimension of theta is 1, otherwise 3 dimensions
+correlated_facets <- c(1, .1, .5) #if == 1, then dimension of theta is 1, otherwise 3 dimensions
 magnitude_sd <- c(sqrt(.14), sqrt(.5))
 strongweak_carry <- c(0, 10, 1) #0 == no, 10 == strong, 1 == weak
 
@@ -68,12 +68,12 @@ while (num_test <= nrow(df)){
   
   if(df[num_test, 3] == 1){
       dimension <- 1
-  } else if (df[num_test, 3] == .6){
+  } else if (df[num_test, 3] == .1){
       dimension <- 3
-      cov_pretest <- .6
-  } else if (df[num_test, 3] == .8){
+      cov_pretest <- .1
+  } else if (df[num_test, 3] == .5){
       dimension <- 3
-      cov_pretest <- .8
+      cov_pretest <- .5
   }
 
   sd_change <- df[num_test, 4]
@@ -325,7 +325,7 @@ while (num_test <= nrow(df)){
   } else{
       
     EMP <- FALSE
-    theta_pop <- Mulchange_sim(1000000000, dimension, cov_pretest, sd_change, EMP)
+    theta_pop <- Mulchange_sim(1000000, dimension, cov_pretest, sd_change, EMP)
     theta_pre_pop <- theta_pop[[1]]
     theta_post_pop <- theta_pop[[2]]
   }
