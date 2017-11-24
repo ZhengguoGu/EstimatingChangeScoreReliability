@@ -301,7 +301,6 @@ while (num_test <= nrow(df)){
   
   restuls_conditions[[num_test]] <- list(sample_results, r_avg, r_sd)
   simulatedRawdata[[num_test]] <- list(sample_theta, simResponses)
-  num_test <- num_test + 1  
   
   
   ############ Calculate population reliability ##################################
@@ -378,6 +377,9 @@ while (num_test <= nrow(df)){
   #r_pop[num_test] <- mean(sim_result)
   r_pop[num_test] <- (cor(truechange_sumscores_pop, change_sumscores_pop))^2
   
+  num_test <- num_test + 1
+  
+  print(num_test)
 } # END OF WHILE
 
 
