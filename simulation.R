@@ -6,7 +6,9 @@ library(psychometric)
 
 #Update: 2017-11-13
 
-################################################
+#Note: On Jan 21, 2018, Zhengguo checked this file to add a few annotated descriptions. 
+
+######################### START ###############################################################################################################
 
 set.seed(110)
 
@@ -17,7 +19,7 @@ set.seed(110)
 test_length <- c(9, 21, 36)
 parallel_item <- c(1, 0) # 1== yes, 0 == no
 correlated_facets <- c(1, .1, .5) #if == 1, then dimension of theta is 1, otherwise 3 dimensions
-magnitude_sd <- c(sqrt(.14), sqrt(.5))
+magnitude_sd <- c(sqrt(.14), sqrt(.5))  # .14 == small variance, .5 == large variance.
 strongweak_carry <- c(0, 10, 1) #0 == no, 10 == strong, 1 == weak
 
 num_condition <- length(test_length)*length(parallel_item)*length(correlated_facets)*length(magnitude_sd)*length(strongweak_carry)
@@ -55,9 +57,8 @@ df <- data.frame(matrix(unlist(conditions), nrow=num_condition, byrow = T))
 #---------------------------------------------------------------------------------
 
 restuls_conditions <- list()
-simulatedRawdata <- list()  #this include the simulated theta's and responses. 
-#ITEM_PAR <- list()
-r_pop <- array()
+simulatedRawdata <- list()  # this include the simulated theta's and responses. 
+r_pop <- array()            # this is to save the population-level reliability. 
 num_test <- 1
 
 while (num_test <= nrow(df)){
@@ -82,10 +83,11 @@ while (num_test <= nrow(df)){
       existence_carryover <- 0
   } else if (df[num_test, 5] == 10){
       existence_carryover <- 1
-      strong_weak <- 1  # 1: strong !!!note that this part might be a bit confusing
+      strong_weak <- 1  # 1: strong carry-over effect; Please dont be confused: Later a function carry_over() will be called, and this function recognize 1 as strong effect. 
+                        # I know that this setup (i.e., first coded as 10 and then swtich to 1) is a bit tedious. 
   } else if (df[num_test, 5] == 1){
       existence_carryover <- 1
-      strong_weak <- -1  # -1: weak !!!note that this part might be a bit confusing
+      strong_weak <- -1  # -1: weak carry-over effect (please see the comment above.)
   }
 
 
@@ -129,9 +131,9 @@ while (num_test <= nrow(df)){
   #####################################################
 
   
-  maxp <- 20  # thus 100 samples (each with 1000 persons) were simulated
-  num_persons <- 1000 # number of subjects
-  n_sim <- 50 # simulate 1000 datasets
+  maxp <- 20  # thus 20 samples of persons are simulated from the population
+  num_persons <- 1000 # number of persons
+  n_sim <- 50 # each sample generates 50 item-score datasets
   num_methods <- 7 #see below, method 0.1 to 2.3
   r_avg <- matrix(NA, maxp, num_methods)
   r_sd <- matrix(NA, maxp, num_methods)
@@ -229,7 +231,9 @@ while (num_test <= nrow(df)){
       #####################################################################################################################################################
       # Methods for calculating reliability
       #
-      # method 0.1: ture-change reliability - cor(true change, observed change)
+      # method 0.1: ture-change reliability - cor(true change, observed change)^2  (Note, because later we approximate the true change-score reliability 
+      #                                                                             in the population, method 0.1 is not used in the paper. But it is nice
+      #                                                                             to check it.)
       # 
       # method 1.1: estimated reliability - alpha (i.e. pre and post reliability estimated by alpha )
       # method 1.2: estimated reliability - lambda2 (i.e. pre and post reliability estimated by lambda2)
@@ -242,7 +246,7 @@ while (num_test <= nrow(df)){
     
 
     
-      ######## method 0.1: ture-change reliability - cor(true change, observed change) ###########
+      ######## method 0.1: ture-change reliability - cor(true change, observed change)^2 ###########
       
       truechange_sumscores <- sum_true_post - sum_true_pre
       change_sumscores <- sum_post - sum_pre
@@ -291,8 +295,7 @@ while (num_test <= nrow(df)){
     r_avg[p, ] <- colSums(r_simresults)/n_sim
     r_sd[p, ] <- apply(r_simresults, 2, sd)
     
-    simResponses[[p]] <- list(sumpre_response, sum_Truepre_response, sumpost_response, sum_Truepost_response) #Note the following has been removed pre_response, pre_response_true, post_response,
-    #post_response_true, post_response_carry, 
+    simResponses[[p]] <- list(sumpre_response, sum_Truepre_response, sumpost_response, sum_Truepost_response) 
     
     p <- p+1
     
@@ -304,7 +307,7 @@ while (num_test <= nrow(df)){
   
   
   ############ Calculate population reliability ##################################
-  ### Here we use 1m people to approximate the population reliability
+  ### Here we use 1 million people to approximate the population reliability
   
   #note that I planned to use Monte Carlo, but Wilco suggest that simulating a super 
   #large sample suffices. But I keep the parallel computing commands here (in case)
