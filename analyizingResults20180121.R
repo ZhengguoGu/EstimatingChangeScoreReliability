@@ -4,17 +4,18 @@
 #
 #
 # Zhengguo Gu, Tilburg University
-# Last update: 03/June/2017
+# Last update: 21/January/2018
 #########################################################################################################
 
 
 
 
-############### PART I: Bias and precision #######################################################################
+############### 0. Check data #######################################################################
+# Note: There are in total 
 
-# 0.1 Load data - large sample size (run the following analysis and then repeat with small sample size)
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
- #load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
+# 0.1 Load data 
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/LargeSample20171126.RData")
+ #load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/SmallSample20171126.RData")
 
 # 0.2 Review the structure of results
 
@@ -24,275 +25,163 @@ length(restuls_conditions[[1]]) # 3 (lists)--> the first list contains all the r
 # the third list contains the SD (might not be useful at this moment)
 
 length(restuls_conditions[[1]][[1]]) # 20 (lists) --> each list contains the reliability estimates for 50 samples of responses
-str(restuls_conditions[[1]][[1]][[1]]) # num [1:50, 1:8] 
+str(restuls_conditions[[1]][[1]][[1]]) # num [1:50, 1:7] --> 7 methods (the first column - i.e., the first method - is not useful, because it will be replaced 
+                                       # by the population reliability; see simulation.R)
 
-str(restuls_conditions[[1]][[2]]) # num [1:20, 1:8] --> reliability estimates of 20 samples from persons under condition cell 1 
-str(restuls_conditions[[1]][[3]]) # num [1:20, 1:8]
-
-# 0.3 check design factors
-df$`correlated facets`==1     # unidimensional data
-df$`correlated facets`!=1     # multidimensional data
-df$`carry-over effects`==0    # No Carry-over effects
-df$`carry-over effects`!=0    # Carry-over effects
+str(restuls_conditions[[1]][[2]]) # num [1:20, 1:8] --> the average reliability for each sample of persons (columns are 7 methods). NOT USED
+str(restuls_conditions[[1]][[3]]) # num [1:20, 1:8] --> the SD. NOT USED.
 
 
 
-######### 1. draw bias and precision table - 4 situations: LEVEL 1 ##############
+############## 1. Research Question 1: Bias #########################################################
 
-# first large sample
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
-for(cel in 1:108){
+D_reliability <- matrix(NA, 108, 6) # this is for calculating the bias for the 6 change-score reliability estimates for each cell. 
+Est_reliability <- matrix(NA, 108, 6) # this is useful for Research Question 2
+for (c in 1:108){ # cth cell
   
-  rel_data <- restuls_conditions[[cel]][[2]][, 2:8]
-  bias <- matrix(NA, 20, 6)
-  bias[, 1] <- rel_data[,2]-rel_data[,1]
-  bias[, 2] <- rel_data[,3]-rel_data[,1]
-  bias[, 3] <- rel_data[,4]-rel_data[,1]
-  bias[, 4] <- rel_data[,5]-rel_data[,1]
-  bias[, 5] <- rel_data[,6]-rel_data[,1]
-  bias[, 6] <- rel_data[,7]-rel_data[,1]
-  colnames(bias) <- c("trad_alpha", "trad_l2", "trad_l4", "item_alpha", "item_l2", "item_l4")
-  file_name <- paste("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/largeS/", "biaslargesample_", cel, ".txt", sep="")
-  write.table(bias, file_name, sep = "\t", col.names = T)  
+  temp_recorder <- matrix(NA, 20, 6)
+  temp_recorder_rel <- matrix(NA, 20, 6)
+  for(l in 1:20){ # lth sample
+     temp_recorder[l, ] <- colSums(restuls_conditions[[c]][[1]][[l]][, 2:7] - r_pop[c])  #cth cell, lth sample
+     temp_recorder_rel[l, ] <- colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])  
+    }
   
-  
-  rel_precision <- cbind(restuls_conditions[[cel]][[2]][, 2:8], restuls_conditions[[cel]][[3]][, 3:8])  #note that precision of true reliability is not needed, thus [, 3:8]
-  colnames(rel_precision) <- c("rel_true", "rel_trad_alpha", "rel_trad_l2", "rel_trad_l4", "rel_item_alpha", "rel_item_l2", "rel_item_l4", 
-                               "precision_trad_alpha", "precision_trad_l2", "precision_trad_l4", "precision_item_alpha", "precision_item_l2", "precision_item_l4")
-  file_name <- paste("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/largeS/", "precisionlargesample_", cel, ".txt", sep="")
-  write.table(rel_precision, file_name, sep = "\t", col.names = T) 
+  D_reliability[c, ] <- colSums(temp_recorder) / 1000
+  Est_reliability[c, ] <- colSums(temp_recorder_rel) / 1000 # the average estimated reliability across 1000 item-score datasets. Useful for Q2 and Q4. 
 }
 
-# now small sample
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
-for(cel in 1:108){
+Q1_Bias <- D_reliability
+
+############# 2. Research Question 2: Precision #######################################################
+
+Q2_Precision <- matrix(NA, 108, 6)
+for (c in 1:108){ # cth cell
   
-  
-  rel_data <- restuls_conditions[[cel]][[2]][, 2:8]
-  bias <- matrix(NA, 20, 6)
-  bias[, 1] <- rel_data[,2]-rel_data[,1]
-  bias[, 2] <- rel_data[,3]-rel_data[,1]
-  bias[, 3] <- rel_data[,4]-rel_data[,1]
-  bias[, 4] <- rel_data[,5]-rel_data[,1]
-  bias[, 5] <- rel_data[,6]-rel_data[,1]
-  bias[, 6] <- rel_data[,7]-rel_data[,1]
-  colnames(bias) <- c("trad_alpha", "trad_l2", "trad_l4", "item_alpha", "item_l2", "item_l4")
-  file_name <- paste("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/smallS/", "biassmallsample_", cel, ".txt", sep="")
-  write.table(bias, file_name, sep = "\t", col.names = T)  
-  
-  
-  rel_precision <- cbind(restuls_conditions[[cel]][[2]][, 2:8], restuls_conditions[[cel]][[3]][, 3:8])  #note that precision of true reliability is not needed, thus [, 3:8]
-  colnames(rel_precision) <- c("rel_true", "rel_trad_alpha", "rel_trad_l2", "rel_trad_l4", "rel_item_alpha", "rel_item_l2", "rel_item_l4", 
-                               "precision_trad_alpha", "precision_trad_l2", "precision_trad_l4", "precision_item_alpha", "precision_item_l2", "precision_item_l4")
-  file_name <- paste("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/smallS/", "precisionsmallsample_", cel, ".txt", sep="")
-  write.table(rel_precision, file_name, sep = "\t", col.names = T) 
-}
-
-
-
-######### 2. bias and precision table - 4 situations: LEVEL 2 ##############
-#large sample size
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
-
-pop_re <- matrix(NA, nrow = 108, ncol = 7)
-pop_sd <- matrix(NA, nrow = 108, ncol = 7)
-for (i in 1:108){
-  pop_re[i, ] <- colMeans(restuls_conditions[[i]][[2]][, 2:8])
-  pop_sd[i, ] <- apply(restuls_conditions[[i]][[2]][, 2:8], 2, sd)
-}
-
-
-
-rel_bias <- matrix(NA, 108, 6)
-rel_bias[, 1] <- pop_re[,2] - pop_re[,1]
-rel_bias[, 2] <- pop_re[,3] - pop_re[,1]
-rel_bias[, 3] <- pop_re[,4] - pop_re[,1]
-rel_bias[, 4] <- pop_re[,5] - pop_re[,1]
-rel_bias[, 5] <- pop_re[,6] - pop_re[,1]
-rel_bias[, 6] <- pop_re[,7] - pop_re[,1]
-colnames(rel_bias) <- c("trad_alpha", "trad_l2", "trad_l4", "item_alpha", "item_l2", "item_l4")
-
-rel_precision <- cbind(pop_re, pop_sd[, 2:7])
-colnames(rel_precision) <- c("rel_true", "rel_trad_alpha", "rel_trad_l2", "rel_trad_l4", "rel_item_alpha", "rel_item_l2", "rel_item_l4", 
-                             "precision_trad_alpha", "precision_trad_l2", "precision_trad_l4", "precision_item_alpha", "precision_item_l2", "precision_item_l4")
-
-celnr <- 1:108
-situation <- 1 # "Unidimensional + No Carryover"
-index <- df$`correlated facets`==1 & df$`carry-over effects`==0
-write.table(cbind(celnr[index], rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasLargeLevel2SIT1.txt", sep = "\t", col.names = T) 
-write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionLargeLevel2SIT1.txt", sep = "\t", col.names = T) 
-
-
-situation <- 2 # "Unidimensional + Carryover"
-index <- df$`correlated facets`==1 & df$`carry-over effects`!=0
-write.table(cbind(celnr[index],rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasLargeLevel2SIT2.txt", sep = "\t", col.names = T) 
-write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionLargeLevel2SIT2.txt", sep = "\t", col.names = T) 
-
-situation <- 3 # "Multidimensional + No Carryover"
-index <- df$`correlated facets`!=1 & df$`carry-over effects`==0
-write.table(cbind(celnr[index],rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasLargeLevel2SIT3.txt", sep = "\t", col.names = T) 
-write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionLargeLevel2SIT3.txt", sep = "\t", col.names = T) 
-
-situation <- 4 #"Multidimensional + Carryover"
-index <- df$`correlated facets`!=1 & df$`carry-over effects`!=0
-write.table(cbind(celnr[index],rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasLargeLevel2SIT4.txt", sep = "\t", col.names = T) 
-write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionLargeLevel2SIT4.txt", sep = "\t", col.names = T) 
-
-
-
-
-
-
-#small sample size
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
-
-pop_re <- matrix(NA, nrow = 108, ncol = 7)
-pop_sd <- matrix(NA, nrow = 108, ncol = 7)
-for (i in 1:108){
-  pop_re[i, ] <- colMeans(restuls_conditions[[i]][[2]][, 2:8])
-  pop_sd[i, ] <- apply(restuls_conditions[[i]][[2]][, 2:8], 2, sd)
-}
-
-
-
-rel_bias <- matrix(NA, 108, 6)
-rel_bias[, 1] <- pop_re[,2] - pop_re[,1]
-rel_bias[, 2] <- pop_re[,3] - pop_re[,1]
-rel_bias[, 3] <- pop_re[,4] - pop_re[,1]
-rel_bias[, 4] <- pop_re[,5] - pop_re[,1]
-rel_bias[, 5] <- pop_re[,6] - pop_re[,1]
-rel_bias[, 6] <- pop_re[,7] - pop_re[,1]
-colnames(rel_bias) <- c("trad_alpha", "trad_l2", "trad_l4", "item_alpha", "item_l2", "item_l4")
-
-rel_precision <- cbind(pop_re, pop_sd[, 2:7])
-colnames(rel_precision) <- c("rel_true", "rel_trad_alpha", "rel_trad_l2", "rel_trad_l4", "rel_item_alpha", "rel_item_l2", "rel_item_l4", 
-                             "precision_trad_alpha", "precision_trad_l2", "precision_trad_l4", "precision_item_alpha", "precision_item_l2", "precision_item_l4")
-
-celnr <- 1:108
-situation <- 1 # "Unidimensional + No Carryover"
-index <- df$`correlated facets`==1 & df$`carry-over effects`==0
-write.table(cbind(celnr[index], rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasSmallLevel2SIT1.txt", sep = "\t", col.names = T) 
-write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionSmallLevel2SIT1.txt", sep = "\t", col.names = T) 
-
-
-situation <- 2 # "Unidimensional + Carryover"
-index <- df$`correlated facets`==1 & df$`carry-over effects`!=0
-write.table(cbind(celnr[index],rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasSmallLevel2SIT2.txt", sep = "\t", col.names = T) 
-write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionSmallLevel2SIT2.txt", sep = "\t", col.names = T) 
-
-situation <- 3 # "Multidimensional + No Carryover"
-index <- df$`correlated facets`!=1 & df$`carry-over effects`==0
-write.table(cbind(celnr[index],rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasSmallLevel2SIT3.txt", sep = "\t", col.names = T) 
-write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionSmallLevel2SIT3.txt", sep = "\t", col.names = T) 
-
-situation <- 4 #"Multidimensional + Carryover"
-index <- df$`correlated facets`!=1 & df$`carry-over effects`!=0
-write.table(cbind(celnr[index],rel_bias[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_biasSmallLevel2SIT4.txt", sep = "\t", col.names = T) 
-write.table(cbind(celnr[index],rel_precision[index, ]), "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170603tables/rel_precisionSmallLevel2SIT4.txt", sep = "\t", col.names = T) 
-
-
-
-
-
-
-######### 3. distance measure:  part 1 ######################################
-
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
-
-pop_re <- matrix(NA, nrow = 108, ncol = 8)
-pop_sd <- matrix(NA, nrow = 108, ncol = 8)
-for (i in 1:108){
-  pop_re[i, ] <- colMeans(restuls_conditions[[i]][[2]])
-  pop_sd[i, ] <- apply(restuls_conditions[[i]][[2]], 2, sd)
-}
-
-population_rel1SD_lower <- pop_re[, 2] - pop_sd[, 2]  # -1SD
-population_rel1SD_upper <- pop_re[, 2] + pop_sd[, 2]  # +1SD
-
-population_rel3SD_lower <- pop_re[, 2] - 3*pop_sd[, 2]  # -3SD
-population_rel3SD_upper <- pop_re[, 2] + 3*pop_sd[, 2]  # +3SD
-
-SDrange1SD <- cbind(population_rel1SD_lower, population_rel1SD_upper)
-SDrange3SD <- cbind(population_rel3SD_lower, population_rel3SD_upper)
-
-SD1sum_in_regionTraAlpha <- array() # # of estimated reliablity within the region of +/- 1SD: traditional + alpha
-SD1sum_in_regionTraL2 <- array()    # # of estimated reliablity within the region of +/- 1SD: traditional + lambda 2
-SD1sum_in_regionTraL4 <- array()    # # of estimated reliablity within the region of +/- 1SD: traditional + lambda 4
-
-SD1sum_in_regionItemAlpha <- array() # # of estimated reliablity within the region of +/- 1SD: Item method + alpha
-SD1sum_in_regionItemL2 <- array()    # # of estimated reliablity within the region of +/- 1SD: Item method + lambda 2
-SD1sum_in_regionItemL4 <- array()    # # of estimated reliablity within the region of +/- 1SD: Item method + lambda 4
-
-SD3sum_in_regionTraAlpha <- array() # # of estimated reliablity within the region of +/- 3SD: traditional + alpha
-SD3sum_in_regionTraL2 <- array()    # # of estimated reliablity within the region of +/- 3SD: traditional + lambda 2
-SD3sum_in_regionTraL4 <- array()    # # of estimated reliablity within the region of +/- 3SD: traditional + lambda 4
-
-SD3sum_in_regionItemAlpha <- array() # # of estimated reliablity within the region of +/- 3SD: Item method + alpha
-SD3sum_in_regionItemL2 <- array()    # # of estimated reliablity within the region of +/- 3SD: Item method + lambda 2
-SD3sum_in_regionItemL4 <- array()    # # of estimated reliablity within the region of +/- 3SD: Item method + lambda 4
-
-for(cel in 1:108){
-
-  SD1sum_in_regionTraAlpha[cel] <- 0 # # of estimated reliablity within the region of +/- 1SD: traditional + alpha
-  SD1sum_in_regionTraL2[cel] <- 0    # # of estimated reliablity within the region of +/- 1SD: traditional + lambda 2
-  SD1sum_in_regionTraL4[cel] <- 0    # # of estimated reliablity within the region of +/- 1SD: traditional + lambda 4
-
-  SD1sum_in_regionItemAlpha[cel] <- 0 # # of estimated reliablity within the region of +/- 1SD: Item method + alpha
-  SD1sum_in_regionItemL2[cel] <- 0    # # of estimated reliablity within the region of +/- 1SD: Item method + lambda 2
-  SD1sum_in_regionItemL4[cel] <- 0    # # of estimated reliablity within the region of +/- 1SD: Item method + lambda 4
-
-  SD3sum_in_regionTraAlpha[cel] <- 0 # # of estimated reliablity within the region of +/- 3SD: traditional + alpha
-  SD3sum_in_regionTraL2[cel] <- 0    # # of estimated reliablity within the region of +/- 3SD: traditional + lambda 2
-  SD3sum_in_regionTraL4[cel] <- 0    # # of estimated reliablity within the region of +/- 3SD: traditional + lambda 4
-
-  SD3sum_in_regionItemAlpha[cel] <- 0 # # of estimated reliablity within the region of +/- 3SD: Item method + alpha
-  SD3sum_in_regionItemL2[cel] <- 0    # # of estimated reliablity within the region of +/- 3SD: Item method + lambda 2
-  SD3sum_in_regionItemL4[cel] <- 0    # # of estimated reliablity within the region of +/- 3SD: Item method + lambda 4
-
-  for(l in 1:20){
-  
-    SD1sum_in_regionTraAlpha[cel] <- SD1sum_in_regionTraAlpha[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,3] <= SDrange1SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,3] >= SDrange1SD[cel, 1])
-    SD1sum_in_regionTraL2[cel] <- SD1sum_in_regionTraL2[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,4] <= SDrange1SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,4] >= SDrange1SD[cel, 1])
-    SD1sum_in_regionTraL4[cel] <- SD1sum_in_regionTraL4[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,5] <= SDrange1SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,5] >= SDrange1SD[cel, 1])
-  
-    SD3sum_in_regionTraAlpha[cel] <- SD3sum_in_regionTraAlpha[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,3] <= SDrange3SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,3] >= SDrange3SD[cel, 1])
-    SD3sum_in_regionTraL2[cel] <- SD3sum_in_regionTraL2[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,4] <= SDrange3SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,4] >= SDrange3SD[cel, 1])
-    SD3sum_in_regionTraL4[cel] <- SD3sum_in_regionTraL4[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,5] <= SDrange3SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,5] >= SDrange3SD[cel, 1])
-  
-    SD1sum_in_regionItemAlpha[cel] <- SD1sum_in_regionItemAlpha[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,6] <= SDrange1SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,6] >= SDrange1SD[cel, 1])
-    SD1sum_in_regionItemL2[cel] <- SD1sum_in_regionItemL2[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,7] <= SDrange1SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,7] >= SDrange1SD[cel, 1])
-    SD1sum_in_regionItemL4[cel] <- SD1sum_in_regionItemL4[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,8] <= SDrange1SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,8] >= SDrange1SD[cel, 1])
-  
-    SD3sum_in_regionItemAlpha[cel] <- SD3sum_in_regionItemAlpha[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,6] <= SDrange3SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,6] >= SDrange3SD[cel, 1])
-    SD3sum_in_regionItemL2[cel] <- SD3sum_in_regionItemL2[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,7] <= SDrange3SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,7] >= SDrange3SD[cel, 1])
-    SD3sum_in_regionItemL4[cel] <- SD3sum_in_regionItemL4[cel] + sum(restuls_conditions[[cel]][[1]][[l]][,8] <= SDrange3SD[cel, 2] & restuls_conditions[[cel]][[1]][[l]][,8] >= SDrange3SD[cel, 1])
+  temp_recorder <- matrix(NA, 20, 6)
+  for(l in 1:20){ # lth sample
+    temp_recorder[l, ] <- colSums(sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, Est_reliability[c, ], "-")^2)  #cth cell, lth sample
   }
-}  
+  Q2_Precision[c, ] <- sqrt(colSums(temp_recorder) / 999)
+ 
+}
 
-dist_measureSD <- cbind(SD1sum_in_regionTraAlpha, SD3sum_in_regionTraAlpha, SD1sum_in_regionTraL2, SD3sum_in_regionTraL2, 
-                        SD1sum_in_regionTraL4, SD3sum_in_regionTraL4, SD1sum_in_regionItemAlpha, SD3sum_in_regionItemAlpha,
-                        SD1sum_in_regionItemL2, SD3sum_in_regionItemL2, SD1sum_in_regionItemL4, SD3sum_in_regionItemL4)/1000
-dist_measureSD <- cbind(pop_sd[, 2], dist_measureSD)  # this is the matrix containing the 
-colnames(dist_measureSD)[1] <- "1SD"
-dist_measureSD <- cbind(dist_measureSD, df)
-# 
-situation <- 1 # "Unidimensional + No Carryover"
-situation <- 2 # "Unidimensional + Carryover"
-situation <- 3 # "Multidimensional + No Carryover"
-situation <- 4 #"Multidimensional + Carryover"
 
-if(situation == 1){
-  index <- df$`correlated facets`==1 & df$`carry-over effects`==0
-} else if (situation == 2){
-  index <- df$`correlated facets`==1 & df$`carry-over effects`!=0
-} else if (situation == 3){
-  index <- df$`correlated facets`!=1 & df$`carry-over effects`==0
-} else if (situation == 4){
-  index <- df$`correlated facets`!=1 & df$`carry-over effects`!=0
-} 
+############# 3. Research Question 3: Proportion of variance in bias due to sampling at Level 2 ##################################
+SS_L2 <- matrix(NA, 108, 6)
+SS_L1 <- matrix(NA, 108, 6)
+SS_Total <- matrix(NA, 108, 6)
+for (c in 1:108){ # cth cell
+  
+  SS_L2_temp <- matrix(NA, 20, 6)
+  SS_L1_temp <- matrix(NA, 20, 6)
+  SS_Total_temp <- matrix(NA, 20, 6)
+  for(l in 1:20){ # lth sample
+    SS_L2_temp[l, ] <- 50*(colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50 - r_pop[c])^2
+    SS_L1_temp[l, ] <- colSums(sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50, "-")^2)
+    SS_Total_temp[l, ] <- colSums((restuls_conditions[[c]][[1]][[l]][, 2:7] - r_pop[c])^2)
+  }
+  
+  SS_L2[c, ] <- colSums(SS_L2_temp)
+  SS_L1[c, ] <- colSums(SS_L1_temp)
+  SS_Total[c, ] <- colSums(SS_Total_temp)
+}
+((SS_L2 + SS_L1) - SS_Total)> .0000001  # this is to verify that SS_Total = SS_L1 + SS_L2, note that rounding errors exist.
 
-resultdistmeasureSD <- dist_measureSD[index, ]
+proportion_L2_Total <- matrix(NA, 108, 6)
+for(c in 1:108){
+  for (m in 1:6){
+    proportion_L2_Total[c, m] <- SS_L2[c, m]/SS_Total[c, m]
+  }
+}
+
+
+############# 4. Research Question 4: Proportion of variance in precision due to sampling at Level 2  ############################
+SS_L2_p <- matrix(NA, 108, 6)
+SS_L1_p <- matrix(NA, 108, 6)
+SS_Total_p <- matrix(NA, 108, 6)
+
+for (c in 1:108){ # cth cell
+  
+  SS_L2_temp <- matrix(NA, 20, 6)
+  SS_L1_temp <- matrix(NA, 20, 6)
+  SS_Total_temp <- matrix(NA, 20, 6)
+  for(l in 1:20){ # lth sample
+    SS_L2_temp[l, ] <- 50*(colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50 - Est_reliability[c, ])^2
+    SS_L1_temp[l, ] <- colSums(sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50, "-")^2)
+    SS_Total_temp[l, ] <- colSums((restuls_conditions[[c]][[1]][[l]][, 2:7] - r_pop[c])^2)
+  }
+  
+  SS_L2_p[c, ] <- colSums(SS_L2_temp)
+  SS_L1_p[c, ] <- colSums(SS_L1_temp)
+  SS_Total_p[c, ] <- colSums(SS_Total_temp)
+}
+
+((SS_L2_p + SS_L1_p) - SS_Total_p)> .0000001 
+
+proportion_L2_Total_p <- matrix(NA, 108, 6)
+for(c in 1:108){
+  for (m in 1:6){
+    proportion_L2_Total_p[c, m] <- SS_L2_p[c, m]/SS_Total_p[c, m]
+  }
+}
+
+
+
+####################### Summarize results in terms of 4 situations  ############################
+# situation1 --> "Unidimensional + No Carryover"
+# situation2 --> "Unidimensional + Carryover"
+# situation3 --> "Multidimensional + No Carryover"
+# situation4 --> "Multidimensional + Carryover"
+
+
+test_length <- c(9, 21, 36)
+parallel_item <- c(1, 0) # 1== yes, 0 == no
+correlated_facets <- c(1, .1, .5) #if == 1, then dimension of theta is 1, otherwise 3 dimensions
+magnitude_sd <- c(sqrt(.14), sqrt(.5))  # .14 == small variance, .5 == large variance.
+strongweak_carry <- c(0, 10, 1) #0 == no, 10 == strong, 1 == weak
+
+num_condition <- length(test_length)*length(parallel_item)*length(correlated_facets)*length(magnitude_sd)*length(strongweak_carry)
+conditions <- list()
+
+p <- 1
+for(i in 1:length(test_length)){
+  for (j in 1:length(parallel_item)){
+    for (k in 1:length(correlated_facets)){
+      for(l in 1:length(magnitude_sd)){
+        for(m in 1:length(strongweak_carry)){
+          
+          conditions[[p]] <- c(test_length[i], parallel_item[j], correlated_facets[k], magnitude_sd[l], strongweak_carry[m])
+          p <- p + 1
+        }
+      }
+    }
+  }
+}
+
+
+df <- data.frame(matrix(unlist(conditions), nrow=num_condition, byrow = T))
+colnames(df) <- c('test length', 'parallel item', 'correlated facets','maginute of sd', 'carry-over effects')
+
+
+situ1 <- df$`correlated facets`==1 & df$`carry-over effects`==0
+situ2 <- df$`correlated facets`==1 & df$`carry-over effects`!=0
+situ3 <- df$`correlated facets`!=1 & df$`carry-over effects`==0
+situ4 <- df$`correlated facets`!=1 & df$`carry-over effects`!=0
+
+
+# summurize results regarding bias
+
+
+write.csv(Q1_Bias[situ1, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ1_LargeSample.csv")
+write.csv(Q1_Bias[situ2, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ2_LargeSample.csv")
+write.csv(Q1_Bias[situ3, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ3_LargeSample.csv")
+write.csv(Q1_Bias[situ4, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ4_LargeSample.csv")
+
+write.csv(Q2_Precision[situ1, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ1_LargeSample.csv")
+write.csv(Q2_Precision[situ2, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ2_LargeSample.csv")
+write.csv(Q2_Precision[situ3, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ3_LargeSample.csv")
+write.csv(Q2_Precision[situ4, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ4_LargeSample.csv")
+
 
 ############# 4.  given the 108 cells, which cells generate negative reliabilites? ####################
 load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
