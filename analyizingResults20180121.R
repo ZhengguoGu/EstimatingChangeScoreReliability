@@ -169,16 +169,29 @@ situ3 <- df$`correlated facets`!=1 & df$`carry-over effects`==0
 situ4 <- df$`correlated facets`!=1 & df$`carry-over effects`!=0
 
 
-# summurize results regarding bias
+####### summurize results regarding bias
+#### bias  
+Q1_Bias[situ1, ]  #Unidimensional theta without carry-over effects --> B_uni_NoCarry.csv
+write.csv(cbind(df[situ1, ], Q1_Bias[situ1, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/B_uni_NoCarry_Large.csv")
+
+Q1_Bias[situ2, ]  #Unidimensional theta with carry-over effects --> B_uni_Carry.csv
+write.csv(cbind(df[situ2, ], Q1_Bias[situ2, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/B_uni_Carry_Large.csv")
+
+Q1_Bias[situ3, ]  #Multidimensional theta without carry-over effects --> B_mul_NoCarry.csv
+write.csv(cbind(df[situ3, ], Q1_Bias[situ3, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/B_mul_NoCarry_Large.csv")
+
+Q1_Bias[situ4, ]  #Multidimensional theta with carry-over effects --> B_mul_Carry.csv
+write.csv(cbind(df[situ4, ], Q1_Bias[situ4, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/B_mul_Carry_Large.csv")
 
 
-write.csv(Q1_Bias[situ1, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ1_LargeSample.csv")
-write.csv(Q1_Bias[situ2, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ2_LargeSample.csv")
-write.csv(Q1_Bias[situ3, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ3_LargeSample.csv")
-write.csv(Q1_Bias[situ4, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ4_LargeSample.csv")
+#### precision
+Q2_Precision[situ1, ] #Unidimensional theta without carry-over effects --> P_uni_NoCarry.csv
+write.csv(cbind(df[situ1, ], Q2_Precision[situ1, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/P_uni_NoCarry_Large.csv")
 
-write.csv(Q2_Precision[situ1, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ1_LargeSample.csv")
-write.csv(Q2_Precision[situ2, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ2_LargeSample.csv")
+Q2_Precision[situ2, ] #Unidimensional theta with carry-over effects --> P_uni_Carry.csv
+write.csv(Q2_Precision[situ2, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/P_uni_Carry_Large.csv")
+
+
 write.csv(Q2_Precision[situ3, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ3_LargeSample.csv")
 write.csv(Q2_Precision[situ4, ], file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/situ4_LargeSample.csv")
 
