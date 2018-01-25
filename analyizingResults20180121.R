@@ -15,7 +15,7 @@
 
 # 0.1 Load data 
 
-#load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/LargeSample20171126.RData")
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/LargeSample20171126.RData")
  load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/SmallSample20171126.RData")
 
 # 0.2 Review the structure of results
@@ -207,6 +207,21 @@ write.csv(cbind(df[situ3, ], Q2_Precision[situ3, ]), file = "D:/Dropbox/Tilburg 
 Q2_Precision[situ4, ] #Multidimensional theta with carry-over effects --> P_mul_Carry.csv
 write.csv(cbind(df[situ4, ], Q2_Precision[situ4, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/P_mul_Carry_Large.csv")
 write.csv(cbind(df[situ4, ], Q2_Precision[situ4, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/P_mul_Carry_Small.csv")
+
+
+#### proportion of variance in bias due to sampling variation at Level 2
+# bias
+proportion_L2_Total[situ1,]
+proportion_L2_Total[situ2,]
+proportion_L2_Total[situ3,]
+proportion_L2_Total[situ4,]
+# precision
+proportion_L2_Total_p[situ1,]
+proportion_L2_Total_p[situ2,]
+proportion_L2_Total_p[situ3,]
+proportion_L2_Total_p[situ4,]
+
+
 
 ############# 4.  given the 108 cells, which cells generate negative reliabilites? ####################
 load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
