@@ -210,17 +210,44 @@ write.csv(cbind(df[situ4, ], Q2_Precision[situ4, ]), file = "D:/Dropbox/Tilburg 
 
 
 #### proportion of variance in bias due to sampling variation at Level 2
-# bias
-proportion_L2_Total[situ1,]
-proportion_L2_Total[situ2,]
-proportion_L2_Total[situ3,]
-proportion_L2_Total[situ4,]
-# precision
-proportion_L2_Total_p[situ1,]
-proportion_L2_Total_p[situ2,]
-proportion_L2_Total_p[situ3,]
-proportion_L2_Total_p[situ4,]
+# bias (Dont forget that we have N=1000 and N=100 -- two datasets!)
 
+proportion_L2_Total[situ1,] #Unidimensional theta without carry-over effects --> Pvar_uni_NoCarry.csv
+write.csv(cbind(df[situ1, ], proportion_L2_Total[situ1,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_uni_NoCarry_Large.csv")
+write.csv(cbind(df[situ1, ], proportion_L2_Total[situ1,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_uni_NoCarry_Small.csv")
+
+proportion_L2_Total[situ2,] #Unidimensional theta with carry-over effects --> Pvar_uni_Carry.csv
+write.csv(cbind(df[situ2, ], proportion_L2_Total[situ2,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_uni_Carry_Large.csv")
+write.csv(cbind(df[situ2, ], proportion_L2_Total[situ2,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_uni_Carry_Small.csv")
+
+
+proportion_L2_Total[situ3,] #Multidimensional theta without carry-over effects --> Pvar_mul_NoCarry.csv
+write.csv(cbind(df[situ3, ], proportion_L2_Total[situ3,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_mul_NoCarry_Large.csv")
+write.csv(cbind(df[situ3, ], proportion_L2_Total[situ3,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_mul_NoCarry_Small.csv")
+
+proportion_L2_Total[situ4,] #Multidimensional theta with carry-over effects --> Pvar_mul_Carry.csv
+write.csv(cbind(df[situ4, ], proportion_L2_Total[situ4,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_mul_Carry_Large.csv")
+write.csv(cbind(df[situ4, ], proportion_L2_Total[situ4,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_mul_Carry_Small.csv")
+
+# precision (Dont forget that we have N=1000 and N=100 -- two datasets!)
+
+proportion_L2_Total_p[situ1,] #Unidimensional theta without carry-over effects --> PvarPre_uni_NoCarry.csv
+write.csv(cbind(df[situ1, ], proportion_L2_Total_p[situ1,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_uni_NoCarry_Large.csv") 
+write.csv(cbind(df[situ1, ], proportion_L2_Total_p[situ1,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_uni_NoCarry_Small.csv") 
+
+proportion_L2_Total_p[situ2,] #Unidimensional theta with carry-over effects --> PvarPre_uni_Carry.csv
+write.csv(cbind(df[situ2, ], proportion_L2_Total_p[situ2,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_uni_Carry_Large.csv")
+write.csv(cbind(df[situ2, ], proportion_L2_Total_p[situ2,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_uni_Carry_Small.csv")
+
+
+proportion_L2_Total_p[situ3,] #Multidimensional theta without carry-over effects --> PvarPre_mul_NoCarry.csv
+write.csv(cbind(df[situ3, ], proportion_L2_Total_p[situ3,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_mul_NoCarry_Large.csv")
+write.csv(cbind(df[situ3, ], proportion_L2_Total_p[situ3,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_mul_NoCarry_Small.csv")
+
+
+proportion_L2_Total_p[situ4,] #Multidimensional theta with carry-over effects --> PvarPre_mul_Carry.csv
+write.csv(cbind(df[situ4, ], proportion_L2_Total_p[situ4,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_mul_Carry_Large.csv")
+write.csv(cbind(df[situ4, ], proportion_L2_Total_p[situ4,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_mul_Carry_Small.csv")
 
 
 ############# 4.  given the 108 cells, which cells generate negative reliabilites? ####################
