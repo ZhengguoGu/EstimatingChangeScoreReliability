@@ -250,31 +250,31 @@ write.csv(cbind(df[situ4, ], proportion_L2_Total_p[situ4,]), file = "D:/Dropbox/
 write.csv(cbind(df[situ4, ], proportion_L2_Total_p[situ4,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_mul_Carry_Small.csv")
 
 
+
+
 ############# 4.  given the 108 cells, which cells generate negative reliabilites? ####################
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170122 rerun to record sum scores/results20170122.RData")
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20170222 results small sample/results20170222smallsample.RData")
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/LargeSample20171126.RData")  #N=1000
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/SmallSample20171126.RData")  #N=100
 
 weird_index <- matrix(NA, 108, 6)
 for(i in 1:108){
-  allestimates <- matrix(unlist(restuls_conditions[[i]][2]), nrow = 20, ncol = 8)[, c(-1,-2)] 
+  allestimates <- matrix(unlist(restuls_conditions[[i]][2]), nrow = 20, ncol = 7)[, -1] 
   weird_index[i, ] = (colSums(allestimates < 0)>=1) #negative reliability
 }
 
 df[, 6:11] <- weird_index 
 names(df)[6:11] <- c("neg traditional alpha", "neg traditional lambda2", "neg traditional lambda4", 
                      "neg item alpha", "neg item lambda2", "neg item lambda4")
+
+df_1 <- df[situ1, ]
+df_2 <- df[situ2, ]
+df_3 <- df[situ3, ]
+df_4 <- df[situ4, ]
 table(df$`carry-over effects`,df$`neg traditional alpha`)
 table(df$`carry-over effects`,df$`neg traditional lambda2`)
 table(df$`carry-over effects`,df$`neg traditional lambda4`)
 
-weird_index2 <- rep(0, 108)
-for(i in 1:108){
-  allestimates <- matrix(unlist(restuls_conditions[[i]][2]), nrow = 20, ncol = 8) 
-  if(sum(allestimates[, 2:8] >1)>=1){ #reliability >1
-    weird_index2[i] <- 1
-  }
-}
-sum(weird_index2) # non of them have reliability > 1.
+
 
 ############# 4.Extra: Why negative estimated reliabiity? A toy example  ################
 # Here we simulate toy example to see why negative estimated reliability happens. 
