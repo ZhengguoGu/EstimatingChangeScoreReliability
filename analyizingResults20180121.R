@@ -256,23 +256,41 @@ write.csv(cbind(df[situ4, ], proportion_L2_Total_p[situ4,]), file = "D:/Dropbox/
 load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/LargeSample20171126.RData")  #N=1000
 load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/SmallSample20171126.RData")  #N=100
 
-weird_index <- matrix(NA, 108, 6)
-for(i in 1:108){
-  allestimates <- matrix(unlist(restuls_conditions[[i]][2]), nrow = 20, ncol = 7)[, -1] 
-  weird_index[i, ] = (colSums(allestimates < 0)>=1) #negative reliability
+NUM_negative <- matrix(NA, 108, 6)
+for (c in 1:108){
+  num_negative <- matrix(NA, 20, 6)
+  for(r in 1:20){
+    num_negative[r, ] <- colSums(restuls_conditions[[c]][[1]][[r]][, -1] < 0)
+  }
+  
+  NUM_negative[c, ] <- colSums(num_negative)/1000 #note in total 1000 estimated reliability: 20 samples x 50 replication/sample
 }
 
-df[, 6:11] <- weird_index 
-names(df)[6:11] <- c("neg traditional alpha", "neg traditional lambda2", "neg traditional lambda4", 
-                     "neg item alpha", "neg item lambda2", "neg item lambda4")
+NUM_negative[situ1, ]  #Unidimensional theta without carry-over effects --> NegRel__uni_NoCarry.csv
+write.csv(cbind(df[situ1, ], r_pop[situ1], NUM_negative[situ1, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel__uni_NoCarry_Large.csv") 
+write.csv(cbind(df[situ1, ], r_pop[situ1], NUM_negative[situ1, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel__uni_NoCarry_Small.csv") 
 
-df_1 <- df[situ1, ]
-df_2 <- df[situ2, ]
-df_3 <- df[situ3, ]
-df_4 <- df[situ4, ]
-table(df$`carry-over effects`,df$`neg traditional alpha`)
-table(df$`carry-over effects`,df$`neg traditional lambda2`)
-table(df$`carry-over effects`,df$`neg traditional lambda4`)
+
+NUM_negative[situ2, ]  #Unidimensional theta with carry-over effects --> NegRel_uni_Carry.csv
+write.csv(cbind(df[situ2, ], r_pop[situ2], NUM_negative[situ2, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel_uni_Carry_Large.csv") 
+write.csv(cbind(df[situ2, ], r_pop[situ2], NUM_negative[situ2, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel_uni_Carry_Small.csv") 
+
+
+NUM_negative[situ3, ]  #Multidimensional theta without carry-over effects --> NegRel_mul_NoCarry.csv
+write.csv(cbind(df[situ3, ], r_pop[situ3], NUM_negative[situ3, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel_mul_NoCarry_Large.csv") 
+write.csv(cbind(df[situ3, ], r_pop[situ3], NUM_negative[situ3, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel_mul_NoCarry_Small.csv") 
+
+
+NUM_negative[situ4, ]  #Multidimensional theta with carry-over effects --> NegRel_mul_Carry.csv
+write.csv(cbind(df[situ4, ], r_pop[situ4], NUM_negative[situ4, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel_mul_Carry_Large.csv") 
+write.csv(cbind(df[situ4, ], r_pop[situ4], NUM_negative[situ4, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel_mul_Carry_Small.csv") 
+
+
+
+
+###########################
+###########################
+########################### ends here
 
 
 
