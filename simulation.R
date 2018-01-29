@@ -315,5 +315,5 @@ while (num_test <= nrow(df)){
 
 
 
-save(r_pop, restuls_conditions, file = "D:/ZG/LargeSample20171122.RData")
+save( restuls_conditions, file = "D:/ZG/LargeSample20171122.RData")
 
