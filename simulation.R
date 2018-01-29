@@ -303,82 +303,10 @@ while (num_test <= nrow(df)){
   }
   
   restuls_conditions[[num_test]] <- list(sample_results, r_avg, r_sd)
-  simulatedRawdata[[num_test]] <- list(sample_theta, simResponses)
+  #simulatedRawdata[[num_test]] <- list(sample_theta, simResponses)
   
   
-  ############ Calculate population reliability ##################################
-  ### Here we use 1 million people to approximate the population reliability
   
-  #note that I planned to use Monte Carlo, but Wilco suggest that simulating a super 
-  #large sample suffices. But I keep the parallel computing commands here (in case)
-  
-  #c2 <- makeCluster(12)
-  #registerDoSNOW(c2)
-  
-  #set.seed(112)
-  #sim_result <- foreach(i = 1:1000, .combine='cbind') %dorng% {
-   
-  if (dimension == 1){
-    
-    theta_pop <- Unichange_sim(1000000, sd_change)
-    theta_pre_pop <- theta_pop[[1]]
-    theta_post_pop <- theta_pop[[2]]
-    
-  } else{
-      
-    EMP <- FALSE
-    theta_pop <- Mulchange_sim(1000000, dimension, cov_pretest, sd_change, EMP)
-    theta_pre_pop <- theta_pop[[1]]
-    theta_post_pop <- theta_pop[[2]]
-  }
-  
-  
-  #-------------------------------------------------
-  # simulate graded response data
-  #-------------------------------------------------
-  
-  responses_pop <- GRM_sim(theta_pre_pop, itempar, id)
-  response_pre_pop <- responses_pop[[1]]
- 
-  true_pre_pop <- responses_pop[[2]]
-   
-  responses_pop <- GRM_sim(theta_post_pop, itempar, id)
-  response_post_pop <- responses_pop[[1]]
- 
-  true_post_pop <- responses_pop[[2]]
-  
-  carryover_results_pop <- carry_over(response_pre_pop, response_post_pop)
-  response_post_strong_pop <- carryover_results_pop[[1]]
-  response_post_weak_pop <- carryover_results_pop[[2]]
-  
-   
-  if (existence_carryover == 1){
-    if (strong_weak == 1){
-      response_post_pop <- response_post_strong_pop #replace with scores with strong carryover effects
-    } else if (strong_weak == -1){
-      response_post_pop <- response_post_weak_pop #replace with scores with weak carryover effects
-    }
-  }
-  
-  
-    # sum scores
-  
-  sum_pre_pop <- rowSums(response_pre_pop)
-  sum_true_pre_pop <- rowSums(true_pre_pop)
-  sum_post_pop <- rowSums(response_post_pop)
-  sum_true_post_pop <- rowSums(true_post_pop)
-   
-  truechange_sumscores_pop <- sum_true_post_pop - sum_true_pre_pop
-  change_sumscores_pop <- sum_post_pop - sum_pre_pop
- 
-  #r_population <- (cor(truechange_sumscores_pop, change_sumscores_pop))^2
-  
-    #return(r_population)
-  #}
-  #stopCluster(c2)
-  
-  #r_pop[num_test] <- mean(sim_result)
-  r_pop[num_test] <- (cor(truechange_sumscores_pop, change_sumscores_pop))^2
   
   num_test <- num_test + 1
   
@@ -387,5 +315,5 @@ while (num_test <= nrow(df)){
 
 
 
-save(r_pop, restuls_conditions, simulatedRawdata, file = "D:/ZG/LargeSample20171122.RData")
+save(r_pop, restuls_conditions, file = "D:/ZG/LargeSample20171122.RData")
 
