@@ -90,7 +90,7 @@ List GRMc_1theta(double theta_pre, double theta_post, NumericVector Islope, Nume
   
   List output;
   output["response_pre"] = response_pre;
-  //output["response_post"] = response_post;
+  output["response_post"] = response_post;
   output["response_carry"] = response_cary;
   
   return(output);
@@ -104,7 +104,7 @@ List TrueScore(double t_pre, double t_post, NumericVector Islope, NumericMatrix 
   IntegerMatrix Pretest_m(NResample, Islope.size());
   IntegerMatrix Posttest_m(NResample, Islope.size());
   
-  for (int m = 0; m < NResample; ++m){
+  for (int m = 0; m < NResample; ++m){ // this is to calculate the expectation i.e., true score
     List A_result = GRMc_1theta(t_pre, t_post, Islope, Idiff, eff);
     IntegerVector pretest_vec = A_result["response_pre"];
     IntegerVector posttest_vac = A_result["response_carry"];
@@ -112,13 +112,21 @@ List TrueScore(double t_pre, double t_post, NumericVector Islope, NumericMatrix 
     Posttest_m(m, _) = posttest_vac;
     int preSum = sum(pretest_vec);
     int postSum = sum(posttest_vac); // if no carry-over effect, then "response_carry" contains the post scores without carryover effect
-    change_S = postSum - preSum;
+    change_S(m) = postSum - preSum;
   }
-
+  double true_change = mean(change_S);
+  
+  List B_result = GRMc_1theta(t_pre, t_post, Islope, Idiff, eff); // just generate 1 dataset, and ust it as the observed score.
+  IntegerVector pretest_Obs = B_result["response_pre"];
+  IntegerVector posttest_Obs = B_result["response_carry"];
+  int change_Obs = sum(posttest_Obs) - sum(pretest_Obs);
+  
   List OUTPUT;
   OUTPUT["change score"] = change_S;
   OUTPUT["pretest matrix"] = Pretest_m;
   OUTPUT["posttest matrix"] = Posttest_m;
+  OUTPUT["true change"] = true_change;
+  OUTPUT["observed change"] = change_Obs;
   return(OUTPUT);
   
   
