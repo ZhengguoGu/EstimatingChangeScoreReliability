@@ -132,7 +132,7 @@ while (num_test <= nrow(df)){
     theta_post_pop <- theta_pop[[2]]
     
     for(i in 1:length(theta_pre_pop)){
-      pop_result <-  Uni_TrueScore(theta_pre_pop[i], theta_post_pop[i], itempar[,1], itempar[, 2:5], Eff, sample_propensity, Dimen)
+      pop_result <-  Uni_TrueScore(theta_pre_pop[i], theta_post_pop[i], itempar[,1], itempar[, 2:5], Eff, sample_propensity)
       TRUE_SCORE[i] <- pop_result["true change"]
       OBS_SCORE[i] <- pop_result["observed change"]
     }
@@ -149,25 +149,18 @@ while (num_test <= nrow(df)){
       abil_pre <- theta_pre_pop[i, ][id]
       abil_post <- theta_post_pop[i, ][id]
       
+      pop_result <- Multi_TrueScore(abil_pre, abil_post, Islope, Idiff, Eff, sample_propensity)
+      TRUE_SCORE[i] <- pop_result["true change"]
+      OBS_SCORE[i] <- pop_result["observed change"]
       
     }
   }
   
   
-  #-------------------------------------------------
-  # simulate graded response data
-  #-------------------------------------------------
-  
-  
-  
-  
-  
-  truechange_sumscores_pop <- sum_true_post_pop - sum_true_pre_pop
-  change_sumscores_pop <- sum_post_pop - sum_pre_pop
-  
+
   
   #r_pop[num_test] <- mean(sim_result)
-  r_pop[num_test] <- (cor(truechange_sumscores_pop, change_sumscores_pop))^2
+  r_pop[num_test] <- (cor(TRUE_SCORE, OBS_SCORE))^2
   
   num_test <- num_test + 1
   
