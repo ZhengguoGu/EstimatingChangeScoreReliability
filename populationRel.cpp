@@ -96,42 +96,6 @@ List GRMc_1theta(double theta_pre, double theta_post, NumericVector Islope, Nume
   return(output);
 }
 
-
-// [[Rcpp::export]]
-List TrueScore(double t_pre, double t_post, NumericVector Islope, NumericMatrix Idiff, String eff, int NResample) {
-
-  IntegerVector change_S(NResample);
-  IntegerMatrix Pretest_m(NResample, Islope.size());
-  IntegerMatrix Posttest_m(NResample, Islope.size());
-  
-  for (int m = 0; m < NResample; ++m){ // this is to calculate the expectation i.e., true score
-    List A_result = GRMc_1theta(t_pre, t_post, Islope, Idiff, eff);
-    IntegerVector pretest_vec = A_result["response_pre"];
-    IntegerVector posttest_vac = A_result["response_carry"];
-    Pretest_m(m, _) = pretest_vec;
-    Posttest_m(m, _) = posttest_vac;
-    int preSum = sum(pretest_vec);
-    int postSum = sum(posttest_vac); // if no carry-over effect, then "response_carry" contains the post scores without carryover effect
-    change_S(m) = postSum - preSum;
-  }
-  double true_change = mean(change_S);
-  
-  List B_result = GRMc_1theta(t_pre, t_post, Islope, Idiff, eff); // just generate 1 dataset, and ust it as the observed score.
-  IntegerVector pretest_Obs = B_result["response_pre"];
-  IntegerVector posttest_Obs = B_result["response_carry"];
-  int change_Obs = sum(posttest_Obs) - sum(pretest_Obs);
-  
-  List OUTPUT;
-  OUTPUT["change score"] = change_S;
-  OUTPUT["pretest matrix"] = Pretest_m;
-  OUTPUT["posttest matrix"] = Posttest_m;
-  OUTPUT["true change"] = true_change;
-  OUTPUT["observed change"] = change_Obs;
-  return(OUTPUT);
-  
-  
-}
-
 // [[Rcpp::export]]
 List GRMc_1thetaMD(NumericVector theta_preMD, NumericVector theta_postMD, NumericVector Islope, NumericMatrix Idiff, String eff) {
   // this is for multidimentional theta (several sub-attributes subsumed under one factor)
@@ -165,7 +129,7 @@ List GRMc_1thetaMD(NumericVector theta_preMD, NumericVector theta_postMD, Numeri
       }
     }
   }
- 
+  
   // simulate posttest scores
   NumericVector randomnumber_postMD = runif(nitems, 0.0, 1.0); 
   NumericMatrix theta_postBMD(nitems, ncat); 
@@ -182,7 +146,7 @@ List GRMc_1thetaMD(NumericVector theta_preMD, NumericVector theta_postMD, Numeri
       }
     }
   }
-
+  
   
   // introducing carry-over
   for(int l = 0; l < nitems; ++l){
@@ -193,6 +157,82 @@ List GRMc_1thetaMD(NumericVector theta_preMD, NumericVector theta_postMD, Numeri
   List OUTPUT_md;
   OUTPUT_md["response_preMD"] = response_preMD;
   OUTPUT_md["response_postMD"] = response_postMD;
-  OUTPUT_md["after carry"] = response_caryMD;
+  OUTPUT_md["response_postCarry"] = response_caryMD;
   return(OUTPUT_md);
+}
+
+
+// [[Rcpp::export]]
+List Uni_TrueScore(double t_pre, double t_post, NumericVector Islope, NumericMatrix Idiff, String eff, int NResample) {
+  // calculate true score, for unidimentional theta
+  IntegerVector change_S(NResample);
+  IntegerMatrix Pretest_m(NResample, Islope.size());
+  IntegerMatrix Posttest_m(NResample, Islope.size());
+  int change_obs=0;
+  
+  for (int m = 0; m < NResample; ++m){ // this is to calculate the expectation i.e., true score
+      List A_result = GRMc_1theta(t_pre, t_post, Islope, Idiff, eff);
+      IntegerVector pretest_vec = A_result["response_pre"];
+      IntegerVector posttest_vac = A_result["response_carry"];
+      Pretest_m(m, _) = pretest_vec;
+      Posttest_m(m, _) = posttest_vac;
+      int preSum = sum(pretest_vec);
+      int postSum = sum(posttest_vac); // if no carry-over effect, then "response_carry" contains the post scores without carryover effect
+      change_S(m) = postSum - preSum;
+  }
+  
+  double true_change = mean(change_S);
+    
+  // just generate 1 dataset, and ust it as the observed score.  
+  List B_result = GRMc_1theta(t_pre, t_post, Islope, Idiff, eff); 
+  IntegerVector pretest_Obs = B_result["response_pre"];
+  IntegerVector posttest_Obs = B_result["response_carry"];
+  int preSum_obs = sum(pretest_Obs);
+  int postSum_obs = sum(posttest_Obs);
+  change_obs = postSum_obs - preSum_obs; 
+ 
+  
+  List OUTPUT;
+  OUTPUT["true change"] = true_change;   // true change
+  OUTPUT["observed change"] = change_obs; //observed change score 
+  return(OUTPUT);
+  
+}
+
+// [[Rcpp::export]]
+List Multi_TrueScore(NumericVector t_pre, NumericVector t_post, NumericVector Islope, NumericMatrix Idiff, String eff, int NResample) {
+  
+  IntegerVector change_S(NResample);
+  IntegerMatrix Pretest_m(NResample, Islope.size());
+  IntegerMatrix Posttest_m(NResample, Islope.size());
+  int change_obs=0;
+  
+  
+  for (int m = 0; m < NResample; ++m){ // this is to calculate the expectation i.e., true score
+    List A_resultMD = GRMc_1thetaMD(t_pre, t_post, Islope, Idiff, eff);
+    IntegerVector pretest_vecMD = A_resultMD["response_preMD"];
+    IntegerVector posttest_vecMD = A_resultMD["response_postCarry"];
+    Pretest_m(m, _) = pretest_vecMD;
+    Posttest_m(m, _) = posttest_vecMD;
+    int preSumMD = sum(pretest_vecMD);
+    int postSumMD = sum(posttest_vecMD); // if no carry-over effect, then "response_carry" contains the post scores without carryover effect
+    change_S(m) = postSumMD - preSumMD;
+  }
+
+  double true_change = mean(change_S);
+  
+  // just generate 1 dataset, and ust it as the observed score.
+  List B_resultMD = GRMc_1thetaMD(t_pre, t_post, Islope, Idiff, eff); 
+  IntegerVector pretest_Obs = B_resultMD["response_preMD"];
+  IntegerVector posttest_Obs = B_resultMD["response_postCarry"];
+  int preSum_obs = sum(pretest_Obs);
+  int postSum_obs = sum(posttest_Obs);
+  change_obs = postSum_obs - preSum_obs;
+  
+  
+  List OUTPUT;
+  OUTPUT["true change"] = true_change;   // true change
+  OUTPUT["observed change"] = change_obs; //observed change score 
+  return(OUTPUT);
+  
 }
