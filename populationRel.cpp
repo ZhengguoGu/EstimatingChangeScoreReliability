@@ -131,3 +131,68 @@ List TrueScore(double t_pre, double t_post, NumericVector Islope, NumericMatrix 
   
   
 }
+
+// [[Rcpp::export]]
+List GRMc_1thetaMD(NumericVector theta_preMD, NumericVector theta_postMD, NumericVector Islope, NumericMatrix Idiff, String eff) {
+  // this is for multidimentional theta (several sub-attributes subsumed under one factor)
+  // Note: theta is a vector, each element in the vector correspondes to an item.
+  
+  int nitems = Idiff.nrow();
+  int ncat = Idiff.ncol();
+  NumericMatrix numeritor_preMD(nitems, ncat);
+  NumericMatrix Pstar_preMD(nitems, ncat);
+  IntegerVector response_preMD(nitems);
+  
+  NumericMatrix numeritor_postMD(nitems, ncat);
+  NumericMatrix Pstar_postMD(nitems, ncat);
+  IntegerVector response_postMD(nitems);
+  
+  IntegerVector response_caryMD(nitems);
+  
+  // simulate pretest scores
+  NumericVector randomnumber_preMD = runif(nitems, 0.0, 1.0); 
+  NumericMatrix theta_BMD(nitems, ncat); 
+  for(int i = 0; i < ncat; ++i){
+    theta_BMD(_, i) = theta_preMD - Idiff(_, i);
+  }
+  for(int j = 0; j < nitems; ++j){
+    
+    numeritor_preMD(j, _) = exp(Islope(j) * theta_BMD(j,_));
+    for(int k = 0; k <ncat; ++k){
+      Pstar_preMD(j,k) = numeritor_preMD(j,k)/(1.0+numeritor_preMD(j,k));
+      if(Pstar_preMD(j,k) > randomnumber_preMD(j)){
+        response_preMD(j) = response_preMD(j) + 1;
+      }
+    }
+  }
+ 
+  // simulate posttest scores
+  NumericVector randomnumber_postMD = runif(nitems, 0.0, 1.0); 
+  NumericMatrix theta_postBMD(nitems, ncat); 
+  for(int i = 0; i < ncat; ++i){
+    theta_postBMD(_, i) = theta_postMD - Idiff(_, i);
+  }
+  for(int j = 0; j < nitems; ++j){
+    
+    numeritor_postMD(j, _) = exp(Islope(j) * theta_postBMD(j,_));
+    for(int k = 0; k <ncat; ++k){
+      Pstar_postMD(j,k) = numeritor_postMD(j,k)/(1.0+numeritor_postMD(j,k));
+      if(Pstar_postMD(j,k) > randomnumber_postMD(j)){
+        response_postMD(j) = response_postMD(j) + 1;
+      }
+    }
+  }
+
+  
+  // introducing carry-over
+  for(int l = 0; l < nitems; ++l){
+    response_caryMD(l) = Carryover(response_preMD(l), response_postMD(l), eff);
+  }
+  
+  
+  List OUTPUT_md;
+  OUTPUT_md["response_preMD"] = response_preMD;
+  OUTPUT_md["response_postMD"] = response_postMD;
+  OUTPUT_md["after carry"] = response_caryMD;
+  return(OUTPUT_md);
+}
