@@ -124,7 +124,9 @@ while (num_test <= nrow(df)){
   ### Here we use 1,000,000 people to approximate the population reliability
   
   sample_propensity <- 100 # for a theta, we repeatedly measure it 100 times. It's avg is the true score. 
-  TRUE_SCORE <- array
+  TRUE_ChSCORE <- array()
+  OBS_ChSCORE <- array()
+  
   if (dimension == 1){
     
     theta_pop <- Unichange_sim(1000000, sd_change)
@@ -132,9 +134,25 @@ while (num_test <= nrow(df)){
     theta_post_pop <- theta_pop[[2]]
     
     for(i in 1:length(theta_pre_pop)){
-      pop_result <-  Uni_TrueScore(theta_pre_pop[i], theta_post_pop[i], itempar[,1], itempar[, 2:5], Eff, sample_propensity)
-      TRUE_SCORE[i] <- pop_result["true change"]
-      OBS_SCORE[i] <- pop_result["observed change"]
+      resamp <- 1
+      sum_preOBS <- 0
+      sum_postOBS <- 0
+      while(resamp < sample_propensity){
+        pretest_obs <- GRMc_1theta(theta_pre_pop[i], itempar[,1], itempar[, 2:5])
+        posttest_obs <- GRMc_1theta(theta_post_pop[i], itempar[,1], itempar[, 2:5])
+        
+        if(Eff != "N"){
+          posttest_obs <- Carryover(pretest_obs, posttest_obs, Eff)
+        }
+        
+        sum_preOBS = sum_preOBS + sum(pretest_obs)
+        sum_postOBS = sum_postOBS + sum(posttest_obs)
+        
+        resamp = resamp + 1
+      }
+  
+      TRUE_ChSCORE[i] <- (sum_postOBS - sum_preOBS)/sample_propensity
+      OBS_ChSCORE[i] <- sum(posttest_obs) - sum(pretest_obs)  #the 100th generated pretest_obs and posttest_obs are recorded and used as the observed scores
     }
     
     
@@ -149,9 +167,27 @@ while (num_test <= nrow(df)){
       abil_pre <- theta_pre_pop[i, ][id]
       abil_post <- theta_post_pop[i, ][id]
       
-      pop_result <- Multi_TrueScore(abil_pre, abil_post, Islope, Idiff, Eff, sample_propensity)
-      TRUE_SCORE[i] <- pop_result["true change"]
-      OBS_SCORE[i] <- pop_result["observed change"]
+      resamp <- 1
+      sum_preOBS <- 0
+      sum_postOBS <- 0
+      while(resamp < sample_propensity){
+      
+        pretest_obs <- GRMc_1thetaMD(abil_pre, Islope, Idiff)
+        posttest_obs <- GRMc_1thetaMD(abil_post, Islope, Idiff)
+      
+        if(Eff != "N"){
+          posttest_obs <- Carryover(pretest_obs, posttest_obs, Eff)
+        }
+        
+        sum_preOBS = sum_preOBS + sum(pretest_obs)
+        sum_postOBS = sum_postOBS + sum(posttest_obs)
+        
+        resamp = resamp + 1
+      }
+      
+      TRUE_ChSCORE[i] <- (sum_postOBS - sum_preOBS)/sample_propensity
+      OBS_ChSCORE[i] <- sum(posttest_obs) - sum(pretest_obs)
+      
       
     }
   }
@@ -160,7 +196,7 @@ while (num_test <= nrow(df)){
 
   
   #r_pop[num_test] <- mean(sim_result)
-  r_pop[num_test] <- (cor(TRUE_SCORE, OBS_SCORE))^2
+  r_pop[num_test] <- (cor(TRUE_ChSCORE, OBS_ChSCORE))^2
   
   num_test <- num_test + 1
   
