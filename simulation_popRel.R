@@ -58,14 +58,11 @@ while (num_test <= nrow(df)){
   
   if(df[num_test, 3] == 1){
     dimension <- 1
-    Dimen <- "Uni"
   } else if (df[num_test, 3] == .1){
     dimension <- 3
-    Dimen <- "Multi"
     cov_pretest <- .1
   } else if (df[num_test, 3] == .5){
     dimension <- 3
-    Dimen <- "Multi"
     cov_pretest <- .5
   }
   
