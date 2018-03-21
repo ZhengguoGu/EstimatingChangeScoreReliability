@@ -77,27 +77,35 @@ IntegerVector GRMc_1thetaMD(NumericVector thetaMD, NumericVector Islope, Numeric
 
 // [[Rcpp::export]]
 
-int Carryover(int pre, int post, String eff){
+IntegerVector Carryover(IntegerVector pre, IntegerVector post, String eff){
   // eff == "S": strong effect
   // eff == "W": weak effect
   // eff == "N": no effect
-  int post_out = 0;
+  
+  int n_items = pre.size();
+  
+  IntegerVector post_out(n_items);
   
   if(eff == "S"){
-    if(pre - post < -1){
-      post_out = pre + 1;
-    }else if(pre - post > 1){
-      post_out = pre - 1;
-    }else{
-      post_out = pre;
+    for (int k = 1; k < n_items; ++k){
+      if(pre(k) - post(k) < -1){
+        post_out(k) = pre(k) + 1;
+      }else if(pre(k) - post(k) > 1){
+        post_out(k) = pre(k) - 1;
+      }else{
+        post_out(k) = pre(k);
+      }
     }
+    
   }else if(eff == "W"){
-    if(pre - post < -1){
-      post_out = post - 1;
-    }else if(pre - post > 1){
-      post_out = post + 1;
-    }else{
-      post_out = post;
+    for (int k = 1; k < n_items; ++k){
+      if(pre(k) - post(k) < -1){
+        post_out(k) = post(k) - 1;
+      }else if(pre(k) - post(k) > 1){
+        post_out(k) = post(k) + 1;
+      }else{
+        post_out(k) = post(k);
+      }
     }
   }else if(eff == "N"){
     post_out = post;
