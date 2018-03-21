@@ -126,7 +126,7 @@ while (num_test <= nrow(df)){
     theta_pre_pop <- theta_pop[[1]]
     theta_post_pop <- theta_pop[[2]]
     
-    for(i in 1:length(N_pop)){
+    for(i in 1:N_pop){
       resamp <- 1
       sum_preOBS <- 0
       sum_postOBS <- 0
@@ -156,7 +156,7 @@ while (num_test <= nrow(df)){
     theta_pre_pop <- theta_pop[[1]]
     theta_post_pop <- theta_pop[[2]]
     
-    for(i in 1:length(N_pop)){
+    for(i in 1:N_pop){
       abil_pre <- theta_pre_pop[i, ][id]
       abil_post <- theta_post_pop[i, ][id]
       
