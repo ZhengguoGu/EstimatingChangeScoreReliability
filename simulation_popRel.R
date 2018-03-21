@@ -165,8 +165,8 @@ while (num_test <= nrow(df)){
       sum_postOBS <- 0
       while(resamp < sample_propensity){
       
-        pretest_obs <- GRMc_1thetaMD(abil_pre, Islope, Idiff)
-        posttest_obs <- GRMc_1thetaMD(abil_post, Islope, Idiff)
+        pretest_obs <- GRMc_1thetaMD(abil_pre, itempar[,1], itempar[, 2:5])
+        posttest_obs <- GRMc_1thetaMD(abil_post, itempar[,1], itempar[, 2:5])
       
         if(Eff != "N"){
           posttest_obs <- Carryover(pretest_obs, posttest_obs, Eff)
