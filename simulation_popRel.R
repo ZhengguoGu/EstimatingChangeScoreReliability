@@ -1,6 +1,3 @@
-library(Lambda4)
-library(psychometric)
-
 #### This is to simulate population reliability
 
 
@@ -44,9 +41,7 @@ df <- data.frame(matrix(unlist(conditions), nrow=num_condition, byrow = T))
 # Run the simulations following the order of the test conditions --> df dataframe. 
 #
 #---------------------------------------------------------------------------------
-
-restuls_conditions <- list()
-simulatedRawdata <- list()  # this include the simulated theta's and responses. 
+ 
 r_pop <- array()            # this is to save the population-level reliability. 
 num_test <- 1
 
@@ -121,16 +116,17 @@ while (num_test <= nrow(df)){
   ### Here we use 1,000,000 people to approximate the population reliability
   
   sample_propensity <- 100 # for a theta, we repeatedly measure it 100 times. It's avg is the true score. 
+  N_pop <- 1000000
   TRUE_ChSCORE <- array()
   OBS_ChSCORE <- array()
   
   if (dimension == 1){
     
-    theta_pop <- Unichange_sim(1000000, sd_change)
+    theta_pop <- Unichange_sim(N_pop, sd_change)
     theta_pre_pop <- theta_pop[[1]]
     theta_post_pop <- theta_pop[[2]]
     
-    for(i in 1:length(theta_pre_pop)){
+    for(i in 1:length(N_pop)){
       resamp <- 1
       sum_preOBS <- 0
       sum_postOBS <- 0
@@ -156,11 +152,11 @@ while (num_test <= nrow(df)){
   } else{
     
     EMP <- FALSE
-    theta_pop <- Mulchange_sim(1000000, dimension, cov_pretest, sd_change, EMP)
+    theta_pop <- Mulchange_sim(N_pop, dimension, cov_pretest, sd_change, EMP)
     theta_pre_pop <- theta_pop[[1]]
     theta_post_pop <- theta_pop[[2]]
     
-    for(i in 1:length(theta_pre_pop)){
+    for(i in 1:length(N_pop)){
       abil_pre <- theta_pre_pop[i, ][id]
       abil_post <- theta_post_pop[i, ][id]
       
