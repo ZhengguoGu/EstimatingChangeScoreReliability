@@ -4,7 +4,6 @@ library(psychometric)
 #library(doSNOW)
 #library(doRNG)
 
-#Update: 2017-11-13
 
 #Note: On Jan 21, 2018, Zhengguo checked this file to add a few annotated descriptions. 
 
@@ -58,7 +57,6 @@ df <- data.frame(matrix(unlist(conditions), nrow=num_condition, byrow = T))
 
 restuls_conditions <- list()
 simulatedRawdata <- list()  # this include the simulated theta's and responses. 
-r_pop <- array()            # this is to save the population-level reliability. 
 num_test <- 1
 
 while (num_test <= nrow(df)){
