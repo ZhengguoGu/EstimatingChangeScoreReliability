@@ -229,9 +229,7 @@ while (num_test <= nrow(df)){
       #####################################################################################################################################################
       # Methods for calculating reliability
       #
-      # method 0.1: ture-change reliability - cor(true change, observed change)^2  (Note, because later we approximate the true change-score reliability 
-      #                                                                             in the population, method 0.1 is not used in the paper. But it is nice
-      #                                                                             to check it.)
+      # method 0.1: ture-change reliability - cor(true change, observed change)^2  (NOTE: This is not the correct way of doing it.)
       # 
       # method 1.1: estimated reliability - alpha (i.e. pre and post reliability estimated by alpha )
       # method 1.2: estimated reliability - lambda2 (i.e. pre and post reliability estimated by lambda2)
@@ -244,7 +242,7 @@ while (num_test <= nrow(df)){
     
 
     
-      ######## method 0.1: ture-change reliability - cor(true change, observed change)^2 ###########
+      ######## method 0.1: ture-change reliability - cor(true change, observed change)^2 (INCORRECT) ###########
       
       truechange_sumscores <- sum_true_post - sum_true_pre
       change_sumscores <- sum_post - sum_pre

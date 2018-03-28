@@ -14,8 +14,10 @@
 
 # 0.1 Load data 
 
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/LargeSample20171126.RData")
- load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/SmallSample20171126.RData")
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180326 DataAnalysis/PopulationRel20180322.RData")
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180326 DataAnalysis/LargeSample20180327.RData")
+ #load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/SmallSample20171126.RData")
+n_perons <- 1000
 
 # 0.2 Review the structure of results
 
@@ -46,8 +48,8 @@ for (c in 1:108){ # cth cell
      temp_recorder_rel[l, ] <- colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])  
     }
   
-  D_reliability[c, ] <- colSums(temp_recorder) / 1000
-  Est_reliability[c, ] <- colSums(temp_recorder_rel) / 1000 # the average estimated reliability across 1000 item-score datasets. Useful for Q2 and Q4. 
+  D_reliability[c, ] <- colSums(temp_recorder) / n_perons
+  Est_reliability[c, ] <- colSums(temp_recorder_rel) / n_perons # the average estimated reliability across 1000 item-score datasets. Useful for Q2 and Q4. 
 }
 
 Q1_Bias <- D_reliability
@@ -61,7 +63,7 @@ for (c in 1:108){ # cth cell
   for(l in 1:20){ # lth sample
     temp_recorder[l, ] <- colSums(sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, Est_reliability[c, ], "-")^2)  #cth cell, lth sample
   }
-  Q2_Precision[c, ] <- sqrt(colSums(temp_recorder) / 999)
+  Q2_Precision[c, ] <- sqrt(colSums(temp_recorder) / (n_perons-1))
  
 }
 
@@ -85,7 +87,7 @@ for (c in 1:108){ # cth cell
   SS_L1[c, ] <- colSums(SS_L1_temp)
   SS_Total[c, ] <- colSums(SS_Total_temp)
 }
-((SS_L2 + SS_L1) - SS_Total)> .0000001  # this is to verify that SS_Total = SS_L1 + SS_L2, note that rounding errors exist.
+((SS_L2 + SS_L1) - SS_Total)> .0000001  # this is to verify that SS_Total = SS_L1 + SS_L2, note that rounding errors exist. All should be FALSE!
 
 proportion_L2_Total <- matrix(NA, 108, 6)
 for(c in 1:108){
