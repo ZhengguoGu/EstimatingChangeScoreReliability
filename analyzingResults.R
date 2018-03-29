@@ -17,7 +17,7 @@
 load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180326 DataAnalysis/PopulationRel20180322.RData")
 load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180326 DataAnalysis/LargeSample20180327.RData")
  #load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/SmallSample20171126.RData")
-n_perons <- 1000
+
 
 # 0.2 Review the structure of results
 
@@ -48,8 +48,8 @@ for (c in 1:108){ # cth cell
      temp_recorder_rel[l, ] <- colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])  
     }
   
-  D_reliability[c, ] <- colSums(temp_recorder) / n_perons
-  Est_reliability[c, ] <- colSums(temp_recorder_rel) / n_perons # the average estimated reliability across 1000 item-score datasets. Useful for Q2 and Q4. 
+  D_reliability[c, ] <- colSums(temp_recorder) / 1000
+  Est_reliability[c, ] <- colSums(temp_recorder_rel) / 1000 # the average estimated reliability across 1000 item-score datasets. Useful for Q2 and Q4. 
 }
 
 Q1_Bias <- D_reliability
@@ -63,7 +63,7 @@ for (c in 1:108){ # cth cell
   for(l in 1:20){ # lth sample
     temp_recorder[l, ] <- colSums(sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, Est_reliability[c, ], "-")^2)  #cth cell, lth sample
   }
-  Q2_Precision[c, ] <- sqrt(colSums(temp_recorder) / (n_perons-1))
+  Q2_Precision[c, ] <- sqrt(colSums(temp_recorder) / 999)
  
 }
 
@@ -172,84 +172,125 @@ situ4 <- df$`correlated facets`!=1 & df$`carry-over effects`!=0
 
 
 ####### summurize results regarding bias
-#### bias  
-Q1_Bias[situ1, ]  #Unidimensional theta without carry-over effects --> B_uni_NoCarry.csv
-write.csv(cbind(df[situ1, ], Q1_Bias[situ1, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/B_uni_NoCarry_Large.csv")  #for N=1000
-write.csv(cbind(df[situ1, ], Q1_Bias[situ1, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/B_uni_NoCarry_Small.csv")  #for N=100
+#### bias 
+bias_mean <- matrix(NA, 4, 6)
+bias_min <- matrix(NA, 4, 6)
+bias_max <- matrix(NA, 4, 6)
 
+Q1_Bias[situ1, ]  #Unidimensional theta without carry-over effects 
+bias_mean[1, ] <- colMeans(Q1_Bias[situ1, ])
+bias_min[1, ] <- apply(Q1_Bias[situ1, ], min, MARGIN = 2)
+bias_max[1, ] <- apply(Q1_Bias[situ1, ], max, MARGIN = 2)
 
-Q1_Bias[situ2, ]  #Unidimensional theta with carry-over effects --> B_uni_Carry.csv
-write.csv(cbind(df[situ2, ], Q1_Bias[situ2, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/B_uni_Carry_Large.csv")
-write.csv(cbind(df[situ2, ], Q1_Bias[situ2, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/B_uni_Carry_Small.csv")
+Q1_Bias[situ2, ]  #Unidimensional theta with carry-over effects 
+bias_mean[2, ] <- colMeans(Q1_Bias[situ2, ])
+bias_min[2, ] <- apply(Q1_Bias[situ2, ], min, MARGIN = 2)
+bias_max[2, ] <- apply(Q1_Bias[situ2, ], max, MARGIN = 2)
 
+Q1_Bias[situ3, ]  #Multidimensional theta without carry-over effects 
+bias_mean[3, ] <- colMeans(Q1_Bias[situ3, ])
+bias_min[3, ] <- apply(Q1_Bias[situ3, ], min, MARGIN = 2)
+bias_max[3, ] <- apply(Q1_Bias[situ3, ], max, MARGIN = 2)
 
-Q1_Bias[situ3, ]  #Multidimensional theta without carry-over effects --> B_mul_NoCarry.csv
-write.csv(cbind(df[situ3, ], Q1_Bias[situ3, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/B_mul_NoCarry_Large.csv")
-write.csv(cbind(df[situ3, ], Q1_Bias[situ3, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/B_mul_NoCarry_Small.csv")
+Q1_Bias[situ4, ]  #Multidimensional theta with carry-over effects 
+bias_mean[4, ] <- colMeans(Q1_Bias[situ4, ])
+bias_min[4, ] <- apply(Q1_Bias[situ4, ], min, MARGIN = 2)
+bias_max[4, ] <- apply(Q1_Bias[situ4, ], max, MARGIN = 2)
 
-
-Q1_Bias[situ4, ]  #Multidimensional theta with carry-over effects --> B_mul_Carry.csv
-write.csv(cbind(df[situ4, ], Q1_Bias[situ4, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/B_mul_Carry_Large.csv")
-write.csv(cbind(df[situ4, ], Q1_Bias[situ4, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/B_mul_Carry_Small.csv")
+save(bias_mean, bias_min, bias_max, file = "D:\\Dropbox\\Dropbox\\tilburg office\\Research Individual change\\Project 3 - item difference scores\\20180326 DataAnalysis/BiasTable.RData")
 
 #### precision
-Q2_Precision[situ1, ] #Unidimensional theta without carry-over effects --> P_uni_NoCarry.csv
-write.csv(cbind(df[situ1, ], Q2_Precision[situ1, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/P_uni_NoCarry_Large.csv")
-write.csv(cbind(df[situ1, ], Q2_Precision[situ1, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/P_uni_NoCarry_Small.csv")
+precision_mean <- matrix(NA, 4, 6)
+precision_min <- matrix(NA, 4, 6)
+precision_max <- matrix(NA, 4, 6)
 
-Q2_Precision[situ2, ] #Unidimensional theta with carry-over effects --> P_uni_Carry.csv
-write.csv(cbind(df[situ2, ], Q2_Precision[situ2, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/P_uni_Carry_Large.csv")
-write.csv(cbind(df[situ2, ], Q2_Precision[situ2, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/P_uni_Carry_Small.csv")
+Q2_Precision[situ1, ] #Unidimensional theta without carry-over effects 
+precision_mean[1, ] <- colMeans(Q2_Precision[situ1, ])
+precision_min[1, ] <- apply(Q2_Precision[situ1, ], min, MARGIN = 2)
+precision_max[1, ] <- apply(Q2_Precision[situ1, ], max, MARGIN = 2)
 
-Q2_Precision[situ3, ] #Multidimensional theta without carry-over effects --> P_mul_NoCarry.csv
-write.csv(cbind(df[situ3, ], Q2_Precision[situ3, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/P_mul_NoCarry_Large.csv")
-write.csv(cbind(df[situ3, ], Q2_Precision[situ3, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/P_mul_NoCarry_Small.csv")
+Q2_Precision[situ2, ] #Unidimensional theta with carry-over effects 
+precision_mean[2, ] <- colMeans(Q2_Precision[situ2, ])
+precision_min[2, ] <- apply(Q2_Precision[situ2, ], min, MARGIN = 2)
+precision_max[2, ] <- apply(Q2_Precision[situ2, ], max, MARGIN = 2)
 
-Q2_Precision[situ4, ] #Multidimensional theta with carry-over effects --> P_mul_Carry.csv
-write.csv(cbind(df[situ4, ], Q2_Precision[situ4, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/P_mul_Carry_Large.csv")
-write.csv(cbind(df[situ4, ], Q2_Precision[situ4, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/P_mul_Carry_Small.csv")
+
+Q2_Precision[situ3, ] #Multidimensional theta without carry-over effects 
+precision_mean[3, ] <- colMeans(Q2_Precision[situ3, ])
+precision_min[3, ] <- apply(Q2_Precision[situ3, ], min, MARGIN = 2)
+precision_max[3, ] <- apply(Q2_Precision[situ3, ], max, MARGIN = 2)
+
+
+Q2_Precision[situ4, ] #Multidimensional theta with carry-over effects 
+precision_mean[4, ] <- colMeans(Q2_Precision[situ4, ])
+precision_min[4, ] <- apply(Q2_Precision[situ4, ], min, MARGIN = 2)
+precision_max[4, ] <- apply(Q2_Precision[situ4, ], max, MARGIN = 2)
+
+save(precision_mean, precision_min, precision_max, file = "D:\\Dropbox\\Dropbox\\tilburg office\\Research Individual change\\Project 3 - item difference scores\\20180326 DataAnalysis/PrecisionTable.RData")
 
 
 #### proportion of variance in bias due to sampling variation at Level 2
 # bias (Dont forget that we have N=1000 and N=100 -- two datasets!)
+propBias_mean <- matrix(NA, 4, 6)
+propBias_min <- matrix(NA, 4, 6)
+propBias_max <- matrix(NA, 4, 6)
 
-proportion_L2_Total[situ1,] #Unidimensional theta without carry-over effects --> Pvar_uni_NoCarry.csv
-write.csv(cbind(df[situ1, ], proportion_L2_Total[situ1,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_uni_NoCarry_Large.csv")
-write.csv(cbind(df[situ1, ], proportion_L2_Total[situ1,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_uni_NoCarry_Small.csv")
-
-proportion_L2_Total[situ2,] #Unidimensional theta with carry-over effects --> Pvar_uni_Carry.csv
-write.csv(cbind(df[situ2, ], proportion_L2_Total[situ2,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_uni_Carry_Large.csv")
-write.csv(cbind(df[situ2, ], proportion_L2_Total[situ2,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_uni_Carry_Small.csv")
+proportion_L2_Total[situ1,] #Unidimensional theta without carry-over effects 
+propBias_mean[1, ] <- colMeans(proportion_L2_Total[situ1,])
+propBias_min[1, ] <- apply(proportion_L2_Total[situ1,], min, MARGIN = 2)
+propBias_max[1, ] <- apply(proportion_L2_Total[situ1,], max, MARGIN = 2)
 
 
-proportion_L2_Total[situ3,] #Multidimensional theta without carry-over effects --> Pvar_mul_NoCarry.csv
-write.csv(cbind(df[situ3, ], proportion_L2_Total[situ3,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_mul_NoCarry_Large.csv")
-write.csv(cbind(df[situ3, ], proportion_L2_Total[situ3,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_mul_NoCarry_Small.csv")
+proportion_L2_Total[situ2,] #Unidimensional theta with carry-over effects 
+propBias_mean[2, ] <- colMeans(proportion_L2_Total[situ2,])
+propBias_min[2, ] <- apply(proportion_L2_Total[situ2,], min, MARGIN = 2)
+propBias_max[2, ] <- apply(proportion_L2_Total[situ2,], max, MARGIN = 2)
 
-proportion_L2_Total[situ4,] #Multidimensional theta with carry-over effects --> Pvar_mul_Carry.csv
-write.csv(cbind(df[situ4, ], proportion_L2_Total[situ4,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_mul_Carry_Large.csv")
-write.csv(cbind(df[situ4, ], proportion_L2_Total[situ4,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/Pvar_mul_Carry_Small.csv")
+
+proportion_L2_Total[situ3,] #Multidimensional theta without carry-over effects 
+propBias_mean[3, ] <- colMeans(proportion_L2_Total[situ3,])
+propBias_min[3, ] <- apply(proportion_L2_Total[situ3,], min, MARGIN = 2)
+propBias_max[3, ] <- apply(proportion_L2_Total[situ3,], max, MARGIN = 2)
+
+
+proportion_L2_Total[situ4,] #Multidimensional theta with carry-over effects 
+propBias_mean[4, ] <- colMeans(proportion_L2_Total[situ4,])
+propBias_min[4, ] <- apply(proportion_L2_Total[situ4,], min, MARGIN = 2)
+propBias_max[4, ] <- apply(proportion_L2_Total[situ4,], max, MARGIN = 2)
+
+save(propBias_mean, propBias_min, propBias_max, file = "D:\\Dropbox\\Dropbox\\tilburg office\\Research Individual change\\Project 3 - item difference scores\\20180326 DataAnalysis/propBiasTable.RData")
+
+
 
 # precision (Dont forget that we have N=1000 and N=100 -- two datasets!)
-
-proportion_L2_Total_p[situ1,] #Unidimensional theta without carry-over effects --> PvarPre_uni_NoCarry.csv
-write.csv(cbind(df[situ1, ], proportion_L2_Total_p[situ1,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_uni_NoCarry_Large.csv") 
-write.csv(cbind(df[situ1, ], proportion_L2_Total_p[situ1,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_uni_NoCarry_Small.csv") 
-
-proportion_L2_Total_p[situ2,] #Unidimensional theta with carry-over effects --> PvarPre_uni_Carry.csv
-write.csv(cbind(df[situ2, ], proportion_L2_Total_p[situ2,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_uni_Carry_Large.csv")
-write.csv(cbind(df[situ2, ], proportion_L2_Total_p[situ2,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_uni_Carry_Small.csv")
+propPreci_mean <- matrix(NA, 4, 6)
+propPreci_min <- matrix(NA, 4, 6)
+propPreci_max <- matrix(NA, 4, 6)
 
 
-proportion_L2_Total_p[situ3,] #Multidimensional theta without carry-over effects --> PvarPre_mul_NoCarry.csv
-write.csv(cbind(df[situ3, ], proportion_L2_Total_p[situ3,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_mul_NoCarry_Large.csv")
-write.csv(cbind(df[situ3, ], proportion_L2_Total_p[situ3,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_mul_NoCarry_Small.csv")
+proportion_L2_Total_p[situ1,] #Unidimensional theta without carry-over effects 
+propPreci_mean[1, ] <- colMeans(proportion_L2_Total_p[situ1,])
+propPreci_min[1, ] <- apply(proportion_L2_Total_p[situ1,], min, MARGIN = 2)
+propPreci_max[1, ] <- apply(proportion_L2_Total_p[situ1,], max, MARGIN = 2)
 
 
-proportion_L2_Total_p[situ4,] #Multidimensional theta with carry-over effects --> PvarPre_mul_Carry.csv
-write.csv(cbind(df[situ4, ], proportion_L2_Total_p[situ4,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_mul_Carry_Large.csv")
-write.csv(cbind(df[situ4, ], proportion_L2_Total_p[situ4,]), file = "D:/Dropbox/Dropbox/tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/PvarPre_mul_Carry_Small.csv")
+proportion_L2_Total_p[situ2,] #Unidimensional theta with carry-over effects 
+propPreci_mean[2, ] <- colMeans(proportion_L2_Total_p[situ2,])
+propPreci_min[2, ] <- apply(proportion_L2_Total_p[situ2,], min, MARGIN = 2)
+propPreci_max[2, ] <- apply(proportion_L2_Total_p[situ2,], max, MARGIN = 2)
 
+proportion_L2_Total_p[situ3,] #Multidimensional theta without carry-over effects 
+propPreci_mean[3, ] <- colMeans(proportion_L2_Total_p[situ3,])
+propPreci_min[3, ] <- apply(proportion_L2_Total_p[situ3,], min, MARGIN = 2)
+propPreci_max[3, ] <- apply(proportion_L2_Total_p[situ3,], max, MARGIN = 2)
+
+
+proportion_L2_Total_p[situ4,] #Multidimensional theta with carry-over effects 
+propPreci_mean[4, ] <- colMeans(proportion_L2_Total_p[situ4,])
+propPreci_min[4, ] <- apply(proportion_L2_Total_p[situ4,], min, MARGIN = 2)
+propPreci_max[4, ] <- apply(proportion_L2_Total_p[situ4,], max, MARGIN = 2)
+
+save(propPreci_mean, propPreci_min, propPreci_max, file = "D:\\Dropbox\\Dropbox\\tilburg office\\Research Individual change\\Project 3 - item difference scores\\20180326 DataAnalysis/propPreciTable.RData")
 
 
 
