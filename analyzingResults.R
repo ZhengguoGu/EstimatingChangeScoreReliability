@@ -10,13 +10,15 @@
 
 
 ############### 0. Check data #######################################################################
-# Note: There are in total 
 
-# 0.1 Load data 
+
+# 0.1 Load data: Note: there are in total 3 datasets, one for the population reliability, one for N=1000, and one for N=100.
+# To replicate, one has to run the code for N=1000 and for N=100 seperatly. That is, after loading the N=1000 and the population rel dataset, run the code below and save the results. 
+# Afterwards, one load the N=100 dataset (i.e., N=1000 data will be replaced with N=100) and run the code below again. 
 
 load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180326 DataAnalysis/PopulationRel20180322.RData")
 load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180326 DataAnalysis/LargeSample20180327.RData")
- #load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/SmallSample20171126.RData")
+load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/SmallSample20171126.RData")
 
 
 # 0.2 Review the structure of results
@@ -38,7 +40,7 @@ str(restuls_conditions[[1]][[3]]) # num [1:20, 1:8] --> the SD. NOT USED.
 ############## 1. Research Question 1: Bias #########################################################
 
 D_reliability <- matrix(NA, 108, 6) # this is for calculating the bias for the 6 change-score reliability estimates for each cell. 
-Est_reliability <- matrix(NA, 108, 6) # this is useful for Research Question 2
+Est_reliability <- matrix(NA, 108, 6) # this is useful for later
 for (c in 1:108){ # cth cell
   
   temp_recorder <- matrix(NA, 20, 6)
@@ -49,7 +51,7 @@ for (c in 1:108){ # cth cell
     }
   
   D_reliability[c, ] <- colSums(temp_recorder) / 1000
-  Est_reliability[c, ] <- colSums(temp_recorder_rel) / 1000 # the average estimated reliability across 1000 item-score datasets. Useful for Q2 and Q4. 
+  Est_reliability[c, ] <- colSums(temp_recorder_rel) / 1000 # the average estimated reliability across 1000 item-score datasets. 
 }
 
 Q1_Bias <- D_reliability
@@ -67,66 +69,34 @@ for (c in 1:108){ # cth cell
  
 }
 
+############# 3. Research Question 3: Proportion of variance of estiamted chagne score reliability due to Level 2 (i.e., PV)   #############
 
-############# 3. Research Question 3: Proportion of variance in bias due to sampling at Level 2 ##################################
-SS_L2 <- matrix(NA, 108, 6)
-SS_L1 <- matrix(NA, 108, 6)
-SS_Total <- matrix(NA, 108, 6)
-for (c in 1:108){ # cth cell
-  
-  SS_L2_temp <- matrix(NA, 20, 6)
-  SS_L1_temp <- matrix(NA, 20, 6)
-  SS_Total_temp <- matrix(NA, 20, 6)
-  for(l in 1:20){ # lth sample
-    SS_L2_temp[l, ] <- 50*(colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50 - r_pop[c])^2
-    SS_L1_temp[l, ] <- colSums(sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50, "-")^2)
-    SS_Total_temp[l, ] <- colSums((restuls_conditions[[c]][[1]][[l]][, 2:7] - r_pop[c])^2)
-  }
-  
-  SS_L2[c, ] <- colSums(SS_L2_temp)
-  SS_L1[c, ] <- colSums(SS_L1_temp)
-  SS_Total[c, ] <- colSums(SS_Total_temp)
-}
-((SS_L2 + SS_L1) - SS_Total)> .0000001  # this is to verify that SS_Total = SS_L1 + SS_L2, note that rounding errors exist. All should be FALSE!
-
-proportion_L2_Total <- matrix(NA, 108, 6)
-for(c in 1:108){
-  for (m in 1:6){
-    proportion_L2_Total[c, m] <- SS_L2[c, m]/SS_Total[c, m]
-  }
-}
-
-
-############# 4. Research Question 4: Proportion of variance in precision due to sampling at Level 2  ############################
-SS_L2_p <- matrix(NA, 108, 6)
-SS_L1_p <- matrix(NA, 108, 6)
-SS_Total_p <- matrix(NA, 108, 6)
+var_L2 <- matrix(NA, 108, 6)
+var_L1 <- matrix(NA, 108, 6)
+var_total <- matrix(NA, 108, 6)  # this is to check whether var_total = var_L2 + var_L1
 
 for (c in 1:108){ # cth cell
   
-  SS_L2_temp <- matrix(NA, 20, 6)
-  SS_L1_temp <- matrix(NA, 20, 6)
-  SS_Total_temp <- matrix(NA, 20, 6)
+  var_L2_temp <- matrix(NA, 20, 6)
+  var_L1_temp <- matrix(NA, 20, 6)
+  var_Total_temp <- matrix(NA, 20, 6)
   for(l in 1:20){ # lth sample
-    SS_L2_temp[l, ] <- 50*(colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50 - Est_reliability[c, ])^2
-    SS_L1_temp[l, ] <- colSums(sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50, "-")^2)
-    SS_Total_temp[l, ] <- colSums((restuls_conditions[[c]][[1]][[l]][, 2:7] - r_pop[c])^2)
+    var_L2_temp[l, ] <- 50*(colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50 - Est_reliability[c, ])^2
+    var_L1_temp[l, ] <- colSums(sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50, "-")^2)
+    var_Total_temp[l, ] <- colSums((sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, Est_reliability[c, ], "-"))^2)
   }
   
-  SS_L2_p[c, ] <- colSums(SS_L2_temp)
-  SS_L1_p[c, ] <- colSums(SS_L1_temp)
-  SS_Total_p[c, ] <- colSums(SS_Total_temp)
+  var_L2[c, ] <- colSums(var_L2_temp)
+  var_L1[c, ] <- colSums(var_L1_temp)
+  var_total[c, ] <- colSums(var_Total_temp)
 }
 
-((SS_L2_p + SS_L1_p) - SS_Total_p)> .0000001 
+var_total - var_L1 - var_L2 > 0.0000001  # should be FALSE!
 
-proportion_L2_Total_p <- matrix(NA, 108, 6)
-for(c in 1:108){
-  for (m in 1:6){
-    proportion_L2_Total_p[c, m] <- SS_L2_p[c, m]/SS_Total_p[c, m]
-  }
-}
+PV <- var_L2/(var_L1 + var_L2)
 
+#var_L2[10, 5]/( var_L1[10, 5] + var_L2[10, 5])  # this is to check whether PV <- var_L2/(var_L1 + var_L2) is element-wise
+#PV[10, 5]
 
 
 ####################### Summarize results in terms of 4 situations  ############################
@@ -197,7 +167,7 @@ bias_mean[4, ] <- colMeans(Q1_Bias[situ4, ])
 bias_min[4, ] <- apply(Q1_Bias[situ4, ], min, MARGIN = 2)
 bias_max[4, ] <- apply(Q1_Bias[situ4, ], max, MARGIN = 2)
 
-save(bias_mean, bias_min, bias_max, file = "D:\\Dropbox\\Dropbox\\tilburg office\\Research Individual change\\Project 3 - item difference scores\\20180326 DataAnalysis/BiasTable.RData")
+save(bias_mean, bias_min, bias_max, file = "D:\\Dropbox\\tilburg office\\Research Individual change\\Project 3 - item difference scores\\20180326 DataAnalysis/BiasTable.RData")
 
 #### precision
 precision_mean <- matrix(NA, 4, 6)
@@ -226,106 +196,44 @@ precision_mean[4, ] <- colMeans(Q2_Precision[situ4, ])
 precision_min[4, ] <- apply(Q2_Precision[situ4, ], min, MARGIN = 2)
 precision_max[4, ] <- apply(Q2_Precision[situ4, ], max, MARGIN = 2)
 
-save(precision_mean, precision_min, precision_max, file = "D:\\Dropbox\\Dropbox\\tilburg office\\Research Individual change\\Project 3 - item difference scores\\20180326 DataAnalysis/PrecisionTable.RData")
+save(precision_mean, precision_min, precision_max, file = "D:\\Dropbox\\tilburg office\\Research Individual change\\Project 3 - item difference scores\\20180326 DataAnalysis/PrecisionTable.RData")
 
 
-#### proportion of variance in bias due to sampling variation at Level 2
+#### PV
 # bias (Dont forget that we have N=1000 and N=100 -- two datasets!)
-propBias_mean <- matrix(NA, 4, 6)
-propBias_min <- matrix(NA, 4, 6)
-propBias_max <- matrix(NA, 4, 6)
+PV_mean <- matrix(NA, 4, 6)
+PV_min <- matrix(NA, 4, 6)
+PV_max <- matrix(NA, 4, 6)
 
-proportion_L2_Total[situ1,] #Unidimensional theta without carry-over effects 
-propBias_mean[1, ] <- colMeans(proportion_L2_Total[situ1,])
-propBias_min[1, ] <- apply(proportion_L2_Total[situ1,], min, MARGIN = 2)
-propBias_max[1, ] <- apply(proportion_L2_Total[situ1,], max, MARGIN = 2)
-
-
-proportion_L2_Total[situ2,] #Unidimensional theta with carry-over effects 
-propBias_mean[2, ] <- colMeans(proportion_L2_Total[situ2,])
-propBias_min[2, ] <- apply(proportion_L2_Total[situ2,], min, MARGIN = 2)
-propBias_max[2, ] <- apply(proportion_L2_Total[situ2,], max, MARGIN = 2)
+PV[situ1,] #Unidimensional theta without carry-over effects 
+PV_mean[1, ] <- colMeans(PV[situ1,])
+PV_min[1, ] <- apply(PV[situ1,], min, MARGIN = 2)
+PV_max[1, ] <- apply(PV[situ1,], max, MARGIN = 2)
 
 
-proportion_L2_Total[situ3,] #Multidimensional theta without carry-over effects 
-propBias_mean[3, ] <- colMeans(proportion_L2_Total[situ3,])
-propBias_min[3, ] <- apply(proportion_L2_Total[situ3,], min, MARGIN = 2)
-propBias_max[3, ] <- apply(proportion_L2_Total[situ3,], max, MARGIN = 2)
+PV[situ2,] #Unidimensional theta with carry-over effects 
+PV_mean[2, ] <- colMeans(PV[situ2,])
+PV_min[2, ] <- apply(PV[situ2,], min, MARGIN = 2)
+PV_max[2, ] <- apply(PV[situ2,], max, MARGIN = 2)
 
 
-proportion_L2_Total[situ4,] #Multidimensional theta with carry-over effects 
-propBias_mean[4, ] <- colMeans(proportion_L2_Total[situ4,])
-propBias_min[4, ] <- apply(proportion_L2_Total[situ4,], min, MARGIN = 2)
-propBias_max[4, ] <- apply(proportion_L2_Total[situ4,], max, MARGIN = 2)
-
-save(propBias_mean, propBias_min, propBias_max, file = "D:\\Dropbox\\Dropbox\\tilburg office\\Research Individual change\\Project 3 - item difference scores\\20180326 DataAnalysis/propBiasTable.RData")
+PV[situ3,] #Multidimensional theta without carry-over effects 
+PV_mean[3, ] <- colMeans(PV[situ3,])
+PV_min[3, ] <- apply(PV[situ3,], min, MARGIN = 2)
+PV_max[3, ] <- apply(PV[situ3,], max, MARGIN = 2)
 
 
+PV[situ4,] #Multidimensional theta with carry-over effects 
+PV_mean[4, ] <- colMeans(PV[situ4,])
+PV_min[4, ] <- apply(PV[situ4,], min, MARGIN = 2)
+PV_max[4, ] <- apply(PV[situ4,], max, MARGIN = 2)
 
-# precision (Dont forget that we have N=1000 and N=100 -- two datasets!)
-propPreci_mean <- matrix(NA, 4, 6)
-propPreci_min <- matrix(NA, 4, 6)
-propPreci_max <- matrix(NA, 4, 6)
-
-
-proportion_L2_Total_p[situ1,] #Unidimensional theta without carry-over effects 
-propPreci_mean[1, ] <- colMeans(proportion_L2_Total_p[situ1,])
-propPreci_min[1, ] <- apply(proportion_L2_Total_p[situ1,], min, MARGIN = 2)
-propPreci_max[1, ] <- apply(proportion_L2_Total_p[situ1,], max, MARGIN = 2)
-
-
-proportion_L2_Total_p[situ2,] #Unidimensional theta with carry-over effects 
-propPreci_mean[2, ] <- colMeans(proportion_L2_Total_p[situ2,])
-propPreci_min[2, ] <- apply(proportion_L2_Total_p[situ2,], min, MARGIN = 2)
-propPreci_max[2, ] <- apply(proportion_L2_Total_p[situ2,], max, MARGIN = 2)
-
-proportion_L2_Total_p[situ3,] #Multidimensional theta without carry-over effects 
-propPreci_mean[3, ] <- colMeans(proportion_L2_Total_p[situ3,])
-propPreci_min[3, ] <- apply(proportion_L2_Total_p[situ3,], min, MARGIN = 2)
-propPreci_max[3, ] <- apply(proportion_L2_Total_p[situ3,], max, MARGIN = 2)
-
-
-proportion_L2_Total_p[situ4,] #Multidimensional theta with carry-over effects 
-propPreci_mean[4, ] <- colMeans(proportion_L2_Total_p[situ4,])
-propPreci_min[4, ] <- apply(proportion_L2_Total_p[situ4,], min, MARGIN = 2)
-propPreci_max[4, ] <- apply(proportion_L2_Total_p[situ4,], max, MARGIN = 2)
-
-save(propPreci_mean, propPreci_min, propPreci_max, file = "D:\\Dropbox\\Dropbox\\tilburg office\\Research Individual change\\Project 3 - item difference scores\\20180326 DataAnalysis/propPreciTable.RData")
+save(PV_mean, PV_min, PV_max, file = "D:\\Dropbox\\tilburg office\\Research Individual change\\Project 3 - item difference scores\\20180326 DataAnalysis/PVN100.RData")
 
 
 
-############# 4.  given the 108 cells, which cells generate negative reliabilites? ####################
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/LargeSample20171126.RData")  #N=1000
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/SmallSample20171126.RData")  #N=100
-
-NUM_negative <- matrix(NA, 108, 6)
-for (c in 1:108){
-  num_negative <- matrix(NA, 20, 6)
-  for(r in 1:20){
-    num_negative[r, ] <- colSums(restuls_conditions[[c]][[1]][[r]][, -1] < 0)
-  }
-  
-  NUM_negative[c, ] <- colSums(num_negative)/1000 #note in total 1000 estimated reliability: 20 samples x 50 replication/sample
-}
-
-NUM_negative[situ1, ]  #Unidimensional theta without carry-over effects --> NegRel__uni_NoCarry.csv
-write.csv(cbind(df[situ1, ], r_pop[situ1], NUM_negative[situ1, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel__uni_NoCarry_Large.csv") 
-write.csv(cbind(df[situ1, ], r_pop[situ1], NUM_negative[situ1, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel__uni_NoCarry_Small.csv") 
 
 
-NUM_negative[situ2, ]  #Unidimensional theta with carry-over effects --> NegRel_uni_Carry.csv
-write.csv(cbind(df[situ2, ], r_pop[situ2], NUM_negative[situ2, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel_uni_Carry_Large.csv") 
-write.csv(cbind(df[situ2, ], r_pop[situ2], NUM_negative[situ2, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel_uni_Carry_Small.csv") 
-
-
-NUM_negative[situ3, ]  #Multidimensional theta without carry-over effects --> NegRel_mul_NoCarry.csv
-write.csv(cbind(df[situ3, ], r_pop[situ3], NUM_negative[situ3, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel_mul_NoCarry_Large.csv") 
-write.csv(cbind(df[situ3, ], r_pop[situ3], NUM_negative[situ3, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel_mul_NoCarry_Small.csv") 
-
-
-NUM_negative[situ4, ]  #Multidimensional theta with carry-over effects --> NegRel_mul_Carry.csv
-write.csv(cbind(df[situ4, ], r_pop[situ4], NUM_negative[situ4, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel_mul_Carry_Large.csv") 
-write.csv(cbind(df[situ4, ], r_pop[situ4], NUM_negative[situ4, ]), file = "D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180121 DataAnalysis/NegRel_mul_Carry_Small.csv") 
 
 
 
@@ -334,6 +242,64 @@ write.csv(cbind(df[situ4, ], r_pop[situ4], NUM_negative[situ4, ]), file = "D:/Dr
 ###########################
 ########################### ends here
 
+############# 3. Old Research Question 3: Proportion of variance in bias due to sampling at Level 2 ##################################
+SS_L2 <- matrix(NA, 108, 6)
+SS_L1 <- matrix(NA, 108, 6)
+SS_Total <- matrix(NA, 108, 6)
+for (c in 1:108){ # cth cell
+  
+  SS_L2_temp <- matrix(NA, 20, 6)
+  SS_L1_temp <- matrix(NA, 20, 6)
+  SS_Total_temp <- matrix(NA, 20, 6)
+  for(l in 1:20){ # lth sample
+    SS_L2_temp[l, ] <- 50*(colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50 - r_pop[c])^2
+    SS_L1_temp[l, ] <- colSums(sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50, "-")^2)
+    SS_Total_temp[l, ] <- colSums((restuls_conditions[[c]][[1]][[l]][, 2:7] - r_pop[c])^2)
+  }
+  
+  SS_L2[c, ] <- colSums(SS_L2_temp)
+  SS_L1[c, ] <- colSums(SS_L1_temp)
+  SS_Total[c, ] <- colSums(SS_Total_temp)
+}
+((SS_L2 + SS_L1) - SS_Total)> .0000001  # this is to verify that SS_Total = SS_L1 + SS_L2, note that rounding errors exist. All should be FALSE!
+
+proportion_L2_Total <- matrix(NA, 108, 6)
+for(c in 1:108){
+  for (m in 1:6){
+    proportion_L2_Total[c, m] <- SS_L2[c, m]/SS_Total[c, m]
+  }
+}
+
+
+############# Backup: Old Research Question 4: Proportion of variance in precision due to sampling at Level 2  ############################
+SS_L2_p <- matrix(NA, 108, 6)
+SS_L1_p <- matrix(NA, 108, 6)
+SS_Total_p <- matrix(NA, 108, 6)
+
+for (c in 1:108){ # cth cell
+  
+  SS_L2_temp <- matrix(NA, 20, 6)
+  SS_L1_temp <- matrix(NA, 20, 6)
+  SS_Total_temp <- matrix(NA, 20, 6)
+  for(l in 1:20){ # lth sample
+    SS_L2_temp[l, ] <- 50*(colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50 - Est_reliability[c, ])^2
+    SS_L1_temp[l, ] <- colSums(sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50, "-")^2)
+    SS_Total_temp[l, ] <- colSums((restuls_conditions[[c]][[1]][[l]][, 2:7] - r_pop[c])^2)
+  }
+  
+  SS_L2_p[c, ] <- colSums(SS_L2_temp)
+  SS_L1_p[c, ] <- colSums(SS_L1_temp)
+  SS_Total_p[c, ] <- colSums(SS_Total_temp)
+}
+
+((SS_L2_p + SS_L1_p) - SS_Total_p)> .0000001 
+
+proportion_L2_Total_p <- matrix(NA, 108, 6)
+for(c in 1:108){
+  for (m in 1:6){
+    proportion_L2_Total_p[c, m] <- SS_L2_p[c, m]/SS_Total_p[c, m]
+  }
+}
 
 
 ############# 4.Extra: Why negative estimated reliabiity? A toy example  ################
