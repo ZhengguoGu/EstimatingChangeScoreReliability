@@ -19,10 +19,10 @@ test_length <- c(9, 21, 36)
 parallel_item <- c(1, 0) # 1== yes, 0 == no
 correlated_facets <- c(1, .1, .5) #if == 1, then dimension of theta is 1, otherwise 3 dimensions
 magnitude_sd <- c(sqrt(.14), sqrt(.5))  # .14 == small variance, .5 == large variance
-strongweak_carry <- c(0, 10, 1) #0 == no, 10 == strong, 1 == weak
-procent_carry <- c(0, .25, .5)  #percentage of persons showing carry-over effects
+strongweak_carry <- c("no", "25%weak", "50%weak", "25%strong", "50%strong") 
 
-num_condition <- length(test_length)*length(parallel_item)*length(correlated_facets)*length(magnitude_sd)*length(strongweak_carry)*length(procent_carry)
+
+num_condition <- length(test_length)*length(parallel_item)*length(correlated_facets)*length(magnitude_sd)*length(strongweak_carry)
 conditions <- list()
 
 p <- 1
@@ -31,10 +31,10 @@ for(i in 1:length(test_length)){
     for (k in 1:length(correlated_facets)){
       for(l in 1:length(magnitude_sd)){
         for(m in 1:length(strongweak_carry)){
-          for(n in 1:length(procent_carry)){
-            conditions[[p]] <- c(test_length[i], parallel_item[j], correlated_facets[k], magnitude_sd[l], strongweak_carry[m], procent_carry[n])
+          
+            conditions[[p]] <- c(test_length[i], parallel_item[j], correlated_facets[k], magnitude_sd[l], strongweak_carry[m])
             p <- p + 1
-          }
+          
         }
       }
     }
@@ -44,7 +44,7 @@ for(i in 1:length(test_length)){
 
 df <- data.frame(matrix(unlist(conditions), nrow=num_condition, byrow = T))
 colnames(df) <- c('test length', 'parallel item', 'correlated facets',
-                  'maginute of sd', 'carry-over effects', '% persons showing carry-over')
+                  'maginute of sd', 'carry-over effects')
 #library(xlsx)
 #library(rJava)
 #write.csv(df, 'conditions.csv', sep=',')
@@ -79,18 +79,27 @@ while (num_test <= nrow(df)){
 
   sd_change <- df[num_test, 4]
   
-  if(df[num_test, 5] == 0){
+  #("no", "25%weak", "50%weak", "25%strong", "50%strong") 
+  
+  if(df[num_test, 5] == "no"){
       existence_carryover <- 0
-  } else if (df[num_test, 5] == 10){
+  } else if (df[num_test, 5] == "25%weak"){
       existence_carryover <- 1
-      strong_weak <- 1  # 1: strong carry-over effect; Please dont be confused: Later a function carry_over() will be called, and this function recognize 1 as strong effect. 
-                        # I know that this setup (i.e., first coded as 10 and then swtich to 1) is a bit tedious. 
-  } else if (df[num_test, 5] == 1){
+      strong_weak <- -1  # -1: weak carry-over effect 
+      proc_effect <- .25 #25% of persons showing effect
+  } else if (df[num_test, 5] == "50%weak"){
       existence_carryover <- 1
-      strong_weak <- -1  # -1: weak carry-over effect (please see the comment above.)
+      strong_weak <- -1  # -1: weak carry-over effect 
+      proc_effect <- .5  #50% of persons showing effect
+  } else if (df[num_test, 5] == "25%strong"){
+      existence_carryover <- 1
+      strong_weak <- 1     # 1: strong carry-over effect 
+     proc_effect <- .25   # 25% of persons showing effect
+  } else if (df[num_test, 5] == "50%strong"){
+      existence_carryover <- 1
+      strong_weak <- 1     # 1: strong carry-over effect 
+      proc_effect <- .5    # 50% of persons showing effect
   }
-
-
 
     #------------------------------------------------------------------------------
 
@@ -194,7 +203,7 @@ while (num_test <= nrow(df)){
       
       if (existence_carryover == 1){
         
-        carryover_results <- carry_over(response_pre, response_post, df[num_test, 6])
+        carryover_results <- carry_over(response_pre, response_post, proc_effect)
         
         if (strong_weak == 1){
           response_post <- carryover_results[[1]] #replace with scores with strong carryover effects
