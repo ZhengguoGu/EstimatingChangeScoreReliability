@@ -19,7 +19,7 @@ test_length <- c(9, 21, 36)
 parallel_item <- c(1, 0) # 1== yes, 0 == no
 correlated_facets <- c(1, .1, .5) #if == 1, then dimension of theta is 1, otherwise 3 dimensions
 magnitude_sd <- c(sqrt(.14), sqrt(.5))  # .14 == small variance, .5 == large variance
-strongweak_carry <- c("no", "25%weak", "50%weak", "25%strong", "50%strong") 
+strongweak_carry <- c(0, 25, 50, 125, 150) #0:"no carryover effect", 25:"25% of persons showing weak", 50:"50% showing weak", 125: "25% strong", 150: "50% strong"; 
 
 
 num_condition <- length(test_length)*length(parallel_item)*length(correlated_facets)*length(magnitude_sd)*length(strongweak_carry)
@@ -81,21 +81,21 @@ while (num_test <= nrow(df)){
   
   #("no", "25%weak", "50%weak", "25%strong", "50%strong") 
   
-  if(df[num_test, 5] == "no"){
+  if(df[num_test, 5] == 0){
       existence_carryover <- 0
-  } else if (df[num_test, 5] == "25%weak"){
+  } else if (df[num_test, 5] == 25){
       existence_carryover <- 1
       strong_weak <- -1  # -1: weak carry-over effect 
       proc_effect <- .25 #25% of persons showing effect
-  } else if (df[num_test, 5] == "50%weak"){
+  } else if (df[num_test, 5] == 50){
       existence_carryover <- 1
       strong_weak <- -1  # -1: weak carry-over effect 
       proc_effect <- .5  #50% of persons showing effect
-  } else if (df[num_test, 5] == "25%strong"){
+  } else if (df[num_test, 5] == 125){
       existence_carryover <- 1
       strong_weak <- 1     # 1: strong carry-over effect 
      proc_effect <- .25   # 25% of persons showing effect
-  } else if (df[num_test, 5] == "50%strong"){
+  } else if (df[num_test, 5] == 150){
       existence_carryover <- 1
       strong_weak <- 1     # 1: strong carry-over effect 
       proc_effect <- .5    # 50% of persons showing effect
