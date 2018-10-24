@@ -156,13 +156,17 @@ Unichange_sim <- function(n_sub, sd_change){
 }
 
 
-#--------------------------------------------------------------
+#--------------------------------------------------------------------------
 # Mimicking carry-over effects
 #
-# Last update: 2016/12/08
-#--------------------------------------------------------------
+# Last update: 2018/10/24, percentage of persons showing carry-over effects
+#--------------------------------------------------------------------------
 
-carry_over <- function(pre, post){
+carry_over <- function(pre, post, proc_N){
+  
+  #pre: pretest scores (a vector)
+  #post: posttest scores (a vector)
+  #proc_N: percentage of persons showing carry-over effects (a scalar)
   
   strong_post <- post
   weak_post <- post  
@@ -180,6 +184,13 @@ carry_over <- function(pre, post){
   weak_post[ind3] <- post[ind3]
   
 
+  #taking into account the persentage of persons showing carry-over effects
+  N <- length(pre)
+  
+  rand_index <- sample(N, floor(N * (1-proc_N)), replace = FALSE)  #records the index of persons showing NO carry-over effects!
+  
+  strong_post[rand_index] <- post[rand_index]  #those who dont show effects are kepted unchanged. 
+  weak_post[rand_index] <- post[rand_index]
   
   return(list(strong_post, weak_post))
 }
