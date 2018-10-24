@@ -187,9 +187,9 @@ carry_over <- function(pre, post, proc_N){
   #taking into account the persentage of persons showing carry-over effects
   N <- length(pre)
   
-  rand_index <- sample(N, floor(N * (1-proc_N)), replace = FALSE)  #records the index of persons showing NO carry-over effects!
+  rand_index <- sample(N, floor(N * (1-proc_N)), replace = FALSE)  #records the index of persons showing NO carry-over effects! see below
   
-  strong_post[rand_index] <- post[rand_index]  #those who dont show effects are kepted unchanged. 
+  strong_post[rand_index] <- post[rand_index]  #those who dont show effects are kept unchanged. 
   weak_post[rand_index] <- post[rand_index]
   
   return(list(strong_post, weak_post))
