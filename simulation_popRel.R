@@ -2,7 +2,7 @@
 
 
 set.seed(110)
-Rcpp::sourceCpp("C:\\Users\\Zhengguo\\Documents\\EstimatingChangeScoreReliability\\populationRel.cpp")
+Rcpp::sourceCpp("populationRel.cpp")
 
 #------------------------------------------------------------------------------ 
 # parameteres 
@@ -11,8 +11,9 @@ Rcpp::sourceCpp("C:\\Users\\Zhengguo\\Documents\\EstimatingChangeScoreReliabilit
 test_length <- c(9, 21, 36)
 parallel_item <- c(1, 0) # 1== yes, 0 == no
 correlated_facets <- c(1, .1, .5) #if == 1, then dimension of theta is 1, otherwise 3 dimensions
-magnitude_sd <- c(sqrt(.14), sqrt(.5))  # .14 == small variance, .5 == large variance.
-strongweak_carry <- c(0, 10, 1) #0 == no, 10 == strong, 1 == weak
+magnitude_sd <- c(sqrt(.14), sqrt(.5))  # .14 == small variance, .5 == large variance
+strongweak_carry <- c(0, 25, 50, 125, 150) #0:"no carryover effect", 25:"25% of persons showing weak", 50:"50% showing weak", 125: "25% strong", 150: "50% strong"; 
+
 
 num_condition <- length(test_length)*length(parallel_item)*length(correlated_facets)*length(magnitude_sd)*length(strongweak_carry)
 conditions <- list()
@@ -26,6 +27,7 @@ for(i in 1:length(test_length)){
           
           conditions[[p]] <- c(test_length[i], parallel_item[j], correlated_facets[k], magnitude_sd[l], strongweak_carry[m])
           p <- p + 1
+          
         }
       }
     }
@@ -34,6 +36,8 @@ for(i in 1:length(test_length)){
 
 
 df <- data.frame(matrix(unlist(conditions), nrow=num_condition, byrow = T))
+colnames(df) <- c('test length', 'parallel item', 'correlated facets',
+                  'maginute of sd', 'carry-over effects')
 
 
 # --------------------------------------------------------------------------------
@@ -63,20 +67,35 @@ while (num_test <= nrow(df)){
   
   sd_change <- df[num_test, 4]
   
-  if(df[num_test, 5] == 0){
-    existence_carryover <- 0
-    Eff <- "N"
-  } else if (df[num_test, 5] == 10){
-    existence_carryover <- 1
-    strong_weak <- 1  # 1: strong carry-over effect; Please dont be confused: Later a function carry_over() will be called, and this function recognize 1 as strong effect. 
-    # I know that this setup (i.e., first coded as 10 and then swtich to 1) is a bit tedious. 
-    Eff <- "S"
-  } else if (df[num_test, 5] == 1){
-    existence_carryover <- 1
-    strong_weak <- -1  # -1: weak carry-over effect (please see the comment above.)
-    Eff <- "W"
-  }
   
+  #("no", "25%weak", "50%weak", "25%strong", "50%strong") 
+  
+  if(df[num_test, 5] == 0){
+    
+    Eff <- "N"   #no carry-over
+    proc_effect <- 0  #because no carry-over effect
+    
+  } else if (df[num_test, 5] == 25){
+   
+    Eff <- "W"   # weak carry-over  
+    proc_effect <- .25 #25% of persons showing effect
+    
+  } else if (df[num_test, 5] == 50){
+    
+    Eff <- "W"   # weak carry-over
+    proc_effect <- .5  #50% of persons showing effect
+    
+  } else if (df[num_test, 5] == 125){
+    
+    Eff <- "S"   #strong carry-over
+    proc_effect <- .25   # 25% of persons showing effect
+    
+  } else if (df[num_test, 5] == 150){
+    
+    Eff <- "S"   #strong carry-over
+    proc_effect <- .5    # 50% of persons showing effect
+    
+  }
   
   
   #------------------------------------------------------------------------------
@@ -126,27 +145,59 @@ while (num_test <= nrow(df)){
     theta_pre_pop <- theta_pop[[1]]
     theta_post_pop <- theta_pop[[2]]
     
-    for(i in 1:N_pop){
-      resamp <- 1
-      sum_preOBS <- 0
-      sum_postOBS <- 0
-      while(resamp < sample_propensity){
-        pretest_obs <- GRMc_1theta(theta_pre_pop[i], itempar[,1], itempar[, 2:5])
-        posttest_obs <- GRMc_1theta(theta_post_pop[i], itempar[,1], itempar[, 2:5])
+    
+    if(Eff != "N"){ #if this is true, when we are in a cell where some people showing carry-over effects
+      
+      for(i in 1:N_pop){
+        resamp <- 1
+        sum_preOBS <- 0
+        sum_postOBS <- 0
         
-        if(Eff != "N"){
-          posttest_obs <- Carryover(pretest_obs, posttest_obs, Eff)
+        # decide whether this pariticular person shows carry-over effect
+        if(runif(1) > proc_effect){
+          Eff_person <- Eff    #randomly generated value (from unifrom dist) higher than proc_effect (25% or 50% showing effect)
+        }else{
+          Eff_person <- "N"
         }
         
-        sum_preOBS = sum_preOBS + sum(pretest_obs)
-        sum_postOBS = sum_postOBS + sum(posttest_obs)
+        while(resamp < sample_propensity){
+          pretest_obs <- GRMc_1theta(theta_pre_pop[i], itempar[,1], itempar[, 2:5])
+          posttest_obs <- GRMc_1theta(theta_post_pop[i], itempar[,1], itempar[, 2:5])
+          
+          if(Eff_person != "N"){
+            
+            posttest_obs <- Carryover(pretest_obs, posttest_obs, Eff_person)
+          }
+          
+          sum_preOBS = sum_preOBS + sum(pretest_obs)
+          sum_postOBS = sum_postOBS + sum(posttest_obs)
+          
+          resamp = resamp + 1
+        }
         
-        resamp = resamp + 1
+        TRUE_ChSCORE[i] <- (sum_postOBS - sum_preOBS)/sample_propensity
+        OBS_ChSCORE[i] <- sum(posttest_obs) - sum(pretest_obs)  #the 100th generated pretest_obs and posttest_obs are recorded and used as the observed scores
       }
-  
-      TRUE_ChSCORE[i] <- (sum_postOBS - sum_preOBS)/sample_propensity
-      OBS_ChSCORE[i] <- sum(posttest_obs) - sum(pretest_obs)  #the 100th generated pretest_obs and posttest_obs are recorded and used as the observed scores
-    }
+    } else{ #no carry-over effects
+      for(i in 1:N_pop){
+        resamp <- 1
+        sum_preOBS <- 0
+        sum_postOBS <- 0
+        
+        while(resamp < sample_propensity){
+          pretest_obs <- GRMc_1theta(theta_pre_pop[i], itempar[,1], itempar[, 2:5])
+          posttest_obs <- GRMc_1theta(theta_post_pop[i], itempar[,1], itempar[, 2:5])
+          sum_preOBS = sum_preOBS + sum(pretest_obs)
+          sum_postOBS = sum_postOBS + sum(posttest_obs)
+          
+          resamp = resamp + 1
+        }
+        
+        TRUE_ChSCORE[i] <- (sum_postOBS - sum_preOBS)/sample_propensity
+        OBS_ChSCORE[i] <- sum(posttest_obs) - sum(pretest_obs)  #the 100th generated pretest_obs and posttest_obs are recorded and used as the observed scores
+      }
+    } 
+    
     
     
   } else{
