@@ -98,6 +98,8 @@ plot(itempar[15:21, 3], est_par3[, 3])  #item-difficulty 2
 plot(itempar[15:21, 4], est_par3[, 4])  #item-difficulty 3
 plot(itempar[15:21, 5], est_par3[, 5])  #item-difficulty 4 
 
+
+
 #### Test function Carryover
 pretest_obs <- 1:20
 posttest_obs <- 20:1
@@ -108,3 +110,6 @@ pretest_obs
 posttest_obs
 
 carry_over(pretest_obs, posttest_obs, proc_N = 1)  #R function in ZhengguoFunction.R
+
+
+
