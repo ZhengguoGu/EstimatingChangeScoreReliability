@@ -44,7 +44,7 @@ IntegerVector GRMc_1thetaMD(NumericVector thetaMD, NumericVector Islope, Numeric
   IntegerVector responseMD(nitems);
   
   
-  // simulate pretest scores
+  // simulate test scores
   NumericVector randomnumberMD = runif(nitems, 0.0, 1.0); 
   NumericMatrix theta_BMD(nitems, ncat); 
   for(int i = 0; i < ncat; ++i){
@@ -53,7 +53,7 @@ IntegerVector GRMc_1thetaMD(NumericVector thetaMD, NumericVector Islope, Numeric
   for(int j = 0; j < nitems; ++j){
     
     numeritorMD(j, _) = exp(Islope(j) * theta_BMD(j,_));
-    for(int k = 0; k <ncat; ++k){
+    for(int k = 0; k < ncat; ++k){
       PstarMD(j,k) = numeritorMD(j,k)/(1.0+numeritorMD(j,k));
       if(PstarMD(j,k) > randomnumberMD(j)){
         responseMD(j) = responseMD(j) + 1;
@@ -77,7 +77,7 @@ IntegerVector Carryover(IntegerVector pre, IntegerVector post, String eff){
   IntegerVector post_out(n_items);
   
   if(eff == "S"){
-    for (int k = 1; k < n_items; ++k){
+    for (int k = 0; k < n_items; ++k){
       if(pre(k) - post(k) < -1){
         post_out(k) = pre(k) + 1;
       }else if(pre(k) - post(k) > 1){
@@ -88,7 +88,7 @@ IntegerVector Carryover(IntegerVector pre, IntegerVector post, String eff){
     }
     
   }else if(eff == "W"){
-    for (int k = 1; k < n_items; ++k){
+    for (int k = 0; k < n_items; ++k){
       if(pre(k) - post(k) < -1){
         post_out(k) = post(k) - 1;
       }else if(pre(k) - post(k) > 1){
