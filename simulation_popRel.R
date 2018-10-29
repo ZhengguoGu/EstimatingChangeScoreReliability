@@ -146,7 +146,7 @@ while (num_test <= nrow(df)){
     theta_post_pop <- theta_pop[[2]]
     
     
-    if(Eff != "N"){ #if this is true, when we are in a cell where some people showing carry-over effects
+    if(Eff != "N"){ #if this is true, when we are in a cell where SOME people showing carry-over effects
       
       for(i in 1:N_pop){
         resamp <- 1
@@ -155,24 +155,33 @@ while (num_test <= nrow(df)){
         
         # decide whether this pariticular person shows carry-over effect
         if(runif(1) > proc_effect){
-          Eff_person <- Eff    #randomly generated value (from unifrom dist) higher than proc_effect (25% or 50% showing effect)
-        }else{
-          Eff_person <- "N"
-        }
-        
-        while(resamp < sample_propensity){
-          pretest_obs <- GRMc_1theta(theta_pre_pop[i], itempar[,1], itempar[, 2:5])
-          posttest_obs <- GRMc_1theta(theta_post_pop[i], itempar[,1], itempar[, 2:5])
-          
-          if(Eff_person != "N"){
+          #randomly generated value (from unifrom dist) higher than proc_effect (25% or 50% showing effect)
+          while(resamp < sample_propensity){
+            pretest_obs <- GRMc_1theta(theta_pre_pop[i], itempar[,1], itempar[, 2:5])
+            posttest_obs <- GRMc_1theta(theta_post_pop[i], itempar[,1], itempar[, 2:5])
             
-            posttest_obs <- Carryover(pretest_obs, posttest_obs, Eff_person)
+            if(Eff_person != "N"){
+              
+              posttest_obs <- Carryover(pretest_obs, posttest_obs, Eff)
+            }
+            
+            sum_preOBS = sum_preOBS + sum(pretest_obs)
+            sum_postOBS = sum_postOBS + sum(posttest_obs)
+            
+            resamp = resamp + 1
           }
           
-          sum_preOBS = sum_preOBS + sum(pretest_obs)
-          sum_postOBS = sum_postOBS + sum(posttest_obs)
-          
-          resamp = resamp + 1
+        }else{
+          # no carry-over effects
+          while(resamp < sample_propensity){
+            pretest_obs <- GRMc_1theta(theta_pre_pop[i], itempar[,1], itempar[, 2:5])
+            posttest_obs <- GRMc_1theta(theta_post_pop[i], itempar[,1], itempar[, 2:5])
+            
+            sum_preOBS = sum_preOBS + sum(pretest_obs)
+            sum_postOBS = sum_postOBS + sum(posttest_obs)
+            
+            resamp = resamp + 1
+          }
         }
         
         TRUE_ChSCORE[i] <- (sum_postOBS - sum_preOBS)/sample_propensity
@@ -200,40 +209,88 @@ while (num_test <= nrow(df)){
     
     
     
-  } else{
+  } else{  #multidimensional
     
     EMP <- FALSE
     theta_pop <- Mulchange_sim(N_pop, dimension, cov_pretest, sd_change, EMP)
     theta_pre_pop <- theta_pop[[1]]
     theta_post_pop <- theta_pop[[2]]
     
-    for(i in 1:N_pop){
-      abil_pre <- theta_pre_pop[i, ][id]
-      abil_post <- theta_post_pop[i, ][id]
+    if(Eff != "N"){ #if this is true, when we are in a cell where some people showing carry-over effects
       
-      resamp <- 1
-      sum_preOBS <- 0
-      sum_postOBS <- 0
-      while(resamp < sample_propensity){
-      
-        pretest_obs <- GRMc_1thetaMD(abil_pre, itempar[,1], itempar[, 2:5])
-        posttest_obs <- GRMc_1thetaMD(abil_post, itempar[,1], itempar[, 2:5])
-      
-        if(Eff != "N"){
-          posttest_obs <- Carryover(pretest_obs, posttest_obs, Eff)
+      for(i in 1:N_pop){
+        abil_pre <- theta_pre_pop[i, ][id]
+        abil_post <- theta_post_pop[i, ][id]
+        
+        resamp <- 1
+        sum_preOBS <- 0
+        sum_postOBS <- 0
+        
+        # decide whether this pariticular person shows carry-over effect
+        if(runif(1) > proc_effect){
+           #randomly generated value (from unifrom dist) higher than proc_effect (25% or 50% showing effect)
+          
+          while(resamp < sample_propensity){
+            
+            pretest_obs <- GRMc_1thetaMD(abil_pre, itempar[,1], itempar[, 2:5])
+            posttest_obs <- GRMc_1thetaMD(abil_post, itempar[,1], itempar[, 2:5])
+            
+            if(Eff != "N"){
+              posttest_obs <- Carryover(pretest_obs, posttest_obs, Eff)
+            }
+            
+            sum_preOBS = sum_preOBS + sum(pretest_obs)
+            sum_postOBS = sum_postOBS + sum(posttest_obs)
+            
+            resamp = resamp + 1
+          }
+          
+        }else{
+          # no carry-over effects
+          
+          while(resamp < sample_propensity){
+             pretest_obs <- GRMc_1thetaMD(abil_pre, itempar[,1], itempar[, 2:5])
+             posttest_obs <- GRMc_1thetaMD(abil_post, itempar[,1], itempar[, 2:5])
+          
+             sum_preOBS = sum_preOBS + sum(pretest_obs)
+             sum_postOBS = sum_postOBS + sum(posttest_obs)
+          
+             resamp = resamp + 1
+          }
         }
         
-        sum_preOBS = sum_preOBS + sum(pretest_obs)
-        sum_postOBS = sum_postOBS + sum(posttest_obs)
+        TRUE_ChSCORE[i] <- (sum_postOBS - sum_preOBS)/sample_propensity
+        OBS_ChSCORE[i] <- sum(posttest_obs) - sum(pretest_obs)
         
-        resamp = resamp + 1
+        
       }
-      
-      TRUE_ChSCORE[i] <- (sum_postOBS - sum_preOBS)/sample_propensity
-      OBS_ChSCORE[i] <- sum(posttest_obs) - sum(pretest_obs)
-      
-      
+    
+    }else{ # we are in a cell with no carryover effects for all persons
+      for(i in 1:N_pop){
+        abil_pre <- theta_pre_pop[i, ][id]
+        abil_post <- theta_post_pop[i, ][id]
+        
+        resamp <- 1
+        sum_preOBS <- 0
+        sum_postOBS <- 0
+        while(resamp < sample_propensity){
+          
+          pretest_obs <- GRMc_1thetaMD(abil_pre, itempar[,1], itempar[, 2:5])
+          posttest_obs <- GRMc_1thetaMD(abil_post, itempar[,1], itempar[, 2:5])
+          
+          sum_preOBS = sum_preOBS + sum(pretest_obs)
+          sum_postOBS = sum_postOBS + sum(posttest_obs)
+          
+          resamp = resamp + 1
+        }
+        
+        TRUE_ChSCORE[i] <- (sum_postOBS - sum_preOBS)/sample_propensity
+        OBS_ChSCORE[i] <- sum(posttest_obs) - sum(pretest_obs)
+        
+        
+      }
     }
+    
   }
   
   
