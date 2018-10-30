@@ -124,7 +124,7 @@ while (num_test <= nrow(df)){
   
   #ITEM_PAR[[num_test]] <- itempar
   
-  id <- vector()
+  id <- vector()  #this is for multidimensional theta
   for(d in 1: dimension){
     id <- cbind(id, rep(d, num_items/dimension))
   }
@@ -139,7 +139,7 @@ while (num_test <= nrow(df)){
   TRUE_ChSCORE <- array()
   OBS_ChSCORE <- array()
   
-  if (dimension == 1){
+  if (dimension == 1){  #unidimensional
     
     theta_pop <- Unichange_sim(N_pop, sd_change)
     theta_pre_pop <- theta_pop[[1]]
@@ -193,6 +193,7 @@ while (num_test <= nrow(df)){
           while(resamp <= sample_propensity){
             pretest_obs <- GRMc_1theta(theta_pre_pop[i], itempar[,1], itempar[, 2:5])
             posttest_obs <- GRMc_1theta(theta_post_pop[i], itempar[,1], itempar[, 2:5])
+            
             sum_preOBS = sum_preOBS + sum(pretest_obs)
             sum_postOBS = sum_postOBS + sum(posttest_obs)
           
