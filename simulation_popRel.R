@@ -156,15 +156,12 @@ while (num_test <= nrow(df)){
         # decide whether this pariticular person shows carry-over effect
         if(runif(1) > proc_effect){
           #randomly generated value (from unifrom dist) higher than proc_effect (25% or 50% showing effect)
-          while(resamp < sample_propensity){
+          while(resamp <= sample_propensity){
             pretest_obs <- GRMc_1theta(theta_pre_pop[i], itempar[,1], itempar[, 2:5])
             posttest_obs <- GRMc_1theta(theta_post_pop[i], itempar[,1], itempar[, 2:5])
             
-            if(Eff_person != "N"){
-              
-              posttest_obs <- Carryover(pretest_obs, posttest_obs, Eff)
-            }
-            
+            posttest_obs <- Carryover(pretest_obs, posttest_obs, Eff)  #because for this particular person, s/he shows carry-over effects
+          
             sum_preOBS = sum_preOBS + sum(pretest_obs)
             sum_postOBS = sum_postOBS + sum(posttest_obs)
             
@@ -172,8 +169,8 @@ while (num_test <= nrow(df)){
           }
           
         }else{
-          # no carry-over effects
-          while(resamp < sample_propensity){
+          # no carry-over effects: although we are in a cell where carry-over effect exists, but for this particular person, s/he doesn not show the effect. 
+          while(resamp <= sample_propensity){
             pretest_obs <- GRMc_1theta(theta_pre_pop[i], itempar[,1], itempar[, 2:5])
             posttest_obs <- GRMc_1theta(theta_post_pop[i], itempar[,1], itempar[, 2:5])
             
@@ -187,28 +184,26 @@ while (num_test <= nrow(df)){
         TRUE_ChSCORE[i] <- (sum_postOBS - sum_preOBS)/sample_propensity
         OBS_ChSCORE[i] <- sum(posttest_obs) - sum(pretest_obs)  #the 100th generated pretest_obs and posttest_obs are recorded and used as the observed scores
       }
-    } else{ #no carry-over effects
-      for(i in 1:N_pop){
-        resamp <- 1
-        sum_preOBS <- 0
-        sum_postOBS <- 0
+    } else{ #no carry-over effects: We are in a cell where none shows carry-over effects.
+        for(i in 1:N_pop){
+          resamp <- 1
+          sum_preOBS <- 0
+          sum_postOBS <- 0
         
-        while(resamp < sample_propensity){
-          pretest_obs <- GRMc_1theta(theta_pre_pop[i], itempar[,1], itempar[, 2:5])
-          posttest_obs <- GRMc_1theta(theta_post_pop[i], itempar[,1], itempar[, 2:5])
-          sum_preOBS = sum_preOBS + sum(pretest_obs)
-          sum_postOBS = sum_postOBS + sum(posttest_obs)
+          while(resamp <= sample_propensity){
+            pretest_obs <- GRMc_1theta(theta_pre_pop[i], itempar[,1], itempar[, 2:5])
+            posttest_obs <- GRMc_1theta(theta_post_pop[i], itempar[,1], itempar[, 2:5])
+            sum_preOBS = sum_preOBS + sum(pretest_obs)
+            sum_postOBS = sum_postOBS + sum(posttest_obs)
           
-          resamp = resamp + 1
-        }
+            resamp = resamp + 1
+          }
         
-        TRUE_ChSCORE[i] <- (sum_postOBS - sum_preOBS)/sample_propensity
-        OBS_ChSCORE[i] <- sum(posttest_obs) - sum(pretest_obs)  #the 100th generated pretest_obs and posttest_obs are recorded and used as the observed scores
-      }
-    } 
-    
-    
-    
+          TRUE_ChSCORE[i] <- (sum_postOBS - sum_preOBS)/sample_propensity
+          OBS_ChSCORE[i] <- sum(posttest_obs) - sum(pretest_obs)  #the 100th generated pretest_obs and posttest_obs are recorded and used as the observed scores
+        }
+      } 
+ 
   } else{  #multidimensional
     
     EMP <- FALSE
@@ -216,7 +211,7 @@ while (num_test <= nrow(df)){
     theta_pre_pop <- theta_pop[[1]]
     theta_post_pop <- theta_pop[[2]]
     
-    if(Eff != "N"){ #if this is true, when we are in a cell where some people showing carry-over effects
+    if(Eff != "N"){ #if this is true, when we are in a cell where SOME people showing carry-over effects
       
       for(i in 1:N_pop){
         abil_pre <- theta_pre_pop[i, ][id]
@@ -230,14 +225,13 @@ while (num_test <= nrow(df)){
         if(runif(1) > proc_effect){
            #randomly generated value (from unifrom dist) higher than proc_effect (25% or 50% showing effect)
           
-          while(resamp < sample_propensity){
+          while(resamp <= sample_propensity){
             
             pretest_obs <- GRMc_1thetaMD(abil_pre, itempar[,1], itempar[, 2:5])
             posttest_obs <- GRMc_1thetaMD(abil_post, itempar[,1], itempar[, 2:5])
             
-            if(Eff != "N"){
-              posttest_obs <- Carryover(pretest_obs, posttest_obs, Eff)
-            }
+            posttest_obs <- Carryover(pretest_obs, posttest_obs, Eff)  #for this particular person, carry-over effect exists
+           
             
             sum_preOBS = sum_preOBS + sum(pretest_obs)
             sum_postOBS = sum_postOBS + sum(posttest_obs)
@@ -246,9 +240,10 @@ while (num_test <= nrow(df)){
           }
           
         }else{
-          # no carry-over effects
+          # no carry-over effects for this particular person
           
-          while(resamp < sample_propensity){
+          while(resamp <= sample_propensity){
+            
              pretest_obs <- GRMc_1thetaMD(abil_pre, itempar[,1], itempar[, 2:5])
              posttest_obs <- GRMc_1thetaMD(abil_post, itempar[,1], itempar[, 2:5])
           
@@ -273,7 +268,7 @@ while (num_test <= nrow(df)){
         resamp <- 1
         sum_preOBS <- 0
         sum_postOBS <- 0
-        while(resamp < sample_propensity){
+        while(resamp <= sample_propensity){
           
           pretest_obs <- GRMc_1thetaMD(abil_pre, itempar[,1], itempar[, 2:5])
           posttest_obs <- GRMc_1thetaMD(abil_post, itempar[,1], itempar[, 2:5])
@@ -292,8 +287,6 @@ while (num_test <= nrow(df)){
     }
     
   }
-  
-  
 
   
   #r_pop[num_test] <- mean(sim_result)
