@@ -114,6 +114,13 @@ df <- data.frame(matrix(unlist(conditions), nrow=num_condition, byrow = T))
 colnames(df) <- c('test length', 'parallel item', 'correlated facets',
                   'maginute of sd', 'carry-over effects')
 
+########  !! important!! ######### 
+#Comment: I decided to focus on comparing the traditional method using alpha and item-level method using alpha, and ignoring the results estimated by 
+#using lambda2 and lambda 4, because the article is about showing that item-level method is better than the traditional method, not about estimating
+#reliability using alpha/lambda2/lambda4. 
+#########
+Q1_Bias_N1000 <- Q1_Bias_N1000[, c(1, 4)]
+Q1_Bias_N100 <- Q1_Bias_N100[, c(1, 4)]
 
 # Mixed Anova for bias
 Q1_Bias_N1000 <- cbind(1000, Q1_Bias_N1000)
@@ -123,9 +130,10 @@ colnames(Q1_Bias_N100)[1] <- "sample size"
 
 BIAS_data <- rbind(cbind(df, Q1_Bias_N1000), cbind(df, Q1_Bias_N100))
 
+# from wide format to long format
 library(tidyr)
+BIAS_data_longformat <- gather(BIAS_data, estimates, estimatedRel, "trad_alpha":"item_alpha", factor_key=TRUE)
 
-BIAS_data_longformat <- gather(BIAS_data, estimates, estimatedRel, "trad_alpha":"item_l4", factor_key=TRUE)
 summary(BIAS_data_longformat)
 BIAS_data_longformat$`test length` <- factor(BIAS_data_longformat$`test length`, levels = c(9, 21, 36))
 BIAS_data_longformat$`parallel item` <- factor(BIAS_data_longformat$`parallel item`, levels = c(1, 0))
@@ -138,11 +146,14 @@ summary(BIAS_data_longformat)  #check whether predictors agains
 #add row identifier for mixed ANOVA
 BIAS_data_longformat <- cbind(1:nrow(BIAS_data_longformat), BIAS_data_longformat)
 colnames(BIAS_data_longformat)[1] <- 'order' 
-fit_bias <- aov(estimatedRel ~ `test length` + `parallel item` +
+#comments on the use of aov(), https://www.statmethods.net/stats/anova.html
+fit_bias <- aov(estimatedRel ~  `test length` + `parallel item`  +
                   `correlated facets` + `maginute of sd` +
-                  `carry-over effects` + `sample size` + estimates +
-                  Error(order/estimates), data=BIAS_data_longformat)
+                  `carry-over effects` + `sample size` +  estimates +
+                  Error(BIAS_data_longformat$order/estimates), data=BIAS_data_longformat)
 summary(fit_bias)
+library(DescTools)
+eta <- EtaSq(fit_bias, type = 1)
 
 ####################### Summarize results in terms of 4 situations  ############################
 # situation1 --> "Unidimensional + No Carryover"
