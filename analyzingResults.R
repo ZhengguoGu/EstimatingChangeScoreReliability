@@ -12,42 +12,41 @@
 ############### 0. Check data #######################################################################
 
 
-# 0.1 Load data: Note: there are in total 3 datasets, one for the population reliability, one for N=1000, and one for N=100.
-# To replicate, one has to run the code for N=1000 and for N=100 seperatly. That is, after loading the N=1000 and the population rel dataset, run the code below and save the results. 
+# 0.1 Load data: Note: there are in total 3 datasets, one for the population reliability, one for N=1000 (estimated rel), and one for N=100 (estimate rel).
+# To replicate the result, one has to run the code for N=1000 and for N=100 seperatly. That is, after loading the N=1000 and the population rel dataset, run the code below and save the results. 
 # Afterwards, one load the N=100 dataset (i.e., N=1000 data will be replaced with N=100) and run the code below again. 
 
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180326 DataAnalysis/PopulationRel20180322.RData")
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20180326 DataAnalysis/LargeSample20180327.RData")
-load("D:/Dropbox/Tilburg office/Research Individual change/Project 3 - item difference scores/20171126 Newdata/SmallSample20171126.RData")
+load("PopulationRel20181030/PopulationRel.RData")
+#load("EstimatingReliability20181024_estimatedRel/LargeSample20181025.RData")
+load("EstimatingReliability20181024_estimatedRel/SmallSample20181026.RData")
 
 
 # 0.2 Review the structure of results
 
-length(restuls_conditions)  # 108 --> total number of cells (Note that there are two datasets, one for small sample one for large sample, and thus 108x2=216 cells)
+length(restuls_conditions)  # 180 --> total number of cells (Note that there are two datasets, one for small sample one for large sample, and thus 180x2=360 cells)
 length(restuls_conditions[[1]]) # 3 (lists)--> the first list contains all the reliability estimates for the 20 samples of persons
 # the second list contains the average reliability for each sample of persons (thus, 20 rows)
 # the third list contains the SD (might not be useful at this moment)
 
 length(restuls_conditions[[1]][[1]]) # 20 (lists) --> each list contains the reliability estimates for 50 samples of responses
-str(restuls_conditions[[1]][[1]][[1]]) # num [1:50, 1:7] --> 7 methods (the first column - i.e., the first method - is not useful, because it will be replaced 
-                                       # by the population reliability; see simulation.R)
+str(restuls_conditions[[1]][[1]][[1]]) # num [1:50, 1:6] --> (6 estimates; 3 for the traditional method and 3 for the item-level method)
 
-str(restuls_conditions[[1]][[2]]) # num [1:20, 1:8] --> the average reliability for each sample of persons (columns are 7 methods). NOT USED
-str(restuls_conditions[[1]][[3]]) # num [1:20, 1:8] --> the SD. NOT USED.
+str(restuls_conditions[[1]][[2]]) # num [1:20, 1:6] --> the average reliability for each sample of persons. NOT USED
+str(restuls_conditions[[1]][[3]]) # num [1:20, 1:6] --> the SD. NOT USED.
 
 
 
 ############## 1. Research Question 1: Bias #########################################################
 
-D_reliability <- matrix(NA, 108, 6) # this is for calculating the bias for the 6 change-score reliability estimates for each cell. 
-Est_reliability <- matrix(NA, 108, 6) # this is useful for later
-for (c in 1:108){ # cth cell
+D_reliability <- matrix(NA, 180, 6) # this is for calculating the bias for the 6 change-score reliability estimates for each cell. 
+Est_reliability <- matrix(NA, 180, 6) # this is useful for later
+for (c in 1:180){ # cth cell
   
   temp_recorder <- matrix(NA, 20, 6)
   temp_recorder_rel <- matrix(NA, 20, 6)
   for(l in 1:20){ # lth sample
-     temp_recorder[l, ] <- colSums(restuls_conditions[[c]][[1]][[l]][, 2:7] - r_pop[c])  #cth cell, lth sample
-     temp_recorder_rel[l, ] <- colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])  
+     temp_recorder[l, ] <- colSums(restuls_conditions[[c]][[1]][[l]][, 1:6] - r_pop[c])  #cth cell, lth sample
+     temp_recorder_rel[l, ] <- colSums(restuls_conditions[[c]][[1]][[l]][, 1:6])  
     }
   
   D_reliability[c, ] <- colSums(temp_recorder) / 1000
@@ -58,46 +57,92 @@ Q1_Bias <- D_reliability
 
 ############# 2. Research Question 2: Precision #######################################################
 
-Q2_Precision <- matrix(NA, 108, 6)
-for (c in 1:108){ # cth cell
+Q2_Precision <- matrix(NA, 180, 6)
+for (c in 1:180){ # cth cell
   
   temp_recorder <- matrix(NA, 20, 6)
   for(l in 1:20){ # lth sample
-    temp_recorder[l, ] <- colSums(sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, Est_reliability[c, ], "-")^2)  #cth cell, lth sample
+    temp_recorder[l, ] <- colSums(sweep(restuls_conditions[[c]][[1]][[l]][, 1:6], 2, Est_reliability[c, ], "-")^2)  #cth cell, lth sample
   }
   Q2_Precision[c, ] <- sqrt(colSums(temp_recorder) / 999)
  
 }
 
-############# 3. Research Question 3: Proportion of variance of estiamted chagne score reliability due to Level 2 (i.e., PV)   #############
+#Q1_Bias_N1000 <- Q1_Bias
+#Q2_Precision_N1000 <- Q2_Precision
+#save(Q1_Bias_N1000, Q2_Precision_N1000, file = "Bias_and_precision_N1000.RData") 
 
-var_L2 <- matrix(NA, 108, 6)
-var_L1 <- matrix(NA, 108, 6)
-var_total <- matrix(NA, 108, 6)  # this is to check whether var_total = var_L2 + var_L1
+Q1_Bias_N100 <- Q1_Bias
+Q2_Precision_N100 <- Q2_Precision
+save(Q1_Bias_N100, Q2_Precision_N100, file = "Bias_and_precision_N100.RData")
 
-for (c in 1:108){ # cth cell
-  
-  var_L2_temp <- matrix(NA, 20, 6)
-  var_L1_temp <- matrix(NA, 20, 6)
-  var_Total_temp <- matrix(NA, 20, 6)
-  for(l in 1:20){ # lth sample
-    var_L2_temp[l, ] <- 50*(colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50 - Est_reliability[c, ])^2
-    var_L1_temp[l, ] <- colSums(sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50, "-")^2)
-    var_Total_temp[l, ] <- colSums((sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, Est_reliability[c, ], "-"))^2)
+
+
+######## mixed ANOVA
+load(file = "Bias_and_precision_N1000.RData")
+load(file = "Bias_and_precision_N100.RData")
+
+colnames(Q1_Bias_N1000) <- c("trad_alpha", "trad_l2", "trad_l4", "item_alpha", "item_l2", "item_l4")
+colnames(Q1_Bias_N100) <- c("trad_alpha", "trad_l2", "trad_l4", "item_alpha", "item_l2", "item_l4")
+colnames(Q2_Precision_N1000) <- c("trad_alpha", "trad_l2", "trad_l4", "item_alpha", "item_l2", "item_l4")
+colnames(Q2_Precision_N100) <- c("trad_alpha", "trad_l2", "trad_l4", "item_alpha", "item_l2", "item_l4")
+
+
+test_length <- c(9, 21, 36)
+parallel_item <- c(1, 0) # 1== yes, 0 == no
+correlated_facets <- c(1, .1, .5) #if == 1, then dimension of theta is 1, otherwise 3 dimensions
+magnitude_sd <- c(sqrt(.14), sqrt(.5))  # .14 == small variance, .5 == large variance
+strongweak_carry <- c(0, 25, 50, 125, 150) #0:"no carryover effect", 25:"25% of persons showing weak", 50:"50% showing weak", 125: "25% strong", 150: "50% strong"; 
+num_condition <- length(test_length)*length(parallel_item)*length(correlated_facets)*length(magnitude_sd)*length(strongweak_carry)
+conditions <- list()
+p <- 1
+for(i in 1:length(test_length)){
+  for (j in 1:length(parallel_item)){
+    for (k in 1:length(correlated_facets)){
+      for(l in 1:length(magnitude_sd)){
+        for(m in 1:length(strongweak_carry)){
+          
+          conditions[[p]] <- c(test_length[i], parallel_item[j], correlated_facets[k], magnitude_sd[l], strongweak_carry[m])
+          p <- p + 1
+          
+        }
+      }
+    }
   }
-  
-  var_L2[c, ] <- colSums(var_L2_temp)
-  var_L1[c, ] <- colSums(var_L1_temp)
-  var_total[c, ] <- colSums(var_Total_temp)
 }
+df <- data.frame(matrix(unlist(conditions), nrow=num_condition, byrow = T))
+colnames(df) <- c('test length', 'parallel item', 'correlated facets',
+                  'maginute of sd', 'carry-over effects')
 
-var_total - var_L1 - var_L2 > 0.0000001  # should be FALSE!
 
-PV <- var_L2/(var_L1 + var_L2)
+# Mixed Anova for bias
+Q1_Bias_N1000 <- cbind(1000, Q1_Bias_N1000)
+colnames(Q1_Bias_N1000)[1] <- "sample size"
+Q1_Bias_N100 <- cbind(100, Q1_Bias_N100)
+colnames(Q1_Bias_N100)[1] <- "sample size"
 
-#var_L2[10, 5]/( var_L1[10, 5] + var_L2[10, 5])  # this is to check whether PV <- var_L2/(var_L1 + var_L2) is element-wise
-#PV[10, 5]
+BIAS_data <- rbind(cbind(df, Q1_Bias_N1000), cbind(df, Q1_Bias_N100))
 
+library(tidyr)
+
+BIAS_data_longformat <- gather(BIAS_data, estimates, estimatedRel, "trad_alpha":"item_l4", factor_key=TRUE)
+summary(BIAS_data_longformat)
+BIAS_data_longformat$`test length` <- factor(BIAS_data_longformat$`test length`, levels = c(9, 21, 36))
+BIAS_data_longformat$`parallel item` <- factor(BIAS_data_longformat$`parallel item`, levels = c(1, 0))
+BIAS_data_longformat$`correlated facets` <- factor(BIAS_data_longformat$`correlated facets`, levels = c(1, .1, .5))
+BIAS_data_longformat$`maginute of sd` <- factor(BIAS_data_longformat$`maginute of sd`, levels = c(sqrt(.14), sqrt(.5)))
+BIAS_data_longformat$`carry-over effects` <- factor(BIAS_data_longformat$`carry-over effects`, levels = c(0, 25, 50, 125, 150))
+BIAS_data_longformat$`sample size` <- factor(BIAS_data_longformat$`sample size`, levels = c(1000, 100))
+summary(BIAS_data_longformat)  #check whether predictors agains
+
+#add row identifier for mixed ANOVA
+BIAS_data_longformat <- cbind(1:nrow(BIAS_data_longformat), BIAS_data_longformat)
+colnames(BIAS_data_longformat)[1] <- 'order' 
+fit_bias <- aov(estimatedRel ~ `test length` + `parallel item` +
+                  `correlated facets` + `maginute of sd` +
+                  `carry-over effects` + `sample size` + estimates +
+                  Error(order/estimates), data=BIAS_data_longformat)
+summary(fit_bias)
 
 ####################### Summarize results in terms of 4 situations  ############################
 # situation1 --> "Unidimensional + No Carryover"
@@ -241,6 +286,37 @@ save(PV_mean, PV_min, PV_max, file = "D:\\Dropbox\\tilburg office\\Research Indi
 ###########################
 ###########################
 ########################### ends here
+
+
+############# old code
+############# 3. Research Question 3: Proportion of variance of estiamted chagne score reliability due to Level 2 (i.e., PV)   #############
+
+var_L2 <- matrix(NA, 108, 6)
+var_L1 <- matrix(NA, 108, 6)
+var_total <- matrix(NA, 108, 6)  # this is to check whether var_total = var_L2 + var_L1
+
+for (c in 1:108){ # cth cell
+  
+  var_L2_temp <- matrix(NA, 20, 6)
+  var_L1_temp <- matrix(NA, 20, 6)
+  var_Total_temp <- matrix(NA, 20, 6)
+  for(l in 1:20){ # lth sample
+    var_L2_temp[l, ] <- 50*(colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50 - Est_reliability[c, ])^2
+    var_L1_temp[l, ] <- colSums(sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, colSums(restuls_conditions[[c]][[1]][[l]][, 2:7])/50, "-")^2)
+    var_Total_temp[l, ] <- colSums((sweep(restuls_conditions[[c]][[1]][[l]][, 2:7], 2, Est_reliability[c, ], "-"))^2)
+  }
+  
+  var_L2[c, ] <- colSums(var_L2_temp)
+  var_L1[c, ] <- colSums(var_L1_temp)
+  var_total[c, ] <- colSums(var_Total_temp)
+}
+
+var_total - var_L1 - var_L2 > 0.0000001  # should be FALSE!
+
+PV <- var_L2/(var_L1 + var_L2)
+
+#var_L2[10, 5]/( var_L1[10, 5] + var_L2[10, 5])  # this is to check whether PV <- var_L2/(var_L1 + var_L2) is element-wise
+#PV[10, 5]
 
 ############# 3. Old Research Question 3: Proportion of variance in bias due to sampling at Level 2 ##################################
 SS_L2 <- matrix(NA, 108, 6)
