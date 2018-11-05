@@ -132,10 +132,10 @@ while (num_test <= nrow(df)){
   
   
   ############ Calculate population reliability ##################################
-  ### Here we use 1,000,000 people to approximate the population reliability
+  ### Here we use 100,000 people to approximate the population reliability
   
   sample_propensity <- 100 # for a theta, we repeatedly measure it 100 times. It's avg is the true score. 
-  N_pop <- 1000000
+  N_pop <- 100000   # (I tried using N=1,000,000, but because the PC was very old, it had memory problem in the end. So i downsized N)
   TRUE_ChSCORE <- array()
   OBS_ChSCORE <- array()
   
