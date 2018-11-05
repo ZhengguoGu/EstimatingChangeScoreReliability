@@ -141,16 +141,17 @@ BIAS_data_longformat$`correlated facets` <- factor(BIAS_data_longformat$`correla
 BIAS_data_longformat$`maginute of sd` <- factor(BIAS_data_longformat$`maginute of sd`, levels = c(sqrt(.14), sqrt(.5)))
 BIAS_data_longformat$`carry-over effects` <- factor(BIAS_data_longformat$`carry-over effects`, levels = c(0, 25, 50, 125, 150))
 BIAS_data_longformat$`sample size` <- factor(BIAS_data_longformat$`sample size`, levels = c(1000, 100))
+BIAS_data_longformat$estimates <- factor(BIAS_data_longformat$estimates, levels = c('trad_alpha', 'item_alpha'))
 summary(BIAS_data_longformat)  #check whether predictors agains
 
 #add row identifier for mixed ANOVA
 BIAS_data_longformat <- cbind(1:nrow(BIAS_data_longformat), BIAS_data_longformat)
 colnames(BIAS_data_longformat)[1] <- 'order' 
 #comments on the use of aov(), https://www.statmethods.net/stats/anova.html
-fit_bias <- aov(estimatedRel ~  `test length` + `parallel item`  +
-                  `correlated facets` + `maginute of sd` +
-                  `carry-over effects` + `sample size` +  estimates +
-                  Error(BIAS_data_longformat$order/estimates), data=BIAS_data_longformat)
+fit_bias <- aov(BIAS_data_longformat$estimatedRel ~  BIAS_data_longformat$`test length` + BIAS_data_longformat$`parallel item`  +
+                  BIAS_data_longformat$`correlated facets` + BIAS_data_longformat$`maginute of sd` +
+                  BIAS_data_longformat$`carry-over effects` + BIAS_data_longformat$`sample size` +  BIAS_data_longformat$estimates +
+                  Error(BIAS_data_longformat$order/BIAS_data_longformat$estimates), data=BIAS_data_longformat)
 summary(fit_bias)
 library(DescTools)
 eta <- EtaSq(fit_bias, type = 1)
