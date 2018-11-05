@@ -129,6 +129,9 @@ Q1_Bias_N100 <- cbind(100, Q1_Bias_N100)
 colnames(Q1_Bias_N100)[1] <- "sample size"
 
 BIAS_data <- rbind(cbind(df, Q1_Bias_N1000), cbind(df, Q1_Bias_N100))
+library(xlsx)
+write.xlsx(BIAS_data, "BIAS_data.xlsx") 
+write.table(BIAS_data, file = "BIAS_data.csv", sep=";")
 
 # from wide format to long format
 library(tidyr)
@@ -142,16 +145,25 @@ BIAS_data_longformat$`maginute of sd` <- factor(BIAS_data_longformat$`maginute o
 BIAS_data_longformat$`carry-over effects` <- factor(BIAS_data_longformat$`carry-over effects`, levels = c(0, 25, 50, 125, 150))
 BIAS_data_longformat$`sample size` <- factor(BIAS_data_longformat$`sample size`, levels = c(1000, 100))
 BIAS_data_longformat$estimates <- factor(BIAS_data_longformat$estimates, levels = c('trad_alpha', 'item_alpha'))
-summary(BIAS_data_longformat)  #check whether predictors agains
+summary(BIAS_data_longformat)  #check whether predictors again
 
 #add row identifier for mixed ANOVA
 BIAS_data_longformat <- cbind(1:nrow(BIAS_data_longformat), BIAS_data_longformat)
 colnames(BIAS_data_longformat)[1] <- 'order' 
+BIAS_data_longformat$order <- factor(BIAS_data_longformat$order)
+summary(BIAS_data_longformat)  #check whether predictors again
+
 #comments on the use of aov(), https://www.statmethods.net/stats/anova.html
 fit_bias <- aov(BIAS_data_longformat$estimatedRel ~  BIAS_data_longformat$`test length` + BIAS_data_longformat$`parallel item`  +
                   BIAS_data_longformat$`correlated facets` + BIAS_data_longformat$`maginute of sd` +
-                  BIAS_data_longformat$`carry-over effects` + BIAS_data_longformat$`sample size` +  BIAS_data_longformat$estimates +
+                  BIAS_data_longformat$`carry-over effects` + BIAS_data_longformat$`sample size` + BIAS_data_longformat$estimates +
                   Error(BIAS_data_longformat$order/BIAS_data_longformat$estimates), data=BIAS_data_longformat)
+
+fit_bias <- aov(estimatedRel ~  estimates*`test length` + estimates*`parallel item`  +
+                  estimates*`correlated facets` + estimates*`maginute of sd` +
+                  estimates*`carry-over effects` + estimates*`sample size`  +
+                  Error(order/estimates), data=BIAS_data_longformat)
+
 summary(fit_bias)
 library(DescTools)
 eta <- EtaSq(fit_bias, type = 1)
