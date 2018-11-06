@@ -78,7 +78,7 @@ save(Q1_Bias_N100, Q2_Precision_N100, file = "Bias_and_precision_N100.RData")
 
 
 
-######## BIAS
+##############  3. plots for BIAS
 load(file = "Bias_and_precision_N1000.RData")
 load(file = "Bias_and_precision_N100.RData")
 
@@ -126,3 +126,14 @@ write.table(BIAS_data, file = "BIAS_data.csv", sep=";", row.names=FALSE) # I use
 
 
 
+################ 4. plots for precision
+
+
+Q2_Precision_N1000 <- cbind(1000, Q2_Precision_N1000)
+colnames(Q2_Precision_N1000)[1] <- "sample size"
+Q2_Precision_N100 <- cbind(100, Q2_Precision_N100)
+colnames(Q2_Precision_N100)[1] <- "sample size"
+
+Precision_data <- rbind(cbind(df, Q2_Precision_N1000), cbind(df, Q2_Precision_N100))
+
+write.table(Precision_data, file = "Precision_data.csv", sep=";", row.names=FALSE) # I used SPSS 24 to obtain the plots.
