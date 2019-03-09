@@ -78,7 +78,7 @@ save(Q1_Bias_N100, Q2_Precision_N100, file = "Bias_and_precision_N100.RData")
 
 
 
-##############  3. plots for BIAS
+##############  3. preparing the data for ploting BIAS
 load(file = "Bias_and_precision_N1000.RData")
 load(file = "Bias_and_precision_N100.RData")
 
@@ -126,7 +126,7 @@ write.table(BIAS_data, file = "BIAS_data.csv", sep=";", row.names=FALSE) # I use
 
 
 
-################ 4. plots for precision
+################ 4. preparing the data for ploting for precision
 
 
 Q2_Precision_N1000 <- cbind(1000, Q2_Precision_N1000)
@@ -137,3 +137,201 @@ colnames(Q2_Precision_N100)[1] <- "sample size"
 Precision_data <- rbind(cbind(df, Q2_Precision_N1000), cbind(df, Q2_Precision_N100))
 
 write.table(Precision_data, file = "Precision_data.csv", sep=";", row.names=FALSE) # I used SPSS 24 to obtain the plots.
+
+############### 5. plots for BIAS  (added on March 09, 2019 on mac)   #################
+
+library(reshape2)
+library(ggplot2)
+library(latex2exp)
+library(gridExtra)
+
+
+bias_result <- read.table(file = "BIAS_data.csv", header = T, sep = ";")
+bias_result$carry.over.effects <- as.factor(bias_result$carry.over.effects)
+
+
+# plot: carry-over effects
+dat_temp <- melt(bias_result,id.vars="carry.over.effects", measure.vars=c("trad_alpha", 
+                                                                        "trad_l2",
+                                                                        "trad_l4", 
+                                                                        "item_alpha", 
+                                                                        "item_l2", 
+                                                                        "item_l4"))
+
+p <- ggplot(dat_temp) +
+  geom_boxplot(aes(x=carry.over.effects, y=value, color=variable)) +
+  geom_hline(yintercept=0,linetype="dashed") +
+  scale_x_discrete(labels=c("No effect", "25% weak", 
+         "50% weak", "25% strong",
+         "50% strong")) +
+  labs(x = "Carry-Over Effects", y = "Bias") +
+  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+p
+
+# plot: test length
+bias_result$test.length <- as.factor(bias_result$test.length)
+dat_temp_noCarry <- melt(bias_result[bias_result$carry.over.effects == 0, ],id.vars="test.length", measure.vars=c("trad_alpha", 
+                                                                                                                  "trad_l2",
+                                                                                                                  "trad_l4", 
+                                                                                                                  "item_alpha", 
+                                                                                                                  "item_l2", 
+                                                                                                                  "item_l4"))
+dat_temp_Carry <- melt(bias_result[bias_result$carry.over.effects != 0, ],id.vars="test.length", measure.vars=c("trad_alpha", 
+                                                                                                                  "trad_l2",
+                                                                                                                  "trad_l4", 
+                                                                                                                  "item_alpha", 
+                                                                                                                  "item_l2", 
+                                                                                                                  "item_l4"))
+p1 <- ggplot(dat_temp_noCarry) +
+  geom_boxplot(aes(x=test.length, y=value, color=variable)) +
+  geom_hline(yintercept=0,linetype="dashed") +
+  ylim(-2, 0.5) +
+  scale_x_discrete(labels=c("9 items", "21 items", "36 items")) +
+  labs(x = "Test Length", y = "Bias") +
+  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+p2 <- ggplot(dat_temp_Carry) +
+  geom_boxplot(aes(x=test.length, y=value, color=variable)) +
+  geom_hline(yintercept=0,linetype="dashed") +
+  ylim(-2, 0.5) +
+  scale_x_discrete(labels=c("9 items", "21 items", "36 items")) +
+  labs(x = "Test Length", y = "Bias") +
+  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+grid.arrange(
+  p1, p2,
+  nrow = 2
+) 
+
+# item parameters
+bias_result$parallel.item <- as.factor(bias_result$parallel.item)
+dat_temp_noCarry <- melt(bias_result[bias_result$carry.over.effects == 0, ],id.vars="parallel.item", measure.vars=c("trad_alpha", 
+                                                                                                                  "trad_l2",
+                                                                                                                  "trad_l4", 
+                                                                                                                  "item_alpha", 
+                                                                                                                  "item_l2", 
+                                                                                                                  "item_l4"))
+dat_temp_Carry <- melt(bias_result[bias_result$carry.over.effects != 0, ],id.vars="parallel.item", measure.vars=c("trad_alpha", 
+                                                                                                                "trad_l2",
+                                                                                                                "trad_l4", 
+                                                                                                                "item_alpha", 
+                                                                                                                "item_l2", 
+                                                                                                                "item_l4"))
+p1 <- ggplot(dat_temp_noCarry) +
+  geom_boxplot(aes(x=parallel.item, y=value, color=variable)) +
+  geom_hline(yintercept=0,linetype="dashed") +
+  ylim(-2, 0.5) +
+  scale_x_discrete(labels=c("Not identical", "Identical")) +
+  labs(x = "Item Parameters", y = "Bias") +
+  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+p2 <- ggplot(dat_temp_Carry) +
+  geom_boxplot(aes(x=parallel.item, y=value, color=variable)) +
+  geom_hline(yintercept=0,linetype="dashed") +
+  ylim(-2, 0.5) +
+  scale_x_discrete(labels=c("Not identical", "Identical")) +
+  labs(x = "Item Parameters", y = "Bias") +
+  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+grid.arrange(
+  p1, p2,
+  nrow = 2
+) 
+
+
+# dimensionality of theta
+bias_result$correlated.facets <- as.factor(bias_result$correlated.facets)
+dat_temp_noCarry <- melt(bias_result[bias_result$carry.over.effects == 0, ],id.vars="correlated.facets", measure.vars=c("trad_alpha", 
+                                                                                                                    "trad_l2",
+                                                                                                                    "trad_l4", 
+                                                                                                                    "item_alpha", 
+                                                                                                                    "item_l2", 
+                                                                                                                    "item_l4"))
+dat_temp_Carry <- melt(bias_result[bias_result$carry.over.effects != 0, ],id.vars="correlated.facets", measure.vars=c("trad_alpha", 
+                                                                                                                  "trad_l2",
+                                                                                                                  "trad_l4", 
+                                                                                                                  "item_alpha", 
+                                                                                                                  "item_l2", 
+                                                                                                                  "item_l4"))
+p1 <- ggplot(dat_temp_noCarry) +
+  geom_boxplot(aes(x=correlated.facets, y=value, color=variable)) +
+  geom_hline(yintercept=0,linetype="dashed") +
+  ylim(-2, 0.5) +
+  scale_x_discrete(labels=c("3-D, corr=0.1", "3-D, corr=0.5", "Unidimensional")) +
+  labs(x = expression(paste("Dimensionality of ", theta)), y = "Bias") +
+  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+p2 <- ggplot(dat_temp_Carry) +
+  geom_boxplot(aes(x=correlated.facets, y=value, color=variable)) +
+  geom_hline(yintercept=0,linetype="dashed") +
+  ylim(-2, 0.5) +
+  scale_x_discrete(labels=c("3-D, corr=0.1", "3-D, corr=0.5", "Unidimensional")) +
+  labs(x = expression(paste("Dimensionality of ", theta)), y = "Bias") +
+  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+grid.arrange(
+  p1, p2,
+  nrow = 2
+) 
+
+# magnitude of variance
+bias_result$maginute.of.sd <- as.factor(bias_result$maginute.of.sd)
+dat_temp_noCarry <- melt(bias_result[bias_result$carry.over.effects == 0, ],id.vars="maginute.of.sd", measure.vars=c("trad_alpha", 
+                                                                                                                        "trad_l2",
+                                                                                                                        "trad_l4", 
+                                                                                                                        "item_alpha", 
+                                                                                                                        "item_l2", 
+                                                                                                                        "item_l4"))
+dat_temp_Carry <- melt(bias_result[bias_result$carry.over.effects != 0, ],id.vars="maginute.of.sd", measure.vars=c("trad_alpha", 
+                                                                                                                      "trad_l2",
+                                                                                                                      "trad_l4", 
+                                                                                                                      "item_alpha", 
+                                                                                                                      "item_l2", 
+                                                                                                                      "item_l4"))
+p1 <- ggplot(dat_temp_noCarry) +
+  geom_boxplot(aes(x=maginute.of.sd, y=value, color=variable)) +
+  geom_hline(yintercept=0,linetype="dashed") +
+  ylim(-2, 0.5) +
+  scale_x_discrete(labels=c("Small variance", "Large variance")) +
+  labs(x = expression(paste("Magnitude of Variance of ", theta, " Change")), y = "Bias") +
+  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+p2 <- ggplot(dat_temp_Carry) +
+  geom_boxplot(aes(x=maginute.of.sd, y=value, color=variable)) +
+  geom_hline(yintercept=0,linetype="dashed") +
+  ylim(-2, 0.5) +
+  scale_x_discrete(labels=c("Small variance", "Large variance")) +
+  labs(x = expression(paste("Magnitude of Variance of ", theta, " Change")), y = "Bias") +
+  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+grid.arrange(
+  p1, p2,
+  nrow = 2
+) 
