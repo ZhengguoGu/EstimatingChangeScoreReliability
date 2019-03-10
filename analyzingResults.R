@@ -188,10 +188,11 @@ dat_temp_Carry <- melt(bias_result[bias_result$carry.over.effects != 0, ],id.var
 p1 <- ggplot(dat_temp_noCarry) +
   geom_boxplot(aes(x=test.length, y=value, color=variable)) +
   geom_hline(yintercept=0,linetype="dashed") +
+  ggtitle("(a) Without carry-over effects") +
   ylim(-2, 0.5) +
   scale_x_discrete(labels=c("9 items", "21 items", "36 items")) +
   labs(x = "Test Length", y = "Bias") +
-  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
   scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
                                 expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
                      values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
@@ -199,10 +200,11 @@ p1 <- ggplot(dat_temp_noCarry) +
 p2 <- ggplot(dat_temp_Carry) +
   geom_boxplot(aes(x=test.length, y=value, color=variable)) +
   geom_hline(yintercept=0,linetype="dashed") +
+  ggtitle("(b) With carry-over effects") +
   ylim(-2, 0.5) +
   scale_x_discrete(labels=c("9 items", "21 items", "36 items")) +
   labs(x = "Test Length", y = "Bias") +
-  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
   scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
                                 expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
                      values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
@@ -229,10 +231,11 @@ dat_temp_Carry <- melt(bias_result[bias_result$carry.over.effects != 0, ],id.var
 p1 <- ggplot(dat_temp_noCarry) +
   geom_boxplot(aes(x=parallel.item, y=value, color=variable)) +
   geom_hline(yintercept=0,linetype="dashed") +
+  ggtitle("(a) Without carry-over effects") +
   ylim(-2, 0.5) +
   scale_x_discrete(labels=c("Not identical", "Identical")) +
   labs(x = "Item Parameters", y = "Bias") +
-  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
   scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
                                 expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
                      values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
@@ -240,10 +243,11 @@ p1 <- ggplot(dat_temp_noCarry) +
 p2 <- ggplot(dat_temp_Carry) +
   geom_boxplot(aes(x=parallel.item, y=value, color=variable)) +
   geom_hline(yintercept=0,linetype="dashed") +
+  ggtitle("(b) With carry-over effects") +
   ylim(-2, 0.5) +
   scale_x_discrete(labels=c("Not identical", "Identical")) +
   labs(x = "Item Parameters", y = "Bias") +
-  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
   scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
                                 expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
                      values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
@@ -271,10 +275,11 @@ dat_temp_Carry <- melt(bias_result[bias_result$carry.over.effects != 0, ],id.var
 p1 <- ggplot(dat_temp_noCarry) +
   geom_boxplot(aes(x=correlated.facets, y=value, color=variable)) +
   geom_hline(yintercept=0,linetype="dashed") +
+  ggtitle("(a) Without carry-over effects") +
   ylim(-2, 0.5) +
   scale_x_discrete(labels=c("3-D, corr=0.1", "3-D, corr=0.5", "Unidimensional")) +
   labs(x = expression(paste("Dimensionality of ", theta)), y = "Bias") +
-  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
   scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
                                 expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
                      values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
@@ -282,10 +287,11 @@ p1 <- ggplot(dat_temp_noCarry) +
 p2 <- ggplot(dat_temp_Carry) +
   geom_boxplot(aes(x=correlated.facets, y=value, color=variable)) +
   geom_hline(yintercept=0,linetype="dashed") +
+  ggtitle("(b) With carry-over effects") +
   ylim(-2, 0.5) +
   scale_x_discrete(labels=c("3-D, corr=0.1", "3-D, corr=0.5", "Unidimensional")) +
   labs(x = expression(paste("Dimensionality of ", theta)), y = "Bias") +
-  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
   scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
                                 expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
                      values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
@@ -312,10 +318,11 @@ dat_temp_Carry <- melt(bias_result[bias_result$carry.over.effects != 0, ],id.var
 p1 <- ggplot(dat_temp_noCarry) +
   geom_boxplot(aes(x=maginute.of.sd, y=value, color=variable)) +
   geom_hline(yintercept=0,linetype="dashed") +
+  ggtitle("(a) Without carry-over effects") +
   ylim(-2, 0.5) +
   scale_x_discrete(labels=c("Small variance", "Large variance")) +
   labs(x = expression(paste("Magnitude of Variance of ", theta, " Change")), y = "Bias") +
-  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
   scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
                                 expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
                      values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
@@ -323,10 +330,54 @@ p1 <- ggplot(dat_temp_noCarry) +
 p2 <- ggplot(dat_temp_Carry) +
   geom_boxplot(aes(x=maginute.of.sd, y=value, color=variable)) +
   geom_hline(yintercept=0,linetype="dashed") +
+  ggtitle("(b) With carry-over effects") +
   ylim(-2, 0.5) +
   scale_x_discrete(labels=c("Small variance", "Large variance")) +
   labs(x = expression(paste("Magnitude of Variance of ", theta, " Change")), y = "Bias") +
-  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+grid.arrange(
+  p1, p2,
+  nrow = 2
+) 
+
+# sample size
+bias_result$sample.size<- as.factor(bias_result$sample.size)
+dat_temp_noCarry <- melt(bias_result[bias_result$carry.over.effects == 0, ],id.vars="sample.size", measure.vars=c("trad_alpha", 
+                                                                                                                     "trad_l2",
+                                                                                                                     "trad_l4", 
+                                                                                                                     "item_alpha", 
+                                                                                                                     "item_l2", 
+                                                                                                                     "item_l4"))
+dat_temp_Carry <- melt(bias_result[bias_result$carry.over.effects != 0, ],id.vars="sample.size", measure.vars=c("trad_alpha", 
+                                                                                                                   "trad_l2",
+                                                                                                                   "trad_l4", 
+                                                                                                                   "item_alpha", 
+                                                                                                                   "item_l2", 
+                                                                                                                   "item_l4"))
+p1 <- ggplot(dat_temp_noCarry) +
+  geom_boxplot(aes(x=sample.size, y=value, color=variable)) +
+  geom_hline(yintercept=0,linetype="dashed") +
+  ggtitle("(a) Without carry-over effects") +
+  ylim(-2, 0.5) +
+  scale_x_discrete(labels=c("N=100", "N=1,000")) +
+  labs(x = "Sample Size", y = "Bias") +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+p2 <- ggplot(dat_temp_Carry) +
+  geom_boxplot(aes(x=sample.size, y=value, color=variable)) +
+  geom_hline(yintercept=0,linetype="dashed") +
+  ggtitle("(b) With carry-over effects") +
+  ylim(-2, 0.5) +
+  scale_x_discrete(labels=c("N=100", "N=1,000")) +
+  labs(x = "Sample Size", y = "Bias") +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
   scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
                                 expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
                      values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
