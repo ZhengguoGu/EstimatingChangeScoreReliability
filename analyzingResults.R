@@ -150,7 +150,7 @@ bias_result <- read.table(file = "BIAS_data.csv", header = T, sep = ";")
 bias_result$carry.over.effects <- as.factor(bias_result$carry.over.effects)
 
 
-# plot: carry-over effects
+# plot: carry-over effects ####
 dat_temp <- melt(bias_result,id.vars="carry.over.effects", measure.vars=c("trad_alpha", 
                                                                         "trad_l2",
                                                                         "trad_l4", 
@@ -171,7 +171,7 @@ p <- ggplot(dat_temp) +
                      values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
 p
 
-# plot: test length
+# plot: test length #####
 bias_result$test.length <- as.factor(bias_result$test.length)
 dat_temp_noCarry <- melt(bias_result[bias_result$carry.over.effects == 0, ],id.vars="test.length", measure.vars=c("trad_alpha", 
                                                                                                                   "trad_l2",
@@ -214,7 +214,7 @@ grid.arrange(
   nrow = 2
 ) 
 
-# item parameters
+# item parameters ##########
 bias_result$parallel.item <- as.factor(bias_result$parallel.item)
 dat_temp_noCarry <- melt(bias_result[bias_result$carry.over.effects == 0, ],id.vars="parallel.item", measure.vars=c("trad_alpha", 
                                                                                                                   "trad_l2",
@@ -258,7 +258,7 @@ grid.arrange(
 ) 
 
 
-# dimensionality of theta
+# dimensionality of theta #######
 bias_result$correlated.facets <- as.factor(bias_result$correlated.facets)
 dat_temp_noCarry <- melt(bias_result[bias_result$carry.over.effects == 0, ],id.vars="correlated.facets", measure.vars=c("trad_alpha", 
                                                                                                                     "trad_l2",
@@ -301,7 +301,7 @@ grid.arrange(
   nrow = 2
 ) 
 
-# magnitude of variance
+# magnitude of variance ##########
 bias_result$maginute.of.sd <- as.factor(bias_result$maginute.of.sd)
 dat_temp_noCarry <- melt(bias_result[bias_result$carry.over.effects == 0, ],id.vars="maginute.of.sd", measure.vars=c("trad_alpha", 
                                                                                                                         "trad_l2",
@@ -344,7 +344,7 @@ grid.arrange(
   nrow = 2
 ) 
 
-# sample size
+# sample size ###########
 bias_result$sample.size<- as.factor(bias_result$sample.size)
 dat_temp_noCarry <- melt(bias_result[bias_result$carry.over.effects == 0, ],id.vars="sample.size", measure.vars=c("trad_alpha", 
                                                                                                                      "trad_l2",
@@ -377,6 +377,241 @@ p2 <- ggplot(dat_temp_Carry) +
   ylim(-2, 0.5) +
   scale_x_discrete(labels=c("N=100", "N=1,000")) +
   labs(x = "Sample Size", y = "Bias") +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+grid.arrange(
+  p1, p2,
+  nrow = 2
+) 
+
+
+############### 6. plots for Precision  (added on March 10, 2019 on mac)   #################
+
+precision_result <- read.table(file = "precision_data.csv", header = T, sep = ";")
+precision_result$carry.over.effects <- as.factor(precision_result$carry.over.effects)
+
+
+# plot: carry-over effects
+dat_temp <- melt(precision_result,id.vars="carry.over.effects", measure.vars=c("trad_alpha", 
+                                                                          "trad_l2",
+                                                                          "trad_l4", 
+                                                                          "item_alpha", 
+                                                                          "item_l2", 
+                                                                          "item_l4"))
+
+p <- ggplot(dat_temp) +
+  geom_boxplot(aes(x=carry.over.effects, y=value, color=variable)) +
+  scale_x_discrete(labels=c("No effect", "25% weak", 
+                            "50% weak", "25% strong",
+                            "50% strong")) +
+  labs(x = "Carry-Over Effects", y = "Precision") +
+  theme(legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+p
+
+# plot test length
+
+precision_result$test.length <- as.factor(precision_result$test.length)
+dat_temp_noCarry <- melt(precision_result[precision_result$carry.over.effects == 0, ],id.vars="test.length", measure.vars=c("trad_alpha", 
+                                                                                                                  "trad_l2",
+                                                                                                                  "trad_l4", 
+                                                                                                                  "item_alpha", 
+                                                                                                                  "item_l2", 
+                                                                                                                  "item_l4"))
+dat_temp_Carry <- melt(precision_result[precision_result$carry.over.effects != 0, ],id.vars="test.length", measure.vars=c("trad_alpha", 
+                                                                                                                "trad_l2",
+                                                                                                                "trad_l4", 
+                                                                                                                "item_alpha", 
+                                                                                                                "item_l2", 
+                                                                                                                "item_l4"))
+p1 <- ggplot(dat_temp_noCarry) +
+  geom_boxplot(aes(x=test.length, y=value, color=variable)) +
+  ggtitle("(a) Without carry-over effects") +
+  ylim(0, 0.5) +
+  scale_x_discrete(labels=c("9 items", "21 items", "36 items")) +
+  labs(x = "Test Length", y = "Precision") +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+p2 <- ggplot(dat_temp_Carry) +
+  geom_boxplot(aes(x=test.length, y=value, color=variable)) +
+  ggtitle("(b) With carry-over effects") +
+  ylim(0, 0.5) +
+  scale_x_discrete(labels=c("9 items", "21 items", "36 items")) +
+  labs(x = "Test Length", y = "Precision") +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+grid.arrange(
+  p1, p2,
+  nrow = 2
+) 
+
+# item parameters ##########
+precision_result$parallel.item <- as.factor(precision_result$parallel.item)
+dat_temp_noCarry <- melt(precision_result[precision_result$carry.over.effects == 0, ],id.vars="parallel.item", measure.vars=c("trad_alpha", 
+                                                                                                                    "trad_l2",
+                                                                                                                    "trad_l4", 
+                                                                                                                    "item_alpha", 
+                                                                                                                    "item_l2", 
+                                                                                                                    "item_l4"))
+dat_temp_Carry <- melt(precision_result[precision_result$carry.over.effects != 0, ],id.vars="parallel.item", measure.vars=c("trad_alpha", 
+                                                                                                                  "trad_l2",
+                                                                                                                  "trad_l4", 
+                                                                                                                  "item_alpha", 
+                                                                                                                  "item_l2", 
+                                                                                                                  "item_l4"))
+p1 <- ggplot(dat_temp_noCarry) +
+  geom_boxplot(aes(x=parallel.item, y=value, color=variable)) +
+  ggtitle("(a) Without carry-over effects") +
+  ylim(0, 0.5) +
+  scale_x_discrete(labels=c("Not identical", "Identical")) +
+  labs(x = "Item Parameters", y = "Precision") +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+p2 <- ggplot(dat_temp_Carry) +
+  geom_boxplot(aes(x=parallel.item, y=value, color=variable)) +
+  ggtitle("(b) With carry-over effects") +
+  ylim(0, 0.5) +
+  scale_x_discrete(labels=c("Not identical", "Identical")) +
+  labs(x = "Item Parameters", y = "Precision") +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+grid.arrange(
+  p1, p2,
+  nrow = 2
+) 
+
+
+# dimensionality of theta #######
+precision_result$correlated.facets <- as.factor(precision_result$correlated.facets)
+dat_temp_noCarry <- melt(precision_result[precision_result$carry.over.effects == 0, ],id.vars="correlated.facets", measure.vars=c("trad_alpha", 
+                                                                                                                        "trad_l2",
+                                                                                                                        "trad_l4", 
+                                                                                                                        "item_alpha", 
+                                                                                                                        "item_l2", 
+                                                                                                                        "item_l4"))
+dat_temp_Carry <- melt(precision_result[precision_result$carry.over.effects != 0, ],id.vars="correlated.facets", measure.vars=c("trad_alpha", 
+                                                                                                                      "trad_l2",
+                                                                                                                      "trad_l4", 
+                                                                                                                      "item_alpha", 
+                                                                                                                      "item_l2", 
+                                                                                                                      "item_l4"))
+p1 <- ggplot(dat_temp_noCarry) +
+  geom_boxplot(aes(x=correlated.facets, y=value, color=variable)) +
+  ggtitle("(a) Without carry-over effects") +
+  ylim(0, 0.5) +
+  scale_x_discrete(labels=c("3-D, corr=0.1", "3-D, corr=0.5", "Unidimensional")) +
+  labs(x = expression(paste("Dimensionality of ", theta)), y = "Precision") +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+p2 <- ggplot(dat_temp_Carry) +
+  geom_boxplot(aes(x=correlated.facets, y=value, color=variable)) +
+  ggtitle("(b) With carry-over effects") +
+  ylim(0, 0.5) +
+  scale_x_discrete(labels=c("3-D, corr=0.1", "3-D, corr=0.5", "Unidimensional")) +
+  labs(x = expression(paste("Dimensionality of ", theta)), y = "Precision") +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+grid.arrange(
+  p1, p2,
+  nrow = 2
+) 
+
+# magnitude of variance ##########
+precision_result$maginute.of.sd <- as.factor(precision_result$maginute.of.sd)
+dat_temp_noCarry <- melt(precision_result[precision_result$carry.over.effects == 0, ],id.vars="maginute.of.sd", measure.vars=c("trad_alpha", 
+                                                                                                                     "trad_l2",
+                                                                                                                     "trad_l4", 
+                                                                                                                     "item_alpha", 
+                                                                                                                     "item_l2", 
+                                                                                                                     "item_l4"))
+dat_temp_Carry <- melt(precision_result[precision_result$carry.over.effects != 0, ],id.vars="maginute.of.sd", measure.vars=c("trad_alpha", 
+                                                                                                                   "trad_l2",
+                                                                                                                   "trad_l4", 
+                                                                                                                   "item_alpha", 
+                                                                                                                   "item_l2", 
+                                                                                                                   "item_l4"))
+p1 <- ggplot(dat_temp_noCarry) +
+  geom_boxplot(aes(x=maginute.of.sd, y=value, color=variable)) +
+  ggtitle("(a) Without carry-over effects") +
+  ylim(0, 0.5) +
+  scale_x_discrete(labels=c("Small variance", "Large variance")) +
+  labs(x = expression(paste("Magnitude of Variance of ", theta, " Change")), y = "Precision") +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+p2 <- ggplot(dat_temp_Carry) +
+  geom_boxplot(aes(x=maginute.of.sd, y=value, color=variable)) +
+  ggtitle("(b) With carry-over effects") +
+  ylim(0, 0.5) +
+  scale_x_discrete(labels=c("Small variance", "Large variance")) +
+  labs(x = expression(paste("Magnitude of Variance of ", theta, " Change")), y = "Precision") +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+grid.arrange(
+  p1, p2,
+  nrow = 2
+) 
+
+
+# sample size ###########
+precision_result$sample.size<- as.factor(precision_result$sample.size)
+dat_temp_noCarry <- melt(precision_result[precision_result$carry.over.effects == 0, ],id.vars="sample.size", measure.vars=c("trad_alpha", 
+                                                                                                                  "trad_l2",
+                                                                                                                  "trad_l4", 
+                                                                                                                  "item_alpha", 
+                                                                                                                  "item_l2", 
+                                                                                                                  "item_l4"))
+dat_temp_Carry <- melt(precision_result[precision_result$carry.over.effects != 0, ],id.vars="sample.size", measure.vars=c("trad_alpha", 
+                                                                                                                "trad_l2",
+                                                                                                                "trad_l4", 
+                                                                                                                "item_alpha", 
+                                                                                                                "item_l2", 
+                                                                                                                "item_l4"))
+p1 <- ggplot(dat_temp_noCarry) +
+  geom_boxplot(aes(x=sample.size, y=value, color=variable)) +
+  ggtitle("(a) Without carry-over effects") +
+  ylim(0, 0.5) +
+  scale_x_discrete(labels=c("N=100", "N=1,000")) +
+  labs(x = "Sample Size", y = "Precision") +
+  theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
+  scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
+                                expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
+                     values = c("red", "green", "blue", "darkred", "darkgreen", "darkblue")) 
+
+p2 <- ggplot(dat_temp_Carry) +
+  geom_boxplot(aes(x=sample.size, y=value, color=variable)) +
+  ggtitle("(b) With carry-over effects") +
+  ylim(0, 0.5) +
+  scale_x_discrete(labels=c("N=100", "N=1,000")) +
+  labs(x = "Sample Size", y = "Precision") +
   theme(plot.title = element_text(size=15), legend.title = element_blank(), legend.text=element_text(size=20), text = element_text(size=20)) +
   scale_color_manual(labels = c(expression(r[alpha]), expression(r[lambda*2]), expression(r[lambda*4]), 
                                 expression(a[D]), expression(l[2*D]), expression(l[4*D])), 
