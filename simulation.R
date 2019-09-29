@@ -5,7 +5,7 @@ library(psychometric)
 #library(doRNG)
 
 
-#Note: On Jan 21, 2018, Zhengguo checked this file to add a few annotated descriptions. 
+#Note: updated for the revise and resubmission
 
 ######################### START ###############################################################################################################
 
@@ -146,6 +146,8 @@ while (num_test <= nrow(df)){
   num_methods <- 6 #see below, method 1.1 to 2.3
   r_avg <- matrix(NA, maxp, num_methods)
   r_sd <- matrix(NA, maxp, num_methods)
+  coefficients_avg <- matrix(NA, maxp, 3)  #average alpha_pre, average alpha_post, average cor_pre_post (added based on the reviewer suggestions)
+  
   sample_results <- list()
   #sample_theta <- list()  sample_theta and simResponses are not saved in the end to save some memory.
   #simResponses <- list()  #this contains a list of p lists. 
@@ -178,12 +180,12 @@ while (num_test <= nrow(df)){
   
   
     r_simresults <- matrix(NA, n_sim, num_methods)  # 6 methods.
-  
+    coefficients_simresults <- matrix(NA, n_sim, 3)  # alpha_pre, alpha_post, corr_pre_post; this is added based on the reviewer's suggestions.
     
-    sumpre_response <- list()
-    sum_Truepre_response <- list()
-    sumpost_response <- list()
-    sum_Truepost_response <- list()
+    #sumpre_response <- list()
+    #sum_Truepre_response <- list()
+    #sumpost_response <- list()
+    #sum_Truepost_response <- list()
     
     for (i in 1:n_sim){
     #-------------------------------------------------
@@ -227,13 +229,13 @@ while (num_test <= nrow(df)){
       # sum scores
       
       sum_pre <- rowSums(response_pre)
-      sumpre_response[[i]] <- sum_pre
-      sum_true_pre <- rowSums(true_pre)
-      sum_Truepre_response[[i]] <- sum_true_pre
+      #sumpre_response[[i]] <- sum_pre
+      #sum_true_pre <- rowSums(true_pre)
+      #sum_Truepre_response[[i]] <- sum_true_pre
       sum_post <- rowSums(response_post)
-      sumpost_response[[i]] <- sum_post
-      sum_true_post <- rowSums(true_post)
-      sum_Truepost_response[[i]] <- sum_true_post
+      #sumpost_response[[i]] <- sum_post
+      #sum_true_post <- rowSums(true_post)
+      #sum_Truepost_response[[i]] <- sum_true_post
       
       #####################################################################################################################################################
       # Methods for calculating reliability
@@ -253,6 +255,10 @@ while (num_test <= nrow(df)){
       r_pre <- psychometric::alpha(response_pre)  # ! cronback alpha is used here. 
       r_post <- psychometric::alpha(response_post)
     
+      coefficients_simresults[i, 1] <- r_pre
+      coefficients_simresults[i, 2] <- r_post
+      coefficients_simresults[i, 3] <- cor(sum_pre, sum_post)
+      
       r_simresults[i, 1] <- (var(sum_pre) * r_pre + var(sum_post) * r_post - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))/(var(sum_pre) + var(sum_post) - 2 * cor(sum_pre, sum_post) * sd(sum_pre) * sd(sum_post))
       
       ######## method 1.2: estimated reliability - lambda2 (i.e. pre and post reliability estimated by lambda2) #######
@@ -289,7 +295,7 @@ while (num_test <= nrow(df)){
     
     r_avg[p, ] <- colSums(r_simresults)/n_sim
     r_sd[p, ] <- apply(r_simresults, 2, sd)
-    
+    coefficients_avg[p, ] <- colSums(coefficients_simresults)/n_sim
     #simResponses[[p]] <- list(sumpre_response, sum_Truepre_response, sumpost_response, sum_Truepost_response) 
     
     p <- p+1
