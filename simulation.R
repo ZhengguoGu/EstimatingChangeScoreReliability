@@ -303,7 +303,7 @@ while (num_test <= nrow(df)){
     
   }
   
-  restuls_conditions[[num_test]] <- list(sample_results, r_avg, r_sd)
+  restuls_conditions[[num_test]] <- list(sample_results, r_avg, r_sd, coefficients_avg)
   #simulatedRawdata[[num_test]] <- list(sample_theta, simResponses)
   
   
