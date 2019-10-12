@@ -2,8 +2,6 @@
 #
 # This file contains the code for analyzing the results
 #
-#
-# Zhengguo Gu, Tilburg University
 #########################################################################################################
 
 
@@ -17,24 +15,24 @@
 # Afterwards, one load the N=100 dataset (i.e., N=1000 data will be replaced with N=100) and run the code below again. 
 
 load("PopulationRel20181030/PopulationRel.RData")
-#load("EstimatingReliability20181024_estimatedRel/LargeSample20181025.RData")
-load("EstimatingReliability20181024_estimatedRel/SmallSample20181026.RData")
+load("ZG/LargeSample20191001.RData")  #load the N=1000 data
+load("ZG/SmallSample20190929.RData")  #load the N=100 data
 
 
 # 0.2 Review the structure of results
 
 length(restuls_conditions)  # 180 --> total number of cells (Note that there are two datasets, one for small sample one for large sample, and thus 180x2=360 cells)
-length(restuls_conditions[[1]]) # 3 (lists)--> the first list contains all the reliability estimates for the 20 samples of persons
+length(restuls_conditions[[1]]) # 4 (lists)--> the first list contains all the reliability estimates for the 20 samples of persons
 # the second list contains the average reliability for each sample of persons (thus, 20 rows)
 # the third list contains the SD (might not be useful at this moment)
+# the fourth list contains the average reliability at pretest, at posttest, and the average correlation between pre and post for the 20 samples of persons
 
+# Take the first cell for example:
 length(restuls_conditions[[1]][[1]]) # 20 (lists) --> each list contains the reliability estimates for 50 samples of responses
 str(restuls_conditions[[1]][[1]][[1]]) # num [1:50, 1:6] --> (6 estimates; 3 for the traditional method and 3 for the item-level method)
-
 str(restuls_conditions[[1]][[2]]) # num [1:20, 1:6] --> the average reliability for each sample of persons. NOT USED
 str(restuls_conditions[[1]][[3]]) # num [1:20, 1:6] --> the SD. NOT USED.
-
-
+str(restuls_conditions[[1]][[4]]) # num [1:20, 1:6] --> the average reliability at pretest, at posttest, and the average correlation between pre and post for the 20 samples of persons
 
 ############## 1. Data prep: Bias #########################################################
 
@@ -76,7 +74,15 @@ Q1_Bias_N100 <- Q1_Bias
 Q2_Precision_N100 <- Q2_Precision
 save(Q1_Bias_N100, Q2_Precision_N100, file = "Bias_and_precision_N100.RData")
 
+############## Data prep EXTRA (for the 2nd revision): summarizing r_11', r_22', and r_12
 
+Qextra <- matrix(NA, 180, 3)
+for (c in 1:180){
+  Qextra[c, ] <- colMeans(restuls_conditions[[c]][[4]])
+}
+
+save(Qextra, file = "Qextra_r11_r22_r12_N1000.RData")
+#save(Qextra, file = "Qextra_r11_r22_r12_N100.RData")
 
 ##############  3. preparing the data for ploting BIAS
 load(file = "Bias_and_precision_N1000.RData")
@@ -124,6 +130,22 @@ BIAS_data <- rbind(cbind(df, Q1_Bias_N1000), cbind(df, Q1_Bias_N100))
 
 write.table(BIAS_data, file = "BIAS_data.csv", sep=";", row.names=FALSE) # I used SPSS 24 to obtain the plots.
 
+#######  Note: In order to make sure that the code is reproducible, I compared the new BIAS_data with the old BIAS_data generated for the previous revision. They are the same. 
+#Bias_20191012 <- read.csv(file = 'BIAS_data.csv')  #note that file directory has been removed for the purpose of blind review. 
+#Bias_2018 <- read.csv(file = 'BIAS_data.csv' )
+#sum(Bias_2018 != Bias_2018)  # sum=0, meanig that the results are the same. 
+
+################ 3.Extra: preparting for table for r11', r22', and r12
+load(file = "Qextra_r11_r22_r12_N1000.RData")
+Qextra1000 <- Qextra
+load(file = "Qextra_r11_r22_r12_N100.RData")
+Qextra100<- Qextra
+
+colnames(Qextra1000) <- c("r_11", "r_22", "r12")
+colnames(Qextra100) <- c("r_11", "r_22", "r12")
+
+BIAS_r11r22r12_data <- rbind(cbind(df, Q1_Bias_N1000, Qextra1000), cbind(df, Q1_Bias_N100, Qextra100))
+write.table(BIAS_r11r22r12_data, file = "BIAS_r11r22r12_data.csv", sep=";", row.names=FALSE) # this is used to construct table
 
 
 ################ 4. preparing the data for ploting for precision
