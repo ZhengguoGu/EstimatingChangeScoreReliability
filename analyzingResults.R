@@ -144,9 +144,94 @@ Qextra100<- Qextra
 colnames(Qextra1000) <- c("r_11", "r_22", "r12")
 colnames(Qextra100) <- c("r_11", "r_22", "r12")
 
-BIAS_r11r22r12_data <- rbind(cbind(df, Q1_Bias_N1000, Qextra1000), cbind(df, Q1_Bias_N100, Qextra100))
+BIAS_r11r22r12_data <- rbind(cbind(df, Q1_Bias_N1000, Qextra1000, r_pop), cbind(df, Q1_Bias_N100, Qextra100, r_pop))
 write.table(BIAS_r11r22r12_data, file = "BIAS_r11r22r12_data.csv", sep=";", row.names=FALSE) # this is used to construct table
 
+#!!We report the cases when N=1000,non-parallel items, small change variance
+
+#part 1: 9 items
+#Unidimensional, no carry-over, A1
+A1_9 <- BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==9 & 
+                               BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`==1 &
+                               BIAS_r11r22r12_data$`carry-over effects`==0, ]
+#Unidimensional, weak carry-over effect, A2
+A2_9 <- colMeans(BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==9 & 
+                                        BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`==1 &
+                                        (BIAS_r11r22r12_data$`carry-over effects`== 25 | BIAS_r11r22r12_data$`carry-over effects`==50), ])
+#Unidimensional, strong carry-over effect, A3
+A3_9 <- colMeans(BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==9 & 
+                                        BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`==1 &
+                                        (BIAS_r11r22r12_data$`carry-over effects`== 125 | BIAS_r11r22r12_data$`carry-over effects`==150), ])
+#Multidimesional, no carry-over, B1
+B1_9 <- colMeans(BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==9 & 
+                                        BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`!=1 &
+                                        BIAS_r11r22r12_data$`carry-over effects`==0, ])
+#Multidimensional, weak carry-over, B2
+B2_9 <- colMeans(BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==9 & 
+                                        BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`!=1 &
+                                        (BIAS_r11r22r12_data$`carry-over effects`== 25 | BIAS_r11r22r12_data$`carry-over effects`==50), ])
+#Multidimensional, strong carry-over, B3
+B3_9 <- colMeans(BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==9 & 
+                                        BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`!=1 &
+                                        (BIAS_r11r22r12_data$`carry-over effects`== 125 | BIAS_r11r22r12_data$`carry-over effects`==150), ])
+
+#part 2: 21 items
+#Unidimensional, no carry-over, A1
+A1_21 <- BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==21 & 
+                      BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`==1 &
+                      BIAS_r11r22r12_data$`carry-over effects`==0, ]
+#Unidimensional, weak carry-over effect, A2
+A2_21 <- colMeans(BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==21 & 
+                            BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`==1 &
+                            (BIAS_r11r22r12_data$`carry-over effects`== 25 | BIAS_r11r22r12_data$`carry-over effects`==50), ])
+#Unidimensional, strong carry-over effect, A3
+A3_21 <- colMeans(BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==21 & 
+                                     BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`==1 &
+                                     (BIAS_r11r22r12_data$`carry-over effects`== 125 | BIAS_r11r22r12_data$`carry-over effects`==150), ])
+#Multidimesional, no carry-over, B1
+B1_21 <- colMeans(BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==21 & 
+                            BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`!=1 &
+                            BIAS_r11r22r12_data$`carry-over effects`==0, ])
+#Multidimensional, weak carry-over, B2
+B2_21 <- colMeans(BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==21 & 
+                                     BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`!=1 &
+                                     (BIAS_r11r22r12_data$`carry-over effects`== 25 | BIAS_r11r22r12_data$`carry-over effects`==50), ])
+#Multidimensional, strong carry-over, B3
+B3_21 <- colMeans(BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==21 & 
+                                     BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`!=1 &
+                                     (BIAS_r11r22r12_data$`carry-over effects`== 125 | BIAS_r11r22r12_data$`carry-over effects`==150), ])
+
+#part 3: 36 items
+#Unidimensional, no carry-over, A1
+A1_36 <- BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==36 & 
+                               BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`==1 &
+                               BIAS_r11r22r12_data$`carry-over effects`==0, ]
+#Unidimensional, weak carry-over effect, A2
+A2_36 <- colMeans(BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==36 & 
+                                        BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`==1 &
+                                        (BIAS_r11r22r12_data$`carry-over effects`== 25 | BIAS_r11r22r12_data$`carry-over effects`==50), ])
+#Unidimensional, strong carry-over effect, A3
+A3_36 <- colMeans(BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==36 & 
+                                        BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`==1 &
+                                        (BIAS_r11r22r12_data$`carry-over effects`== 125 | BIAS_r11r22r12_data$`carry-over effects`==150), ])
+#Multidimesional, no carry-over, B1
+B1_36 <- colMeans(BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==36 & 
+                                        BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`!=1 &
+                                        BIAS_r11r22r12_data$`carry-over effects`==0, ])
+#Multidimensional, weak carry-over, B2
+B2_36 <- colMeans(BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==36 & 
+                                        BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`!=1 &
+                                        (BIAS_r11r22r12_data$`carry-over effects`== 25 | BIAS_r11r22r12_data$`carry-over effects`==50), ])
+#Multidimensional, strong carry-over, B3
+B3_36 <- colMeans(BIAS_r11r22r12_data[BIAS_r11r22r12_data$`sample size`==1000 & BIAS_r11r22r12_data$`test length`==36 & 
+                                        BIAS_r11r22r12_data$`parallel item`==0 & BIAS_r11r22r12_data$`maginute of sd`==sqrt(.14) & BIAS_r11r22r12_data$`correlated facets`!=1 &
+                                        (BIAS_r11r22r12_data$`carry-over effects`== 125 | BIAS_r11r22r12_data$`carry-over effects`==150), ])
+
+
+final_table <- rbind(A1_9, A2_9, A3_9, B1_9, B2_9, B3_9,
+                     A1_21, A2_21, A3_21, B1_21, B2_21, B3_21,
+                     A1_36, A2_36, A3_36, B1_36, B2_36, B3_36)
+write.table(final_table[, 7:16], file = "Table1.csv", sep=";", row.names=FALSE)
 
 ################ 4. preparing the data for ploting for precision
 
